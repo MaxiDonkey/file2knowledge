@@ -1,5 +1,9 @@
 unit Provider.ResponseIdTracker;
 
+interface
+
+{$REGION  'Dev notes'}
+
 (*
   Unit: Provider.ResponseIdTracker
 
@@ -29,7 +33,7 @@ unit Provider.ResponseIdTracker;
   Conventions follow File2knowledgeAI project and OpenAI chaining best practices.
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.Generics.Collections, Helper.TextFile, Manager.Intf;

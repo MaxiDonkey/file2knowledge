@@ -1,5 +1,9 @@
 ﻿unit Provider.OpenAI;
 
+interface
+
+{$REGION  'Dev notes : Provider.OpenAI'}
+
 (*
   Unit: Provider.OpenAI
 
@@ -41,12 +45,11 @@
   making it easy to maintain, extend, and adapt to new OpenAI and GenAI usage scenarios or workflows.
 *)
 
-
-interface
+{$ENDREGION}
 
 uses
-  System.SysUtils, System.classes, GenAI, GenAI.Types,
-  Manager.Async.Promise, Manager.Intf, Manager.IoC, Provider.OpenAI.FileStore,
+  System.SysUtils, System.classes, GenAI, GenAI.Types, GenAI.Async.Promise, GenAI.Exceptions,
+  Manager.Intf, Manager.IoC, Provider.OpenAI.FileStore,
   Provider.OpenAI.VectorStore, Provider.OpenAI.ExecutionEngine, Provider.InstructionManager;
 
 type
@@ -68,6 +71,10 @@ type
     FVectorStoreManager: IVectorStoreManager;
     FPromptExecutionEngine: IPromptExecutionEngine;
     procedure InitializeProviderOpenAI(const GenAIClient: IGenAI);
+    procedure HandleError(E: Exception);
+    function HandleThenSilently(Value: TResponse): string;
+    function HandleThenDeleteResponse(Value: TResponseDelete): string;
+    function HandleThenDeleteFile(Value: TDeletion): string;
   protected
     /// <summary>
     /// Deletes a response from the OpenAI backend.
@@ -193,7 +200,7 @@ implementation
 
 function TOpenAIProvider.EnsureVectorStoreFileLinked(const FileName, FileId,
   VectorStoreId: string): TPromise<string>;
-
+{$REGION 'limitation restricts to five files'}
 (*
    A current limitation restricts processing to five files, due to constraints in the Delphi compiler.
    Specifically, the compiler is unable to perform self-invocation within recursively nested closures
@@ -205,7 +212,7 @@ function TOpenAIProvider.EnsureVectorStoreFileLinked(const FileName, FileId,
    The current implementation leads to a pyramid of doom due to deeply nested closures and lack of proper
    promise chaining. :(
 *)
-
+{$ENDREGION}
 var
   LFileId: string;
   LVectorStoreId: string;
@@ -254,18 +261,13 @@ begin
           {--- Final resolution: the promise returns the two concatenated ids }
           Result := TPromise<string>.Resolved(LVectorStoreId + #10 + LFileId);
         end)
-      .&Catch(
-        procedure(E: Exception)
-        begin
-          {--- Promises chain error handling (display and rejection) }
-          AlertService.ShowWarning('Error : ' + E.Message);
-        end
-      );
+      .&Catch(HandleError);
 end;
 
 constructor TOpenAIProvider.Create;
 begin
-  {
+  {$REGION  'Dev notes'}
+  (*
     IMPORTANT: This class is designed to be used as a singleton.
 
     - Only one instance of TOpenAIProvider should exist in the application lifecycle.
@@ -277,7 +279,8 @@ begin
       with a valid IGenAI client to properly register all required dependencies in the IoC.
     - The singleton pattern centralizes OpenAI API access, state, and resource coordination, improving
       stability, maintainability, and resource usage throughout the application.
-  }
+  *)
+  {$ENDREGION}
   inherited;
   FClient := IoC.Resolve<IGenAI>;
   InitializeProviderOpenAI(FClient);
@@ -288,52 +291,19 @@ end;
 
 function TOpenAIProvider.DeleteFile(FileId: string): TPromise<string>;
 begin
-  Result := TPromise<string>.Create(
-    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
-    begin
-      FClient.Files.AsynDelete(FileId,
-        function : TAsynDeletion
-        begin
-          Result.Sender := nil;
-          Result.OnStart := nil;
-          Result.OnSuccess :=
-            procedure (Sender: TObject; Value: TDeletion)
-            begin
-              Resolve(Value.Id + ' deleted');
-            end;
-          Result.OnError :=
-            procedure (Sender: TObject; Error: string)
-            begin
-              Reject(Exception.Create(Error));
-            end;
-        end);
-    end);
+  Result := FClient.Files
+    .AsyncAwaitDelete(FileId)
+    .&Then<string>(HandleThenDeleteFile)
+    .&Catch(HandleError);
 end;
 
 function TOpenAIProvider.DeleteResponse(ResponseId: string): TPromise<string>;
 begin
-  Result := TPromise<string>.Create(
-    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
-    begin
-      FClient.Responses.AsynDelete(ResponseId,
-        function : TAsynResponseDelete
-        begin
-          Result.Sender := nil;
-          Result.OnStart := nil;
-          Result.OnSuccess :=
-            procedure (Sender: TObject; Value: TResponseDelete)
-            begin
-              ResponseTracking.RemoveId(ResponseId);
-              Resolve(Value.Id + ' deleted');
-            end;
-          Result.OnError :=
-            procedure (Sender: TObject; Error: string)
-            begin
-              ResponseTracking.RemoveId(ResponseId);
-              Reject(Exception.Create(Error));
-            end;
-        end);
-    end);
+  ResponseTracking.RemoveId(ResponseId);
+  Result := FClient.Responses
+    .AsyncAwaitDelete(ResponseId)
+    .&Then<string>(HandleThenDeleteResponse)
+    .&Catch(HandleError);
 end;
 
 function TOpenAIProvider.DeleteVectorStore(const VectorStoreId,
@@ -354,42 +324,44 @@ begin
 end;
 
 function TOpenAIProvider.ExecuteSilently(const Prompt, Instructions: string): TPromise<string>;
-var
- Buffer: string;
 begin
-  Result := TPromise<string>.Create(
-    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
+  Result := FClient.Responses.AsyncAwaitCreate(
+      procedure (Params: TResponsesParams)
+      begin
+         Params.Model(Settings.SearchModel);
+         Params.Input(Prompt);
+         Params.Instructions(Instructions);
+         Params.Store(False);
+         Params.Stream(False);
+      end)
+   .&Then<string>(HandleThenSilently)
+   .&Catch(HandleError);
+end;
+
+procedure TOpenAIProvider.HandleError(E: Exception);
+begin
+  if not E.Message.StartsWith('error 404') then
     begin
-      FClient.Responses.AsynCreate(
-        procedure (Params: TResponsesParams)
-        begin
-           Params.Model(Settings.SearchModel);
-           Params.Input(Prompt);
-           Params.Instructions(Instructions);
-           Params.Store(False);
-        end,
-        function : TASynResponse
-        begin
-          Result.Sender := nil;
+      AlertService.ShowError(E.ClassName + ' : ' + E.Message);
+    end;
+end;
 
-          Result.OnStart := nil;
+function TOpenAIProvider.HandleThenDeleteFile(Value: TDeletion): string;
+begin
+  Result := Value.Id + ' deleted';
+end;
 
-          Result.OnSuccess :=
-            procedure (Sender: TObject; Response: TResponse)
-            begin
-              for var Item in Response.Output do
-                for var SubItem in Item.Content do
-                  Buffer := Buffer + SubItem.Text;
-              Resolve(Buffer);
-            end;
+function TOpenAIProvider.HandleThenDeleteResponse(
+  Value: TResponseDelete): string;
+begin
+  Result := Value.Id + ' deleted';
+end;
 
-          Result.OnError :=
-            procedure (Sender: TObject; Error: string)
-            begin
-              Reject(Exception.Create(Error));
-            end;
-        end)
-    end);
+function TOpenAIProvider.HandleThenSilently(Value: TResponse): string;
+begin
+  for var Item in Value.Output do
+    for var SubItem in Item.Content do
+      Result := Result + SubItem.Text;
 end;
 
 procedure TOpenAIProvider.InitializeProviderOpenAI(const GenAIClient: IGenAI);

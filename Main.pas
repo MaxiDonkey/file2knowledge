@@ -11,7 +11,7 @@ uses
 
 
   GenAI, GenAI.Types, Helper.PanelRoundedCorners.VCL, Helper.ScrollBoxMouseWheel.VCL,
-  Manager.Async.Promise, Vcl.Menus, Vcl.WinXCtrls;
+  GenAI.Async.Promise, Vcl.Menus, Vcl.WinXCtrls;
 
 const
   PROMPT_MAX_WIDTH = 800;

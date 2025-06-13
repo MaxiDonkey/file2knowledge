@@ -1,3 +1,6 @@
+#### 2025
+- Manager.Async.Promise replaced by GenAI.Async.Promise from GenAI wrapper.
+
 #### 2025, June 4 versio 1.0.1
 - Update the DelphiGenAI documentation.
 

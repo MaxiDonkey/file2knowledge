@@ -1,5 +1,9 @@
 ﻿unit Provider.OpenAI.ExecutionEngine;
 
+interface
+
+{$REGION 'Dev notes'}
+
 (*
   Unit: Provider.OpenAI.ExecutionEngine
 
@@ -10,17 +14,17 @@
 
   Architecture and approach:
     - TPromptExecutionEngine is the key orchestrator for executing user prompts:
-        - Handles prompt formatting, parameter building, and contextual instructions (tools, web/file search, reasoning, etc).
-        - Coordinates asynchronous streaming of results via the GenAI client, managing cancellation, error chains, file/web search and UI callbacks.
-        - Delegates all event processing during response streaming to an event engine manager (IEventEngineManager).
-        - Integrates with persistent session objects for chat continuity, storage, and history tracking.
+        • Handles prompt formatting, parameter building, and contextual instructions (tools, web/file search, reasoning, etc).
+        • Coordinates asynchronous streaming of results via the GenAI client, managing cancellation, error chains, file/web search and UI callbacks.
+        • Delegates all event processing during response streaming to an event engine manager (IEventEngineManager).
+        • Integrates with persistent session objects for chat continuity, storage, and history tracking.
     - Modularity and extensibility:
-        - Designed for dependency injection; all external collaborations are interface-driven (GenAI, system prompt builder, etc).
-        - Implements async promise patterns for non-blocking UI and workflow chaining.
-        - All event/stream-specific logic is delegated to pluggable managers (cf. Provider.OpenAI.StreamEvents).
+        • Designed for dependency injection; all external collaborations are interface-driven (GenAI, system prompt builder, etc).
+        • Implements async promise patterns for non-blocking UI and workflow chaining.
+        • All event/stream-specific logic is delegated to pluggable managers (cf. Provider.OpenAI.StreamEvents).
     - Robust lifecycle management:
-        - Explicit control over chat turn creation, prompt history, intermediate/finalization states, cancellation, and error handling.
-        - All UI and session feedback is routed explicitly for user experience and recoverability.
+        • Explicit control over chat turn creation, prompt history, intermediate/finalization states, cancellation, and error handling.
+        • All UI and session feedback is routed explicitly for user experience and recoverability.
 
   Developer highlights:
     - To use, instantiate TPromptExecutionEngine via IoC or directly, providing required dependencies.
@@ -35,17 +39,15 @@
 
   This unit is designed for robustness, modularity, and scalability in prompt execution and streaming scenarios,
   enabling maintainable and extensible Delphi OpenAI/GenAI integrations aligned with best architecture practices (SOLID, async, DI).
-
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.classes, System.Generics.Collections, System.DateUtils, System.Threading,
-  GenAI, GenAI.Types,
-  Manager.Async.Promise, Manager.Intf, Manager.IoC, ChatSession.Controller, Manager.Utf8Mapping,
+  GenAI, GenAI.Types, GenAI.Async.Promise,
+  Manager.Intf, Manager.IoC, ChatSession.Controller, Manager.Utf8Mapping,
   Helper.UserSettings, Manager.Types, Provider.InstructionManager, Provider.OpenAI.StreamEvents,
-
   Helper.TextFile;
 
 type
@@ -85,6 +87,13 @@ type
   ///   </code>
   /// </remarks>
   TPromptExecutionEngine = class(TInterfacedObject, IPromptExecutionEngine)
+  strict private
+    procedure TurnUpdate;
+    procedure ServiceClearUI;
+    function UpdateAnnotation(const Displayer: IAnnotationsDisplayer): string;
+    function CreateStreamParamsConfigurator(const Turn: TChatTurn): TProc<TResponsesParams>;
+    function CreateErrorHandlerCallback(const StreamBuffer: string): TFunc<TObject, string, string>;
+    function CreateCancellationHandlerCallback(const StreamBuffer: string): TFunc<TObject, string>;
   private
     /// <summary>
     /// The GenAI client instance used for all API communications.
@@ -136,7 +145,7 @@ type
     /// <summary>
     ///   Finalizes the current chat turn, updating stored search and reasoning results and saving session state.
     /// </summary>
-    procedure FinalizeCurrentTurn;
+    procedure FinalizeTurn;
 
     /// <summary>
     ///   Adds a new chat turn to the persistent session, stamping it with the current timestamp.
@@ -162,7 +171,7 @@ type
     /// <param name="Sender">
     /// The sender of the completion notification (engine, promise, etc.).
     /// </param>
-    procedure OnTurnSuccess(Sender: TObject);
+    function OnTurnSuccess(Sender: TObject): string;
 
     /// <summary>
     /// Event handler triggered when an error occurs during prompt execution or streaming.
@@ -184,6 +193,62 @@ type
     /// The context object triggering cancellation.
     /// </param>
     procedure OnTurnCancelled(Sender: TObject);
+
+    /// <summary>
+    /// Determines whether the current chat turn should be canceled and updates the UI if so.
+    /// </summary>
+    /// <returns>
+    /// <c>True</c> if a cancellation has been requested; otherwise, <c>False</c>.
+    /// </returns>
+    /// <remarks>
+    /// Used as the OnDoCancel callback during streaming.
+    /// When <c>True</c>, it hides the reasoning bubble and displays an "Operation canceled" message.
+    /// </remarks>
+    function OnTurnDoCancel: Boolean;
+
+    /// <summary>
+    /// Initializes the HTTP client’s response timeout based on the current application settings.
+    /// </summary>
+    /// <remarks>
+    /// Reads the timeout value from <c>Settings.TimeOut</c>, converts it into a cardinal number,
+    /// and assigns it to the underlying GenAI client’s <c>HttpClient.ResponseTimeout</c> property.
+    /// </remarks>
+    procedure InitClientTimeOut;
+
+    /// <summary>
+    /// Configures the chat turn before execution by enabling storage and assigning the user prompt.
+    /// </summary>
+    /// <param name="Turn">The chat turn object that will be populated with the prompt and marked for storage.</param>
+    /// <param name="Prompt">The text of the user’s prompt to send to the AI engine.</param>
+    /// <remarks>
+    /// Sets <c>Turn.Storage</c> to <c>True</c> and assigns <c>Turn.Prompt</c> to the provided <c>Prompt</c> string.
+    /// This ensures the prompt is stored and ready for processing by the execution engine.
+    /// </remarks>
+    procedure ConfigureRequest(const Turn: TChatTurn; const Prompt: string);
+
+    /// <summary>
+    /// Creates and configures an asynchronous streaming request for the specified chat turn.
+    /// </summary>
+    /// <param name="Turn">
+    /// The <c>TChatTurn</c> instance that contains the prompt text and storage flag;
+    /// this turn will be used to build request parameters and track response progress.
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> that resolves with the AI’s full response text when streaming completes,
+    /// or is rejected if an error or cancellation occurs.
+    /// </returns>
+    /// <remarks>
+    /// - Evaluates active feature flags (reasoning, web search, file search) to choose the correct AI model and tools.
+    /// - Sets <c>Params.Input</c> to <c>Turn.Prompt</c> and <c>Params.Instructions</c> via the system‐prompt builder.
+    /// - Configures <c>Params.Tools</c> based on context (web search or file search) when reasoning is disabled.
+    /// - Enables streaming (<c>Params.Stream(True)</c>) and persistence (<c>Params.Store(Turn.Storage)</c>),
+    ///   linking to a previous response ID if one exists.
+    /// - Serializes the prompt into <c>Turn.JsonPrompt</c> and immediately saves the chat to disk.
+    /// - Assigns callbacks (<c>OnStart</c>, <c>OnProgress</c>, <c>OnSuccess</c>, <c>OnError</c>, <c>OnDoCancel</c>, <c>OnCancellation</c>)
+    ///   to drive UI updates, error handling, and finalization logic as chunks stream in.
+    /// </remarks>
+    function BuildStreamPromise(const Turn: TChatTurn): TPromise<string>;
+
   public
     /// <summary>
     /// Submits a prompt for execution via the OpenAI/GenAI engine, handling streaming
@@ -218,10 +283,73 @@ begin
   PersistentChat.CurrentChat.ModifiedAt := DateTimeToUnix(Now, False);
 end;
 
+function TPromptExecutionEngine.BuildStreamPromise(
+  const Turn: TChatTurn): TPromise<string>;
+{$REGION  'Dev notes : Contexte SSE & Streambuffer'}
+(*
+  - In the context of SSE reception, the promise associated with a canceled operation must be rejected,
+    as it is not possible to guarantee the availability of a valid TResponseStream.
+
+  - The "StreamBuffer" variable cannot be declared within the lambda "function TPromiseResponseStream",
+    because although it can be captured, it would not have sufficient scope to ensure its integrity
+    during the execution of the "OnError" and "OnCancellation" callbacks.
+*)
+{$ENDREGION}
+var
+  StreamBuffer: string;
+begin
+  var DisplayedChunkCount := 0;
+
+  Result := FClient.Responses
+    .AsyncAwaitCreateStream(
+        CreateStreamParamsConfigurator(Turn),
+        function : TPromiseResponseStream
+        begin
+          Result.Sender := Turn;
+          Result.OnStart := OnTurnStart;
+
+          {--- Chunk aggregation and error handling }
+          Result.OnProgress :=
+            procedure (Sender: TObject; Chunk: TResponseStream)
+            begin
+              if not FEventEngineManager.AggregateStreamEvents(Chunk, StreamBuffer, DisplayedChunkCount) then
+                begin
+                  {--- Error Event }
+                  ResponseTracking.Cancel;
+                  CreateErrorHandlerCallback(StreamBuffer)(Sender, #10#10 + Chunk.Code + ': ' + Chunk.Message);
+                end;
+
+              {--- Last event recieved : It will be resolved by default
+                   => This implies that the OnSuccess cannot be invoked }
+              if Chunk.&Type = TResponseStreamType.completed then
+                begin
+                  OnTurnSuccess(Sender);
+                end;
+            end;
+
+          Result.OnError := CreateErrorHandlerCallback(StreamBuffer);
+          Result.OnDoCancel := OnTurnDoCancel;
+          Result.OnCancellation := CreateCancellationHandlerCallback(StreamBuffer);
+        end)
+    .&Then<string>(
+        function (Value: TResponseStream): string
+        begin
+          for var Item in Value.Response.Output do
+            for var SubItem in Item.Content do
+              Result := Result + SubItem.Text;
+        end);
+end;
+
 function TPromptExecutionEngine.BuildWebSearchToolChoiceParams: THostedToolParams;
 begin
   Result := THostedToolParams.Create
     .&Type('web_search_preview')
+end;
+
+procedure TPromptExecutionEngine.ConfigureRequest(const Turn: TChatTurn; const Prompt: string);
+begin
+  Turn.Storage := True;
+  Turn.Prompt := Prompt;
 end;
 
 constructor TPromptExecutionEngine.Create(const GenAIClient: IGenAI;
@@ -231,6 +359,16 @@ begin
   FClient := GenAIClient;
   FSystemPromptBuilder := AystemPromptBuilder;
   FEventEngineManager := TEventEngineManager.Create;
+end;
+
+function TPromptExecutionEngine.CreateCancellationHandlerCallback(
+  const StreamBuffer: string): TFunc<TObject, string>;
+begin
+  Result := function (Sender: TObject): string
+    begin
+      (Sender as TChatTurn).Response := StreamBuffer + #10#10 + 'Aborted';
+      OnTurnCancelled(Sender);
+    end;
 end;
 
 function TPromptExecutionEngine.CreateFileSearchToolParamsWithStore: TResponseToolParams;
@@ -250,255 +388,254 @@ begin
     Result.Summary(Settings.ReasoningSummary);
 end;
 
+function TPromptExecutionEngine.CreateStreamParamsConfigurator(
+  const Turn: TChatTurn): TProc<TResponsesParams>;
+begin
+  Result := procedure (Params: TResponsesParams)
+    begin
+      {--- Evaluate active service-feature flags for this call }
+      var hasReasoning := sf_reasoning in ServiceFeatureSelector.FeatureModes;
+      var hasWebSearch := sf_webSearch in ServiceFeatureSelector.FeatureModes;
+      var fileSearchDisabled := sf_fileSearchDisabled in ServiceFeatureSelector.FeatureModes;
+      var hasFileStore := Length(FileStoreManager.VectorStore) > 0;
+
+      {--- Choose the proper AI model (reasoning vs. search) }
+      if hasReasoning then
+        begin
+          Params.Model(Settings.ReasoningModel);
+          Params.Reasoning(CreateReasoningEffortParams);
+        end
+      else
+        begin
+          {$REGION '400 Bad Request'}
+          (*
+             If the previous round of the session used a reasoning model, then this round will return:
+
+                 400 Bad Request
+                     Reasoning input items can only be provided to a reasoning or computer use model.
+                     Remove reasoning items from your input and try again.
+
+             As soon as you chain a reasoning-model call → non-reasoning-model call using previousResponseId,
+             all input items—including those labeled type: "reasoning"—get passed back into gpt-4.1, triggering:
+
+               - Reasoning input items can only be provided to a reasoning or computer use model
+
+             Bug reported to OpenAI support on 05/29/2025
+             https://community.openai.com/t/400-error-when-chaining-sessions-between-4-1-and-o4-mini/1272381/1
+          *)
+         {$ENDREGION}
+          Params.Model(Settings.SearchModel);
+        end;
+
+      {--- Set user prompt }
+      Params.Input(Turn.Prompt);
+
+      {--- Set developer instructions }
+      Params.Instructions(FSystemPromptBuilder.BuildSystemPrompt);
+
+      {--- Set explicit tool choice }
+      if hasWebSearch then
+        Params.ToolChoice(BuildWebSearchToolChoiceParams);
+
+      {--- Tool selection according to feature flags }
+      if not hasReasoning then
+        begin
+          if not fileSearchDisabled and hasFileStore and hasWebSearch then
+            begin
+              Params.Tools([
+                CreateFileSearchToolParamsWithStore,
+                CreateWebSearchToolParamsWithContext
+              ]);
+            end
+          else
+            if not fileSearchDisabled and hasFileStore then
+              begin
+                Params.Tools([ CreateFileSearchToolParamsWithStore ]);
+              end
+            else if hasWebSearch then
+              begin
+                Params.Tools([ CreateWebSearchToolParamsWithContext ]);
+              end;
+        end;
+
+      Params.Include([ TOutputIncluding.file_search_result ]);
+
+      {--- Enable streaming mode }
+      Params.Stream(True);
+
+      {--- Enable or disable storage based on configuration }
+      Params.Store(Turn.Storage);
+
+      {--- Link the request to a previous response ID }
+      if Turn.Storage and not ResponseTracking.LastId.IsEmpty then
+        Params.PreviousResponseId(ResponseTracking.LastId);
+
+      {--- Serialize the request to the prompt data collector }
+      Turn.JsonPrompt := Params.ToJsonString();
+
+      {--- Persistently save the current turn to JSON }
+      PersistentChat.SaveToFile;
+    end;
+end;
+
 function TPromptExecutionEngine.CreateWebSearchToolParamsWithContext: TResponseToolParams;
 begin
   Result := TResponseWebSearchParams.New
     .SearchContextSize(Settings.WebContextSize);
 
   if not Settings.Country.Trim.IsEmpty or not Settings.City.Trim.IsEmpty then
-    (Result as TResponseWebSearchParams).UserLocation(
-      TResponseUserLocationParams.New
-        .Country(Settings.Country)
-        .City(Settings.City)
-    );
+    (Result as TResponseWebSearchParams)
+      .UserLocation(
+        TResponseUserLocationParams.New
+          .Country(Settings.Country)
+          .City(Settings.City)
+       );
 end;
 
 function TPromptExecutionEngine.Execute(const Prompt: string): TPromise<string>;
-var
-  StreamBuffer: string;
 begin
-  FClient.API.HttpClient.ResponseTimeout := TTimeOut.TextToCardinal(Settings.TimeOut);
+  {--- Initialize the HTTP client’s response timeout using the current Settings.TimeOut value }
+  InitClientTimeOut;
 
-  var CurrentTurn := AddChatTurnWithTimestamp;
-  CurrentTurn.Storage := True;
-  CurrentTurn.Prompt := Prompt;
+  {--- Create a new TChatTurn with the current timestamp and add it to the persistent chat session }
+  var Turn := AddChatTurnWithTimestamp;
 
-  var ChunkDisplayedCount := 0;
+  {--- Mark the turn for storage and assign the user’s prompt text to the turn object }
+  ConfigureRequest(Turn, Prompt);
 
-  Result := TPromise<string>.Create(
-    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
-    begin
-      FClient.Responses.AsynCreateStream(
-        procedure (Params: TResponsesParams)
-        begin
-          {--- Set the AI model based on the enabled mode }
-          if sf_reasoning in ServiceFeatureSelector.FeatureModes then
-            begin
-              Params.Model(Settings.ReasoningModel);
-              Params.Reasoning(CreateReasoningEffortParams);
-            end
-          else
-            begin
-              (*
-                 If the previous round of the session used a reasoning model, then this round will return:
-
-                     400 Bad Request
-                         Reasoning input items can only be provided to a reasoning or computer use model.
-                         Remove reasoning items from your input and try again.
-
-                 As soon as you chain a reasoning-model call → non-reasoning-model call using previousResponseId,
-                 all input items—including those labeled type: "reasoning"—get passed back into gpt-4.1, triggering:
-
-                   - Reasoning input items can only be provided to a reasoning or computer use model
-
-                 Bug reported to OpenAI support on 05/29/2025
-                 https://community.openai.com/t/400-error-when-chaining-sessions-between-4-1-and-o4-mini/1272381/1
-              *)
-              Params.Model(Settings.SearchModel);
-            end;
-
-          {--- Configure the main user prompt input }
-          Params.Input(CurrentTurn.Prompt);
-
-          {--- Apply contextual system instructions }
-          Params.Instructions(FSystemPromptBuilder.BuildSystemPrompt);
-
-          {--- Explicitly specify tool choices based on active mode }
-          if sf_webSearch in ServiceFeatureSelector.FeatureModes then
-            begin
-              Params.ToolChoice(BuildWebSearchToolChoiceParams);
-            end;
-
-          {--- Define the set of available tools according to current feature modes }
-          if not (sf_reasoning in ServiceFeatureSelector.FeatureModes) then
-            begin
-              if sf_fileSearchDisabled in ServiceFeatureSelector.FeatureModes then
-                begin
-                  if sf_webSearch in ServiceFeatureSelector.FeatureModes then
-                    begin
-                      Params.Tools([CreateWebSearchToolParamsWithContext]);
-                    end;
-                end
-              else
-                begin
-                  if sf_webSearch in ServiceFeatureSelector.FeatureModes then
-                    begin
-                      if Length(FileStoreManager.VectorStore) > 0 then
-                        begin
-                          Params.Tools([
-                            CreateFileSearchToolParamsWithStore,
-                            CreateWebSearchToolParamsWithContext
-                          ]);
-                        end
-                      else
-                        begin
-                          Params.Tools([
-                            CreateWebSearchToolParamsWithContext
-                          ]);
-                        end;
-                    end
-                  else
-                    begin
-                      if Length(FileStoreManager.VectorStore) > 0 then
-                        begin
-                          Params.Tools([CreateFileSearchToolParamsWithStore]);
-                        end;
-                    end;
-                end
-            end
-          else
-            begin
-              {--- No web search tool available for reasoning model }
-            end;
-
-          Params.Include([TOutputIncluding.file_search_result]);
-
-          {--- Enable streaming mode for the response }
-          Params.Stream(True);
-
-          {--- Enable or disable conversation storage based on configuration }
-          Params.Store(CurrentTurn.Storage);
-
-          {--- Link the request to a previous response ID for contextual thread management }
-          if CurrentTurn.Storage and not ResponseTracking.LastId.IsEmpty then
-            begin
-              Params.PreviousResponseId(ResponseTracking.LastId);
-            end;
-
-          {--- Serialize the final request to the prompt data collector }
-          CurrentTurn.JsonPrompt := Params.ToJsonString();
-
-          {--- Persistently save the current prompt to file }
-          PersistentChat.SaveToFile;
-        end,
-
-        function : TAsynResponseStream
-        begin
-          Result.Sender := CurrentTurn;
-
-          Result.OnStart := OnTurnStart;
-
-          Result.OnProgress :=
-            procedure (Sender: TObject; Chunk: TResponseStream)
-            begin
-              try
-                if not FEventEngineManager.AggregateStreamEvents(Chunk, StreamBuffer, ChunkDisplayedCount) then
-                  begin
-                    {--- Event error }
-                    ResponseTracking.Cancel;
-                    Reject(Exception.Create('(' + Chunk.Code + ')' + Chunk.Message));
-                  end;
-              except
-
-              end;
-            end;
-
-          Result.OnSuccess :=
-            procedure (Sender: TObject)
-            begin
-              OnTurnSuccess(Sender);
-              Resolve(CurrentTurn.Response);
-            end;
-
-          Result.OnError :=
-            procedure (Sender: TObject; Error: string)
-            begin
-              CurrentTurn.Response := StreamBuffer;
-              OnTurnError(Sender, Error);
-              Reject(Exception.Create(Error));
-            end;
-
-          Result.OnDoCancel :=
-            function : Boolean
-            begin
-              Result := Cancellation.IsCancelled;
-              if Result then
-                begin
-                  EdgeDisplayer.HideReasoning;
-                  EdgeDisplayer.Display(#10'Operation canceled');
-                end;
-            end;
-
-          Result.OnCancellation :=
-            procedure (Sender: TObject)
-            begin
-              CurrentTurn.Response := StreamBuffer + #10#10 + 'Aborted';
-              OnTurnCancelled(Sender);
-              Reject(Exception.Create('Aborted'));
-            end;
-        end);
-    end);
+  {--- Build and return the asynchronous streaming promise based on the configured turn }
+  Result := BuildStreamPromise(Turn);
 end;
 
-procedure TPromptExecutionEngine.FinalizeCurrentTurn;
+procedure TPromptExecutionEngine.FinalizeTurn;
 begin
-  var CurrentTurn := PersistentChat.CurrentPrompt;
+  {--- Update FileSearch annotation in current prompt }
+  PersistentChat.CurrentPrompt.FileSearch := UpdateAnnotation(FileSearchDisplayer);
 
-  if FileSearchDisplayer.Text.IsEmpty then
-    FileSearchDisplayer.Display('no item found');
-  CurrentTurn.FileSearch := FileSearchDisplayer.Text;
+  {--- Update WebSearch annotation in current prompt }
+  PersistentChat.CurrentPrompt.WebSearch := UpdateAnnotation(WebSearchDisplayer);
 
-  if WebSearchDisplayer.Text.IsEmpty then
-    WebSearchDisplayer.Display('no item found');
-  CurrentTurn.WebSearch := WebSearchDisplayer.Text;
+  {--- Update Reasoning annotation in current prompt }
+  PersistentChat.CurrentPrompt.Reasoning := UpdateAnnotation(ReasoningDisplayer);
 
-  if ReasoningDisplayer.Text.IsEmpty then
-    ReasoningDisplayer.Display('no item found');
-  CurrentTurn.Reasoning := ReasoningDisplayer.Text;
-
+  {--- Service persistent chat : Save to file as JSON }
   PersistentChat.SaveToFile;
+end;
+
+function TPromptExecutionEngine.CreateErrorHandlerCallback(
+  const StreamBuffer: string): TFunc<TObject, string, string>;
+begin
+  Result := function (Sender: TObject; Error: string): string
+    begin
+      (Sender as TChatTurn).Response := StreamBuffer + #10#10 + Error;
+      OnTurnError(Sender, Error);
+      Result := Error;
+    end;
+end;
+
+procedure TPromptExecutionEngine.InitClientTimeOut;
+begin
+  {--- Service GenAI client HTTP: set response timeout from user settings }
+  FClient.API.HttpClient.ResponseTimeout := TTimeOut.TextToCardinal(Settings.TimeOut);
 end;
 
 procedure TPromptExecutionEngine.OnTurnCancelled(Sender: TObject);
 begin
-  FinalizeCurrentTurn;
-  ResponseTracking.Cancel;
+  {--- Service cancellation : disarm cancellation token }
   Cancellation.Cancel;
-  PersistentChat.SaveToFile;
-  ChatSessionHistoryView.Refresh(nil);
+
+  {--- Finalize current chat turn (persist annotations, reset cancellation, refresh history view) }
+  TurnUpdate;
+end;
+
+function TPromptExecutionEngine.OnTurnDoCancel: Boolean;
+begin
+  Result := Cancellation.IsCancelled;
+  if Result then
+    begin
+      EdgeDisplayer.HideReasoning;
+      EdgeDisplayer.Display(#10'Operation canceled');
+    end;
 end;
 
 procedure TPromptExecutionEngine.OnTurnError(Sender: TObject; Error: string);
 begin
-  FinalizeCurrentTurn;
+  {--- Service tracking : cancel last response Id }
   ResponseTracking.Cancel;
+
+    {--- Service cancellation : disarm cancellation token }
+  Cancellation.Cancel(True);
+
+  {--- Finalize current chat turn (persist annotations, reset cancellation, refresh history view) }
+  TurnUpdate;
+
+  {--- Service Edge browser : hide reasoning bubble }
   EdgeDisplayer.HideReasoning;
+
+  {--- Service Edge browser : display error message }
   EdgeDisplayer.Display(TUtf8Mapping.CleanTextAsUTF8(Error));
-  Cancellation.Cancel;
-  PersistentChat.SaveToFile;
-  ChatSessionHistoryView.Refresh(nil);
 end;
 
 procedure TPromptExecutionEngine.OnTurnStart(Sender: TObject);
 begin
+  {--- Service cancellation : reset cancellation token }
   Cancellation.Reset;
+
+  {--- Service prompt + Edge browser : display the current user input in the chat bubble }
   EdgeDisplayer.Prompt(ServicePrompt.Text);
-  ServicePrompt.Clear;
-  FileSearchDisplayer.Clear;
-  WebSearchDisplayer.Clear;
-  ReasoningDisplayer.Clear;
+
+  {--- Clear previous annotations/displays for file search, web search and reasoning }
+  ServiceClearUI;
+
+  {--- Service Edge browser : show reasoning bubble }
   EdgeDisplayer.ShowReasoning;
 end;
 
-procedure TPromptExecutionEngine.OnTurnSuccess(Sender: TObject);
+function TPromptExecutionEngine.OnTurnSuccess(Sender: TObject): string;
 begin
-  FinalizeCurrentTurn;
+  {--- Service cancellation : disarm cancellation token }
+  Cancellation.Cancel(True);
+
+  {--- Finalize current chat turn (persist annotations, reset cancellation, refresh history view) }
+  TurnUpdate;
+
+  {--- Service Edge browser: add gap between chat turns }
   EdgeDisplayer.DisplayStream(sLineBreak + sLineBreak);
-  Cancellation.Cancel;
-  PersistentChat.SaveToFile;
-  ChatSessionHistoryView.Refresh(nil);
+
+  {--- Service prompt selector: update prompt navigation/history UI }
   PromptSelector.Update;
 end;
 
+procedure TPromptExecutionEngine.ServiceClearUI;
+begin
+  {--- Service prompt : clear input editor }
+  ServicePrompt.Clear;
+
+  {--- Service file search displayer : clear previous file search results }
+  FileSearchDisplayer.Clear;
+
+  {--- Service web search displayer : clear previous web search results }
+  WebSearchDisplayer.Clear;
+
+  {--- Service reasoning displayer : clear previous reasoning logs }
+  ReasoningDisplayer.Clear;
+end;
+
+procedure TPromptExecutionEngine.TurnUpdate;
+begin
+  {--- Finalize current chat turn (persist file/web/reasoning annotations, save session) }
+  FinalizeTurn;
+
+  {--- Service chat history view : refresh conversation history UI }
+  ChatSessionHistoryView.Refresh(nil);
+end;
+
+function TPromptExecutionEngine.UpdateAnnotation(const Displayer: IAnnotationsDisplayer): string;
+begin
+  if Displayer.Text.IsEmpty then
+    Displayer.Display('no item found');
+
+  Result := Displayer.Text;
+end;
 
 end.

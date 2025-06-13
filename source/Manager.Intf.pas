@@ -36,7 +36,8 @@ unit Manager.Intf;
 interface
 
 uses
-  System.SysUtils, System.Classes, Manager.Async.Promise, Manager.Types, ChatSession.Controller;
+  System.SysUtils, System.Classes, Manager.Types, ChatSession.Controller,
+  GenAI.Async.Promise;
 
 type
   /// <summary>
@@ -406,7 +407,7 @@ type
     /// <summary>
     /// Marks the cancellation as requested, restores the original button caption and click handler.
     /// </summary>
-    procedure Cancel;
+    procedure Cancel(isDone: Boolean = False);
 
     /// <summary>
     /// Returns True if a cancellation has been requested; otherwise, returns False.

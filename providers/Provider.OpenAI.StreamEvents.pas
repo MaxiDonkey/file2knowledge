@@ -1,5 +1,9 @@
 unit Provider.OpenAI.StreamEvents;
 
+interface
+
+{$REGION  'Dev notes'}
+
 (*
   Unit: Provider.OpenAI.StreamEvents
 
@@ -38,7 +42,7 @@ unit Provider.OpenAI.StreamEvents;
 
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.Classes, Manager.Intf, GenAI, GenAI.Types, ChatSession.Controller,
