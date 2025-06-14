@@ -22,7 +22,7 @@ This approach enables more contextual, relevant, and intelligent responses when 
 ![Preview](https://github.com/MaxiDonkey/file2knowledge/blob/main/Images/F2KAni.gif?raw=true "Preview")
 
 > **Built with Delphi 12 Community Edition**  
-> You can compile and test this wrapper **free of charge (no purchase, no lock-in)**  
+> You can compile and test this app **free of charge (no purchase, no lock-in)**  
 > as long as you meet the Delphi CE licence terms  
 > *(≤ USD 5 000 annual revenue or funding, up to five developers, renewable yearly).*  
 > See the full [Delphi CE FAQ](https://www.embarcadero.com/products/delphi/starter/faq).
