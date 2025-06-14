@@ -1,5 +1,9 @@
 unit UI.VectorResourceManager.VCL;
 
+interface
+
+{$REGION  'Dev notes : UI.VectorResourceManager.VCL'}
+
 (*
   Unit: UI.VectorResourceManager.VCL
 
@@ -39,11 +43,11 @@ unit UI.VectorResourceManager.VCL;
   VCL applications, prioritizing clarity, maintainability, and ease of adding or updating resource wrappers.
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.Classes, System.JSON, REST.Json, System.IOUtils, System.Threading,
-  Manager.Intf, Manager.Async.Promise, Model.VectorResource, UI.Container.VCL;
+  Manager.Intf, GenAI.Async.Promise, Model.VectorResource, UI.Container.VCL;
 
 type
   EFileCountNull = class(Exception);

@@ -1,5 +1,9 @@
 ﻿unit UI.PageSelector.VCL;
 
+interface
+
+{$REGION  'Dev notes : UI.PageSelector.VCL'}
+
 (*
   Unit: UI.PageSelector.VCL
 
@@ -36,7 +40,7 @@
 
 *)
 
-interface
+{$ENDREGION}
 
 uses
   Winapi.Windows, Winapi.Messages, Winapi.CommCtrl,

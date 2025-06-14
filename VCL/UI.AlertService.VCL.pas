@@ -1,5 +1,9 @@
 unit UI.AlertService.VCL;
 
+interface
+
+{$REGION  'Dev notes : UI.AlertService.VCL'}
+
 (*
   Unit: UI.AlertService.VCL
 
@@ -28,7 +32,7 @@ unit UI.AlertService.VCL;
 
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.UITypes, VCL.Dialogs, Manager.Intf;

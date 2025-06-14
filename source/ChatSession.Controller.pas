@@ -1,5 +1,9 @@
 unit ChatSession.Controller;
 
+interface
+
+{$REGION  'Dev notes : ChatSession.Controller'}
+
 (*
   Unit: ChatSession.Controller
 
@@ -35,10 +39,9 @@ unit ChatSession.Controller;
 
   This unit is designed to let any developer persist and manipulate chat histories easily,
   regardless of the target business layer (bot, assistant, support, etc.).
-
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.IOUtils,
@@ -107,26 +110,37 @@ type
   public
     ///<summary> Unique identifier of the chat turn. </summary>
     property Id: string read FId write FId;
+
     ///<summary> Indicates whether this turn should be stored persistently. </summary>
     property Storage: boolean read FStorage write FStorage;
+
     ///<summary> Text of the user's prompt or question. </summary>
     property Prompt: string read FPrompt write FPrompt;
+
     ///<summary> Text of the AI's response to the prompt. </summary>
     property Response: string read FResponse write FResponse;
+
     ///<summary> Text of the AI's response to the FileSearch text. </summary>
     property FileSearch: string read FFileSearch write FFileSearch;
+
     ///<summary> Text of the AI's response to the WebSearch text. </summary>
     property WebSearch: string read FWebSearch write FWebSearch;
+
     ///<summary> Text of the AI's response to the reasoning text. </summary>
     property Reasoning: string read FReasoning write FReasoning;
+
     ///<summary> JSON-formatted detailed data about the prompt. </summary>
     property JsonPrompt: string read FJsonPrompt write FJsonPrompt;
+
     ///<summary> JSON-formatted detailed data about the response. </summary>
     property JsonResponse: string read FJsonResponse write FJsonResponse;
+
     ///<summary> JSON string representing file search results related to this turn. </summary>
     property JsonFileSearch: string read FJsonFileSearch write FJsonFileSearch;
+
     ///<summary> JSON string representing web search results related to this turn. </summary>
     property JsonWebSearch: string read FJsonWebSearch write FJsonWebSearch;
+
     ///<summary> JSON string containing function call information from AI output. </summary>
     property JsonFunctionCall: string read FJsonFunctionCall write FJsonFunctionCall;
   end;
@@ -155,25 +169,33 @@ type
     ///<summary> Sets the Title property and returns the current instance for chaining. </summary>
     ///<param name="Value"> The new title of the chat session. </param>
     function ApplyTitle(const Value: string): TChatSession;
+
     ///<summary> Sets the CreatedAt timestamp and returns the current instance for chaining. </summary>
     ///<param name="Value"> The creation timestamp in Int64 format. </param>
     function ApplyCreatedAt(const Value: Int64): TChatSession;
+
     ///<summary> Sets the ModifiedAt timestamp and returns the current instance for chaining. </summary>
     ///<param name="Value"> The modification timestamp in Int64 format. </param>
     function ApplyModifiedAt(const Value: Int64): TChatSession;
+
     /// <summary>
     /// Returns ChatTurn count
     /// </summary>
     function Count: Integer;
+
     ///<summary> Saves the current chat session's state persistently. </summary>
     ///<returns> The current instance for method chaining. </returns>
     function SaveCurrentChat: TChatSession;
+
     ///<summary> Timestamp indicating when the session was created. </summary>
     property CreatedAt: Int64 read FCreatedAt write FCreatedAt;
+
     ///<summary> Timestamp indicating the last modification date of the session. </summary>
     property ModifiedAt: Int64 read FModifiedAt write FModifiedAt;
+
     ///<summary>T he title of the chat session, typically user-editable. </summary>
     property Title: string read FTitle write FTitle;
+
     destructor Destroy; override;
   end;
 
@@ -200,6 +222,7 @@ type
     /// Loads the list from default JSON file if necessary.
     /// </summary>
     class function Instance: TChatSessionList; static;
+
     /// <summary>
     /// Reloads the chat session list from the specified JSON file or default file if omitted.
     /// Frees the previous instance and reloads it from storage.
@@ -207,10 +230,12 @@ type
     /// <param name="FileName">Optional JSON file name to load from.</param>
     /// <returns>The reloaded singleton instance.</returns>
     class function Reload(const FileName: string = ''): TChatSessionList; static;
+
     /// <summary>
     /// Returns the default JSON file name used for storing the chat sessions.
     /// </summary>
     class function JsonFileName: string;
+
     /// <summary>
     /// Deletes a chat session item.
     /// Calls the provided callback procedure for each stored chat turn's ID before deletion.
@@ -219,6 +244,7 @@ type
     /// <param name="ParamProc">A callback procedure receiving each stored chat turn ID.</param>
     /// <returns>The chat session list instance for chaining.</returns>
     function Delete(const Item: TObject; ParamProc: TProc<string>): TChatSessionList; overload;
+
     /// <summary>
     /// Renames a chat session by its index in the list.
     /// Changes the session's title to the specified new title.
@@ -227,6 +253,7 @@ type
     /// <param name="NewTitle">The new title to assign.</param>
     /// <returns>The chat session list instance for chaining.</returns>
     function Rename(const Index: Integer; NewTitle: string): TChatSessionList; overload;
+
     /// <summary>
     /// Renames a chat session given its object instance.
     /// Changes the session's title to the specified new title.
@@ -235,6 +262,7 @@ type
     /// <param name="NewTitle">The new title to assign.</param>
     /// <returns>The chat session list instance for chaining.</returns>
     function Rename(const Item: TObject; NewTitle: string): TChatSessionList; overload;
+
     destructor Destroy; override;
   end;
 

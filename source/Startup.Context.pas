@@ -1,5 +1,9 @@
 unit Startup.Context;
 
+interface
+
+{$REGION  'Dev notes : Startup.Context'}
+
 (*
   Unit: Startup.Context
 
@@ -25,7 +29,7 @@ unit Startup.Context;
   Conventions follow File2knowledgeAI best practices for modular design, maintainability, and clear documentation.
 *)
 
-interface
+{$ENDREGION}
 
 uses
   Manager.Intf, System.SysUtils;

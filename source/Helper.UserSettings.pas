@@ -1,5 +1,9 @@
 ﻿unit Helper.UserSettings;
 
+interface
+
+{$REGION  'Dev notes : Helper.UserSettings'}
+
 (*
   Unit: Helper.UserSettings
 
@@ -24,8 +28,7 @@
   and fostering extensibility throughout the application.
 *)
 
-
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections;

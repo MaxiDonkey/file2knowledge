@@ -1,5 +1,9 @@
 unit Manager.FileUploadID.Controler;
 
+interface
+
+{$REGION  'Dev notes : UI.VectorResourceManager.VCL'}
+
 (*
   Unit: Manager.FileUploadID.Controler
 
@@ -23,8 +27,7 @@ unit Manager.FileUploadID.Controler;
       error handling.
 *)
 
-
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.Generics.Collections, Model.VectorResource, Helper.FileUploadID.Dictionary,

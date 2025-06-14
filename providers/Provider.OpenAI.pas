@@ -227,7 +227,7 @@ begin
   LVectorStoreId := VectorStoreId;
 
   Result :=
-    {--- Checks if the file already exists on the remote FileStore }
+    {--- Checks if the file already exists on the remote FileStore. }
     FFileStoreManager.EnsureFileId(FileName, LFileId)
       .&Then<string>(
         function (Value: string): string
@@ -252,13 +252,13 @@ begin
       .&Then(
         function (Value: string): TPromise<string>
         begin
-          {--- Check that this file is linked to this vector store (create the link if necessary) }
+          {--- Check that this file is linked to this vector store (create the link if necessary). }
           Result := FVectorStoreManager.EnsureVectorStoreFileId(LVectorStoreId, LFileId);
         end)
       .&Then(
         function (Value: string): TPromise<string>
         begin
-          {--- Final resolution: the promise returns the two concatenated ids }
+          {--- Final resolution: the promise returns the two concatenated ids. }
           Result := TPromise<string>.Resolved(LVectorStoreId + #10 + LFileId);
         end)
       .&Catch(HandleError);

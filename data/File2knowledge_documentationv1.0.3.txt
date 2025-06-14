@@ -1,4 +1,4 @@
-Projet : File2knowledge version 1.0.?
+Projet : File2knowledge version 1.0.3
 
 Ce projet propose une mise en œuvre concrète du point de terminaison v1/responses de l’API OpenAI, en exploitant notamment les fonctionnalités file_search et les magasins vectoriels. L’objectif est de démontrer comment ces outils permettent une exploitation plus fine et pertinente des fichiers, en enrichissant leur surface sémantique. L’indexation vectorielle améliore considérablement la capacité à explorer, relier et interroger le contenu, en offrant des réponses plus contextualisées et informatives.
 
@@ -44,11 +44,8 @@ Cette partie contient:
 
 ### Code source de ces unités:
 
+
 unit ChatSession.Controller;
-
-interface
-
-{$REGION  'Dev notes : ChatSession.Controller'}
 
 (*
   Unit: ChatSession.Controller
@@ -85,9 +82,10 @@ interface
 
   This unit is designed to let any developer persist and manipulate chat histories easily,
   regardless of the target business layer (bot, assistant, support, etc.).
+
 *)
 
-{$ENDREGION}
+interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.IOUtils,
@@ -156,37 +154,26 @@ type
   public
     ///<summary> Unique identifier of the chat turn. </summary>
     property Id: string read FId write FId;
-
     ///<summary> Indicates whether this turn should be stored persistently. </summary>
     property Storage: boolean read FStorage write FStorage;
-
     ///<summary> Text of the user's prompt or question. </summary>
     property Prompt: string read FPrompt write FPrompt;
-
     ///<summary> Text of the AI's response to the prompt. </summary>
     property Response: string read FResponse write FResponse;
-
     ///<summary> Text of the AI's response to the FileSearch text. </summary>
     property FileSearch: string read FFileSearch write FFileSearch;
-
     ///<summary> Text of the AI's response to the WebSearch text. </summary>
     property WebSearch: string read FWebSearch write FWebSearch;
-
     ///<summary> Text of the AI's response to the reasoning text. </summary>
     property Reasoning: string read FReasoning write FReasoning;
-
     ///<summary> JSON-formatted detailed data about the prompt. </summary>
     property JsonPrompt: string read FJsonPrompt write FJsonPrompt;
-
     ///<summary> JSON-formatted detailed data about the response. </summary>
     property JsonResponse: string read FJsonResponse write FJsonResponse;
-
     ///<summary> JSON string representing file search results related to this turn. </summary>
     property JsonFileSearch: string read FJsonFileSearch write FJsonFileSearch;
-
     ///<summary> JSON string representing web search results related to this turn. </summary>
     property JsonWebSearch: string read FJsonWebSearch write FJsonWebSearch;
-
     ///<summary> JSON string containing function call information from AI output. </summary>
     property JsonFunctionCall: string read FJsonFunctionCall write FJsonFunctionCall;
   end;
@@ -215,33 +202,25 @@ type
     ///<summary> Sets the Title property and returns the current instance for chaining. </summary>
     ///<param name="Value"> The new title of the chat session. </param>
     function ApplyTitle(const Value: string): TChatSession;
-
     ///<summary> Sets the CreatedAt timestamp and returns the current instance for chaining. </summary>
     ///<param name="Value"> The creation timestamp in Int64 format. </param>
     function ApplyCreatedAt(const Value: Int64): TChatSession;
-
     ///<summary> Sets the ModifiedAt timestamp and returns the current instance for chaining. </summary>
     ///<param name="Value"> The modification timestamp in Int64 format. </param>
     function ApplyModifiedAt(const Value: Int64): TChatSession;
-
     /// <summary>
     /// Returns ChatTurn count
     /// </summary>
     function Count: Integer;
-
     ///<summary> Saves the current chat session's state persistently. </summary>
     ///<returns> The current instance for method chaining. </returns>
     function SaveCurrentChat: TChatSession;
-
     ///<summary> Timestamp indicating when the session was created. </summary>
     property CreatedAt: Int64 read FCreatedAt write FCreatedAt;
-
     ///<summary> Timestamp indicating the last modification date of the session. </summary>
     property ModifiedAt: Int64 read FModifiedAt write FModifiedAt;
-
     ///<summary>T he title of the chat session, typically user-editable. </summary>
     property Title: string read FTitle write FTitle;
-
     destructor Destroy; override;
   end;
 
@@ -268,7 +247,6 @@ type
     /// Loads the list from default JSON file if necessary.
     /// </summary>
     class function Instance: TChatSessionList; static;
-
     /// <summary>
     /// Reloads the chat session list from the specified JSON file or default file if omitted.
     /// Frees the previous instance and reloads it from storage.
@@ -276,12 +254,10 @@ type
     /// <param name="FileName">Optional JSON file name to load from.</param>
     /// <returns>The reloaded singleton instance.</returns>
     class function Reload(const FileName: string = ''): TChatSessionList; static;
-
     /// <summary>
     /// Returns the default JSON file name used for storing the chat sessions.
     /// </summary>
     class function JsonFileName: string;
-
     /// <summary>
     /// Deletes a chat session item.
     /// Calls the provided callback procedure for each stored chat turn's ID before deletion.
@@ -290,7 +266,6 @@ type
     /// <param name="ParamProc">A callback procedure receiving each stored chat turn ID.</param>
     /// <returns>The chat session list instance for chaining.</returns>
     function Delete(const Item: TObject; ParamProc: TProc<string>): TChatSessionList; overload;
-
     /// <summary>
     /// Renames a chat session by its index in the list.
     /// Changes the session's title to the specified new title.
@@ -299,7 +274,6 @@ type
     /// <param name="NewTitle">The new title to assign.</param>
     /// <returns>The chat session list instance for chaining.</returns>
     function Rename(const Index: Integer; NewTitle: string): TChatSessionList; overload;
-
     /// <summary>
     /// Renames a chat session given its object instance.
     /// Changes the session's title to the specified new title.
@@ -308,7 +282,6 @@ type
     /// <param name="NewTitle">The new title to assign.</param>
     /// <returns>The chat session list instance for chaining.</returns>
     function Rename(const Item: TObject; NewTitle: string): TChatSessionList; overload;
-
     destructor Destroy; override;
   end;
 
@@ -370,11 +343,6 @@ type
     procedure Clear;
 
     /// <summary>
-    /// Returns the list of ResponseIds
-    /// </summary>
-    function GetResponseIds: TArray<string>;
-
-    /// <summary>
     /// Gets the full collection of chat sessions.
     /// </summary>
     property Data: TChatSessionList read GetData;
@@ -406,7 +374,6 @@ type
     procedure SaveToFile(FileName: string = '');
     procedure Clear;
     function Count: Integer;
-    function GetResponseIds: TArray<string>;
     property Data: TChatSessionList read GetData;
     property CurrentChat: TChatSession read GetCurrentChat write SetCurrentChat;
     property CurrentPrompt: TChatTurn read GetCurrentPrompt;
@@ -471,18 +438,6 @@ end;
 function TPersistentChat.GetData: TChatSessionList;
 begin
   Result := FData;
-end;
-
-function TPersistentChat.GetResponseIds: TArray<string>;
-begin
-  for var Session in FData.Data do
-   for var Turn in Session.Data do
-     begin
-       if Length(Result) = 0 then
-         Result := [Turn.Id]
-       else
-         Result := Result + [Turn.Id];
-     end;
 end;
 
 function TPersistentChat.LoadFromFile(FileName: string): string;
@@ -680,10 +635,6 @@ end.
 
 unit Helper.FileUploadID.Dictionary;
 
-interface
-
-{$REGION  'Dev notes : Helper.FileUploadID.Dictionary'}
-
 (*
   Unit: Helper.FileUploadID.Dictionary
 
@@ -705,7 +656,8 @@ interface
     - Extensible structure allowing for future validation logic or additional dictionary manipulation methods if necessary.
 *)
 
-{$ENDREGION}
+
+interface
 
 uses
   System.Generics.Collections, System.SysUtils;
@@ -923,7 +875,8 @@ begin
   else
     begin
       {--- If FileUploadId is not empty, invoke the Proc method (fully asynchronous,
-           fire-and-forget) to delete the corresponding file on the server. }
+           fire-and-forget) to delete the corresponding file on the server.
+      }
       if Assigned(Proc) then
         try
           Proc(FileName, FileUploadId);
@@ -943,48 +896,7 @@ end;
 
 end.
 
-unit Helper.TextFile;
-
-interface
-
-uses
-  System.SysUtils, System.Classes, System.IOUtils;
-
-type
-  TFileIOHelper = record
-    class function LoadFromFile(const FileName: string): string; static;
-    class procedure SaveToFile(const Filename, Content: string); static;
-  end;
-
-
-implementation
-
-{ TFileIOHelper }
-
-class function TFileIOHelper.LoadFromFile(const FileName: string): string;
-begin
-  if TFile.Exists(FileName) then
-    Result := TFile.ReadAllText(FileName, TEncoding.UTF8)
-  else
-    raise Exception.CreateFmt('The template file was not found : %s', [FileName]);
-end;
-
-class procedure TFileIOHelper.SaveToFile(const Filename, Content: string);
-begin
-  var FullPath := TPath.GetDirectoryName(FileName);
-  if not FullPath.isEmpty and not TDirectory.Exists(FullPath) then
-    TDirectory.CreateDirectory(FullPath);
-
-  TFile.WriteAllText(FileName, Content, TEncoding.UTF8);
-end;
-
-end.
-
 unit Helper.UserSettings;
-
-interface
-
-{$REGION  'Dev notes : Helper.UserSettings'}
 
 (*
   Unit: Helper.UserSettings
@@ -1010,7 +922,8 @@ interface
   and fostering extensibility throughout the application.
 *)
 
-{$ENDREGION}
+
+interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections;
@@ -1461,10 +1374,6 @@ end.
 
 unit JSON.Resource;
 
-interface
-
-{$REGION  'Dev notes : JSON.Resource'}
-
 (*
   Unit: JSON.Resource
 
@@ -1504,9 +1413,10 @@ interface
   This unit streamlines, unifies, and secures JSON object persistence for Delphi business objects,
   making it rapid and reliable to store, modify, or restore object graphs in modern cross-platform
   applications.
+
 *)
 
-{$ENDREGION}
+interface
 
 uses
   System.SysUtils, System.IOUtils, System.JSON, System.Rtti, REST.Json;
@@ -1712,11 +1622,904 @@ end;
 
 end.
 
-unit Manager.FileUploadID.Controler;
+unit Manager.Async.Promise;
+
+(*******************************************************************************
+
+      Unit providing a generic implementation of Promises for handling
+      asynchronous operations in Delphi.
+
+      The ASync.Promise unit enables structured handling of asynchronous
+      tasks using Promises, allowing for a clean and readable
+      asynchronous programming model similar to JavaScript Promises.
+
+      Primary components include:
+
+        - TPromise<T>: A generic class representing a promise that can be
+          resolved or rejected asynchronously.
+        - TPromiseState: An enumeration indicating the state of a promise
+          (Pending, Fulfilled, or Rejected).
+        - TPromiseRegistry: An internal registry that tracks all pending
+          promises to prevent premature destruction.
+        - Chained methods for structured handling:
+          - &Then<T>: Chains operations to execute after a promise resolves.
+          - &Catch: Handles errors occurring within a promise chain.
+
+      These abstractions allow a structured and reusable way to manage
+      asynchronous execution without deeply nested callbacks, facilitating
+      a cleaner approach to asynchronous programming in Delphi.
+
+  Example Usage:
+
+  ```delphi
+  procedure ExampleAsyncProcess;
+  begin
+    var Promise := TPromise<string>.Create(
+      procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
+      begin
+        TTask.Run(
+        procedure()
+        begin
+          TThread.Queue(nil,
+            procedure
+            begin
+              Sleep(2000); // Simulating asynchronous work
+              if Random(2) = 0 then
+                Resolve('Operation Successful')
+              else
+                Reject(Exception.Create('Operation Failed'));
+            end)
+        end)
+      end);
+
+    Promise
+      .&Then(
+        procedure(Value: string)
+        begin
+          ShowMessage('Success: ' + Value);
+        end)
+      .&Catch(
+        procedure(E: Exception)
+        begin
+          ShowMessage('Error: ' + E.Message);
+        end);
+  end;
+  ```
+
+      The unit is designed to work seamlessly with other asynchronous
+      programming modules, making it a powerful addition to any Delphi
+      application requiring structured async execution.
+
+*******************************************************************************)
 
 interface
 
-{$REGION  'Dev notes : UI.VectorResourceManager.VCL'}
+uses
+  System.SysUtils, System.Generics.Collections, System.Classes, System.Threading;
+
+type
+  /// <summary>
+  /// Represents the state of a Promise.
+  /// </summary>
+  TPromiseState = (
+    /// <summary>
+    /// The promise is pending and has not yet been resolved or rejected.
+    /// </summary>
+    psPending,
+    /// <summary>
+    /// The promise has been fulfilled with a value.
+    /// </summary>
+    psFulfilled,
+    /// <summary>
+    /// The promise has been rejected due to an error.
+    /// </summary>
+    psRejected
+  );
+
+  /// <summary>
+  /// Abstract base class for promise implementations.
+  /// </summary>
+  /// <remarks>
+  /// Provides a common interface for retrieving the current state
+  /// of a promise. All concrete promise types must implement
+  /// <see cref="GetState"/> to indicate whether they are pending,
+  /// fulfilled, or rejected.
+  /// </remarks>
+  TPromiseBase = class abstract
+  strict protected
+    /// <summary>
+    /// Returns the current state of the promise.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="TPromiseState"/> value indicating whether the
+    /// promise is pending, fulfilled, or rejected.
+    /// </returns>
+    function GetState: TPromiseState; virtual; abstract;
+  public
+    /// <summary>
+    /// Read-only property exposing the promise’s current state.
+    /// </summary>
+    /// <value>
+    /// The <see cref="TPromiseState"/> of the promise.
+    /// </value>
+    property State: TPromiseState read GetState;
+  end;
+
+  /// <summary>
+  /// A generic class that represents an asynchronous operation that may complete in the future.
+  /// </summary>
+  /// <typeparam name="T">The type of the value that the promise resolves with.</typeparam>
+  TPromise<T> = class(TPromiseBase)
+  public
+    type
+      /// <summary>
+      /// Defines the executor procedure for a promise, providing callbacks
+      /// to signal fulfillment or rejection of the asynchronous operation.
+      /// </summary>
+      /// <param name="Resolve">
+      /// A callback that accepts a value of type T and transitions the promise
+      /// into the fulfilled state with that value.
+      /// </param>
+      /// <param name="Reject">
+      /// A callback that accepts an Exception and transitions the promise
+      /// into the rejected state with that error.
+      /// </param>
+      TExecutor = reference to procedure(Resolve: TProc<T>; Reject: TProc<Exception>);
+  private
+    FState: TPromiseState;
+    FValue: T;
+    FError: Exception;
+    FThenHandlers: TList<TProc<T>>;
+    FCatchHandlers: TList<TProc<Exception>>;
+    FHandlerLock: TObject;
+
+    class function CloneException(E: Exception): Exception; static;
+
+    /// <summary>
+    /// Resolves the promise with a given value.
+    /// </summary>
+    /// <param name="AValue">The value to resolve the promise with.</param>
+    procedure Resolve(const AValue: T);
+
+    /// <summary>
+    /// Rejects the promise with a given error.
+    /// </summary>
+    /// <param name="AError">The exception that caused the rejection.</param>
+    procedure Reject(AError: Exception);
+
+  strict protected
+    /// <summary>
+    /// Returns the current state of the promise.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="TPromiseState"/> value indicating whether the
+    /// promise is pending, fulfilled, or rejected.
+    /// </returns>
+    function GetState: TPromiseState; override;
+
+  public
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TPromise{T}"/> class and starts the asynchronous operation.
+    /// </summary>
+    /// <param name="AExecutor">The executor function that starts the asynchronous task.</param>
+    constructor Create(AExecutor: TExecutor);
+
+    /// <summary>
+    /// Destroys the promise instance and releases any associated resources.
+    /// </summary>
+    destructor Destroy; override;
+
+    /// <summary>
+    /// Attaches a fulfillment callback that is executed when the promise is resolved.
+    /// </summary>
+    /// <param name="AOnFulfill">A callback function executed upon fulfillment.</param>
+    /// <returns>A new promise to allow method chaining.</returns>
+    function &Then(AOnFulfill: TProc): TPromise<T>; overload;
+
+    /// <summary>
+    /// Attaches a fulfillment callback that receives the resolved value.
+    /// </summary>
+    /// <param name="AOnFulfill">A callback function that receives the resolved value.</param>
+    /// <returns>A new promise to allow method chaining.</returns>
+    function &Then(AOnFulfill: TProc<T>): TPromise<T>; overload;
+
+    /// <summary>
+    /// Attaches a fulfillment callback that returns a transformed value of a different type.
+    /// </summary>
+    /// <typeparam name="TResult">The type of the transformed result.</typeparam>
+    /// <param name="AOnFulfill">A function that produces the transformed result.</param>
+    /// <returns>A new promise that resolves with the transformed value.</returns>
+    function &Then<TResult>(AOnFulfill: TFunc<TResult>): TPromise<TResult>; overload;
+
+    /// <summary>
+    /// Attaches a fulfillment callback that returns another promise of a different type.
+    /// </summary>
+    /// <typeparam name="TResult">The type of the new promise’s result.</typeparam>
+    /// <param name="AOnFulfill">A function that returns a new promise.</param>
+    /// <returns>A new promise that resolves with the value of the returned promise.</returns>
+    function &Then<TResult>(AOnFulfill: TFunc<T, TPromise<TResult>>): TPromise<TResult>; overload;
+
+    /// <summary>
+    /// Attaches a fulfillment callback that returns another promise of the same type.
+    /// </summary>
+    /// <param name="AOnFulfill">A function that returns a new promise of the same type.</param>
+    /// <returns>A new promise that resolves with the value of the returned promise.</returns>
+    function &Then(AOnFulfill: TFunc<T, TPromise<T>>): TPromise<T>; overload;
+
+    /// <summary>
+    /// Attaches a fulfillment callback that transforms the resolved value into another type.
+    /// </summary>
+    /// <typeparam name="TResult">The type of the transformed value.</typeparam>
+    /// <param name="AOnFulfill">A function that transforms the resolved value.</param>
+    /// <returns>A new promise that resolves with the transformed value.</returns>
+    function &Then<TResult>(AOnFulfill: TFunc<T, TResult>): TPromise<TResult>; overload;
+
+    /// <summary>
+    /// Attaches a rejection callback to handle errors if the promise is rejected.
+    /// </summary>
+    /// <param name="AOnReject">A callback function that handles the error.</param>
+    /// <returns>A new promise to allow method chaining.</returns>
+    function &Catch(AOnReject: TProc<Exception>): TPromise<T>;
+
+    class function Resolved(const AValue: T; Proc: TProc = nil): TPromise<T>;
+
+    class function Rejected(AError: Exception; Proc: TProc = nil): TPromise<T>;
+
+  end;
+
+  /// <summary>
+  /// Maintains a global registry of all pending promises, ensuring they
+  /// are kept alive until they are fulfilled or rejected.
+  /// </summary>
+  /// <remarks>
+  /// This sealed class provides thread-safe methods to add and remove
+  /// promises from the registry, as well as a manual cleanup routine
+  /// to prune completed promises.  It is used internally by
+  /// <see cref="TPromise{T}"/> to prevent premature destruction of
+  /// promises that are still pending.
+  /// </remarks>
+  TPromiseRegistry = class sealed
+  strict private
+    class var FList : TObjectList<TObject>;
+    class var FLock : TObject;
+  public
+    /// <summary>
+    /// Initializes the promise registry and its internal lock.
+    /// </summary>
+    class constructor Create;
+
+    /// <summary>
+    /// Releases all resources held by the promise registry.
+    /// </summary>
+    class destructor  Destroy;
+
+    /// <summary>
+    /// Adds a promise instance to the registry, preventing it
+    /// from being freed until it transitions out of the pending state.
+    /// </summary>
+    /// <param name="APromise">
+    /// The promise instance to register.
+    /// </param>
+    class procedure Add(APromise: TObject);
+
+    /// <summary>
+    /// Removes a promise instance from the registry, allowing it
+    /// to be freed if it is no longer referenced elsewhere.
+    /// </summary>
+    /// <param name="APromise">
+    /// The promise instance to unregister.
+    /// </param>
+    class procedure Remove(APromise: TObject);
+
+    /// <summary>
+    /// Scans the registry and deletes any promises that are no longer
+    /// pending (i.e., fulfilled or rejected), releasing their memory.
+    /// </summary>
+    /// <remarks>
+    /// This method can be called manually if you need to force
+    /// cleanup of completed promises before their <see cref="TPromise{T}"/>
+    /// callbacks are all delivered.
+    /// </remarks>
+    class procedure Cleanup;
+
+    /// <summary>
+    /// Removes and frees all promises in the registry, regardless of their state.
+    /// </summary>
+    /// <remarks>
+    /// Acquires the internal lock to ensure thread safety, then iterates through
+    /// the list of registered promises and deletes each one.  This will release
+    /// both pending and completed promises from memory.  Use with caution, as
+    /// any still-pending promises will be destroyed immediately.
+    /// </remarks>
+    class procedure Clear;
+  end;
+
+implementation
+
+{ TPromise<T> }
+
+class function TPromise<T>.CloneException(E: Exception): Exception;
+var
+  ExClass: ExceptClass ;
+begin
+  ExClass := ExceptClass(E.ClassType);
+  Result := ExClass.Create(E.Message);
+end;
+
+constructor TPromise<T>.Create(AExecutor: TExecutor);
+begin
+  inherited Create;
+  FHandlerLock := TObject.Create;
+  FState := psPending;
+  TPromiseRegistry.Add(Self);
+  FThenHandlers := TList<TProc<T>>.Create;
+  FCatchHandlers := TList<TProc<Exception>>.Create;
+  try
+    {--- The executor function that starts the asynchronous task. }
+    AExecutor(
+      procedure(AValue: T)
+      begin
+        Self.Resolve(AValue);
+      end,
+
+      {--- OnReject — clone then free the original }
+      procedure(E: Exception)
+      begin
+        var Cloned := CloneException(E);
+        {--- releases the original exception }
+        E.Free;
+        Self.Reject(Cloned);
+      end
+    );
+  except
+    on E: Exception do
+    begin
+      var Cloned := CloneException(E);
+      {--- E.Free; Do not release E here because Delphi takes care of it }
+      Reject(Cloned);
+    end;
+  end;
+end;
+
+destructor TPromise<T>.Destroy;
+begin
+  if Assigned(FError) then
+    FError.Free;
+  FThenHandlers.Free;
+  FCatchHandlers.Free;
+  FHandlerLock.Free;
+  inherited;
+end;
+
+function TPromise<T>.GetState: TPromiseState;
+begin
+  Result := FState;
+end;
+
+class function TPromise<T>.Rejected(AError: Exception; Proc: TProc): TPromise<T>;
+begin
+  Result := TPromise<T>.Create(
+    procedure(Resolve: TProc<T>; Reject: TProc<Exception>)
+    begin
+      TTask.Run(
+        procedure()
+        begin
+          TThread.Queue(nil,
+            procedure
+            begin
+              if Assigned(Proc) then
+                Proc();
+              Reject(AError);
+            end)
+        end)
+    end);
+end;
+
+procedure TPromise<T>.Resolve(const AValue: T);
+var
+  Handlers: TArray<TProc<T>>;
+  Handler: TProc<T>;
+begin
+  if FState <> psPending then
+    Exit;
+
+  FState := psFulfilled;
+  FValue := AValue;
+
+  {--- Copy the locked callback list }
+  TMonitor.Enter(FHandlerLock);
+  try
+    Handlers := FThenHandlers.ToArray;
+  finally
+    TMonitor.Exit(FHandlerLock);
+  end;
+
+  {--- Asynchronously call all “then” callbacks }
+  for Handler in Handlers do
+    TThread.Queue(nil,
+      procedure
+      begin
+        Handler(FValue);
+      end);
+
+  {--- Empty locked lists }
+  TMonitor.Enter(FHandlerLock);
+  try
+    FThenHandlers.Clear;
+    FCatchHandlers.Clear;
+  finally
+    TMonitor.Exit(FHandlerLock);
+  end;
+
+  {--- Safe destruction because we are out of the register }
+  TPromiseRegistry.Remove(Self);
+end;
+
+class function TPromise<T>.Resolved(const AValue: T; Proc: TProc): TPromise<T>;
+begin
+  Result := TPromise<T>.Create(
+    procedure(Resolve: TProc<T>; Reject: TProc<Exception>)
+    begin
+      TTask.Run(
+        procedure()
+        begin
+          TThread.Queue(nil,
+            procedure
+            begin
+              if Assigned(Proc) then
+                Proc();
+              Resolve(AValue);
+            end)
+        end)
+    end);
+end;
+
+procedure TPromise<T>.Reject(AError: Exception);
+var
+  Handlers: TArray<TProc<Exception>>;
+  Handler: TProc<Exception>;
+begin
+  if FState <> psPending then
+    begin
+      AError.Free;
+      Exit;
+    end;
+
+  FState := psRejected;
+  FError := AError;
+
+  {--- Copy the locked callback list }
+  TMonitor.Enter(FHandlerLock);
+  try
+    Handlers := FCatchHandlers.ToArray;
+  finally
+    TMonitor.Exit(FHandlerLock);
+  end;
+
+  {--- Call all “catch” callbacks }
+  for Handler in Handlers do
+    TThread.Queue(nil,
+      procedure
+      begin
+        Handler(FError);
+      end);
+
+  {--- Empty locked lists }
+  TMonitor.Enter(FHandlerLock);
+  try
+    FThenHandlers.Clear;
+    FCatchHandlers.Clear;
+  finally
+    TMonitor.Exit(FHandlerLock);
+  end;
+
+  {--- Safe destruction because we are out of the register }
+  TPromiseRegistry.Remove(Self);
+end;
+
+function TPromise<T>.&Then(AOnFulfill: TProc<T>): TPromise<T>;
+begin
+  {--- Version without transformation: we wrap the procedure in a function which returns the unchanged value }
+  Result := &Then<T>(
+    function(Value: T): T
+    begin
+      AOnFulfill(Value);
+      Result := Value;
+    end);
+end;
+
+function TPromise<T>.&Then<TResult>(AOnFulfill: TFunc<T, TResult>): TPromise<TResult>;
+begin
+  {--- Creation of a new promise that will be resolved when this one is resolved }
+  Result := TPromise<TResult>.Create(
+    procedure(Resolve: TProc<TResult>; Reject: TProc<Exception>)
+    begin
+      if FState = psFulfilled then
+        begin
+          try
+            Resolve(AOnFulfill(FValue));
+          except
+            on E: Exception do
+              Reject(CloneException(E));
+          end;
+        end
+      else
+      if FState = psRejected then
+        begin
+          Reject(CloneException(FError))
+        end
+      else
+        begin
+          {--- If the operation is not yet complete, we add callbacks for chaining }
+          TMonitor.Enter(FHandlerLock);
+          try
+            FThenHandlers.Add(
+              procedure(Value: T)
+              begin
+                try
+                  Resolve(AOnFulfill(Value));
+                except
+                  on E: Exception do
+                    Reject(CloneException(E));
+                end;
+              end);
+            FCatchHandlers.Add(
+              procedure(E: Exception)
+              begin
+                Reject(CloneException(E));
+              end);
+          finally
+            TMonitor.Exit(FHandlerLock);
+          end;
+        end;
+    end);
+end;
+
+function TPromise<T>.&Then(AOnFulfill: TFunc<T, TPromise<T>>): TPromise<T>;
+begin
+  Result := TPromise<T>.Create(
+    procedure(Resolve: TProc<T>; Reject: TProc<Exception>)
+    begin
+      if FState = psFulfilled then
+        begin
+          try
+            AOnFulfill(FValue)
+              .&Then(
+                procedure(NewValue: T)
+                begin
+                  Resolve(NewValue);
+                end)
+              .&Catch(
+                procedure(E: Exception)
+                begin
+                  Reject(CloneException(E));
+                end);
+          except
+            on E: Exception do
+              Reject(CloneException(E));
+          end;
+        end
+      else
+      if FState = psRejected then
+        begin
+          Reject(CloneException(FError))
+        end
+      else
+        begin
+          TMonitor.Enter(FHandlerLock);
+          try
+            FThenHandlers.Add(
+              procedure(Value: T)
+              begin
+                try
+                  AOnFulfill(Value)
+                    .&Then(
+                      procedure(NewValue: T)
+                      begin
+                        Resolve(NewValue);
+                      end)
+                    .&Catch(
+                    procedure(E: Exception)
+                    begin
+                      Reject(CloneException(E));
+                    end);
+                except
+                  on E: Exception do
+                    Reject(CloneException(E));
+                end;
+              end);
+            FCatchHandlers.Add(
+              procedure(E: Exception)
+              begin
+                Reject(CloneException(E));
+              end);
+          finally
+            TMonitor.Exit(FHandlerLock);
+          end;
+        end;
+    end);
+end;
+
+function TPromise<T>.&Then<TResult>(
+  AOnFulfill: TFunc<TResult>): TPromise<TResult>;
+begin
+  Result := TPromise<TResult>.Create(
+    procedure(Resolve: TProc<TResult>; Reject: TProc<Exception>)
+    begin
+      if FState = psFulfilled then
+        begin
+          try
+            {--- Call the action without parameters and resolve with the result }
+            Resolve(AOnFulfill());
+          except
+            on E: Exception do
+              Reject(CloneException(E));
+          end;
+        end
+    else
+    if FState = psRejected then
+      begin
+        Reject(CloneException(FError));
+      end
+    else
+      begin
+        {--- If the promise is pending, we add callbacks }
+        TMonitor.Enter(FHandlerLock);
+        try
+          FThenHandlers.Add(
+            procedure(Value: T)
+            begin
+              try
+                Resolve(AOnFulfill());
+              except
+                on E: Exception do
+                  Reject(CloneException(E));
+              end;
+            end);
+          FCatchHandlers.Add(
+            procedure(E: Exception)
+            begin
+              Reject(CloneException(E));
+            end);
+        finally
+          TMonitor.Exit(FHandlerLock);
+        end;
+      end;
+    end);
+end;
+
+function TPromise<T>.&Then<TResult>(
+  AOnFulfill: TFunc<T, TPromise<TResult>>): TPromise<TResult>;
+begin
+  Result := TPromise<TResult>.Create(
+    procedure(Resolve: TProc<TResult>; Reject: TProc<Exception>)
+    begin
+      if FState = psFulfilled then
+        begin
+          try
+            AOnFulfill(FValue)
+              .&Then(
+                procedure(NewValue: TResult)
+                begin
+                  Resolve(NewValue);
+                end)
+              .&Catch(
+                procedure(E: Exception)
+                begin
+                  Reject(CloneException(E));
+                end);
+          except
+            on E: Exception do
+              Reject(CloneException(E));
+          end;
+        end
+      else
+      if FState = psRejected then
+        begin
+          Reject(CloneException(FError));
+        end
+      else
+        begin
+          TMonitor.Enter(FHandlerLock);
+          try
+            FThenHandlers.Add(
+              procedure(Value: T)
+              begin
+                try
+                  AOnFulfill(Value)
+                    .&Then(
+                      procedure(NewValue: TResult)
+                      begin
+                        Resolve(NewValue);
+                      end)
+                    .&Catch(
+                      procedure(E: Exception)
+                      begin
+                        Reject(CloneException(E));
+                      end);
+                except
+                  on E: Exception do
+                    Reject(CloneException(E));
+                end;
+              end);
+            FCatchHandlers.Add(
+              procedure(E: Exception)
+              begin
+                Reject(CloneException(E));
+              end);
+          finally
+            TMonitor.Exit(FHandlerLock);
+          end;
+        end;
+    end);
+end;
+
+function TPromise<T>.&Then(AOnFulfill: TProc): TPromise<T>;
+begin
+  Result := TPromise<T>.Create(
+    procedure(Resolve: TProc<T>; Reject: TProc<Exception>)
+    begin
+      if FState = psFulfilled then
+        begin
+          try
+            {--- Calling the action without parameters }
+            AOnFulfill();
+            {--- Pass the initial value after the action is executed }
+            Resolve(FValue);
+          except
+            on E: Exception do
+              Reject(CloneException(E));
+          end;
+        end
+      else
+      if FState = psRejected then
+        begin
+          Reject(CloneException(FError))
+        end
+      else
+        begin
+          {--- If the operation is not yet completed, add callbacks for chaining }
+          TMonitor.Enter(FHandlerLock);
+          try
+            FThenHandlers.Add(
+              procedure(Value: T)
+              begin
+                try
+                  AOnFulfill();
+                  Resolve(Value);
+                except
+                  on E: Exception do
+                    Reject(CloneException(E));
+                end;
+              end);
+            FCatchHandlers.Add(
+              procedure(E: Exception)
+              begin
+                Reject(CloneException(E));
+              end);
+          finally
+            TMonitor.Exit(FHandlerLock);
+          end;
+        end;
+    end);
+end;
+
+function TPromise<T>.&Catch(AOnReject: TProc<Exception>): TPromise<T>;
+begin
+  {--- Create a new promise that passes the value or handles the error with AOnReject }
+  Result := TPromise<T>.Create(
+    procedure(Resolve: TProc<T>; Reject: TProc<Exception>)
+    begin
+      if FState = psFulfilled then
+        begin
+          Resolve(FValue);
+        end
+      else
+      if FState = psRejected then
+        begin
+          AOnReject(FError);
+          Reject(CloneException(FError));
+        end
+      else
+        begin
+          TMonitor.Enter(FHandlerLock);
+          try
+            FThenHandlers.Add(
+              procedure(Value: T)
+              begin
+                Resolve(Value);
+              end);
+            FCatchHandlers.Add(
+              procedure(E: Exception)
+              begin
+                AOnReject(E);
+                Reject(CloneException(E));
+              end);
+          finally
+            TMonitor.Exit(FHandlerLock);
+          end;
+        end;
+    end);
+end;
+
+{ TPromiseRegistry }
+
+class procedure TPromiseRegistry.Add(APromise: TObject);
+begin
+  TMonitor.Enter(FLock);
+  try
+    FList.Add(APromise);
+  finally
+    TMonitor.Exit(FLock);
+  end;
+end;
+
+class procedure TPromiseRegistry.Cleanup;
+begin
+  TMonitor.Enter(FLock);
+  try
+    for var I := FList.Count - 1 downto 0 do
+      {--- Remove the promise from the list as soon as it moves to the final state. }
+      if TObject(FList[I]) is TPromiseBase then
+        with TPromiseBase(FList[I]) do
+          if State <> psPending then
+            {--- releases the object }
+            FList.Delete(I);
+  finally
+    TMonitor.Exit(FLock);
+  end;
+end;
+
+class procedure TPromiseRegistry.Clear;
+begin
+  TMonitor.Enter(FLock);
+  try
+    for var I := FList.Count - 1 downto 0 do
+      {--- Remove the promise from the list as soon as it moves to the final state. }
+      if TObject(FList[I]) is TPromiseBase then
+        with TPromiseBase(FList[I]) do
+            {--- releases the object }
+            FList.Delete(I);
+  finally
+    TMonitor.Exit(FLock);
+  end;
+end;
+
+class constructor TPromiseRegistry.Create;
+begin
+  {--- simple critical section }
+  FLock := TObject.Create;
+
+  {--- OwnsObjects = True }
+  FList := TObjectList<TObject>.Create(True);
+end;
+
+class destructor TPromiseRegistry.Destroy;
+begin
+  FList.Free;
+  FLock.Free;
+end;
+
+class procedure TPromiseRegistry.Remove(APromise: TObject);
+begin
+  TMonitor.Enter(FLock);
+  try
+    {--- releases the object }
+    var Index := FList.IndexOf(APromise);
+    if Index >= 0 then
+      FList.Delete(Index);
+  finally
+    TMonitor.Exit(FLock);
+  end;
+end;
+
+initialization
+finalization
+  {--- Delete pending promises }
+  TPromiseRegistry.Clear;
+end.
+
+unit Manager.FileUploadID.Controler;
 
 (*
   Unit: Manager.FileUploadID.Controler
@@ -1741,7 +2544,8 @@ interface
       error handling.
 *)
 
-{$ENDREGION}
+
+interface
 
 uses
   System.SysUtils, System.Generics.Collections, Model.VectorResource, Helper.FileUploadID.Dictionary,
@@ -1885,11 +2689,8 @@ end;
 
 end.
 
+
 unit Manager.Intf;
-
-interface
-
-{$REGION  'Dev notes : Manager.Intf'}
 
 (*
   Unit: Manager.Intf
@@ -1924,11 +2725,10 @@ interface
   Conventions follow the File2knowledgeAI project and OpenAI v1/responses standards.
 *)
 
-{$ENDREGION}
+interface
 
 uses
-  System.SysUtils, System.Classes, Manager.Types, ChatSession.Controller,
-  GenAI.Async.Promise;
+  System.SysUtils, System.Classes, Manager.Async.Promise, Manager.Types, ChatSession.Controller;
 
 type
   /// <summary>
@@ -2298,7 +3098,7 @@ type
     /// <summary>
     /// Marks the cancellation as requested, restores the original button caption and click handler.
     /// </summary>
-    procedure Cancel(isDone: Boolean = False);
+    procedure Cancel;
 
     /// <summary>
     /// Returns True if a cancellation has been requested; otherwise, returns False.
@@ -2794,21 +3594,6 @@ type
     /// If there was only one or no ID tracked, the last ID will be set to an empty string.
     /// </summary>
     procedure Cancel;
-
-    /// <summary>
-    /// Remove the responseId from LogId
-    /// </summary>
-    procedure RemoveId(const ResponseId: string);
-
-    /// <summary>
-    /// Get the list of the responseId
-    /// </summary>
-    function GetLogIds: string;
-
-    /// <summary>
-    /// Get the orphaned responseId
-    /// </summary>
-    function GetOrphans(const SessionIds: TArray<string>): TArray<string>;
 
     /// <summary>
     /// Gets the last tracked unique identifier.
@@ -3823,10 +4608,6 @@ end.
 
 unit Manager.TemplateProvider;
 
-interface
-
-{$REGION  'Dev notes : Manager.TemplateProvider'}
-
 (*
   DESIGN NOTE:
   ============
@@ -3842,10 +4623,10 @@ interface
 
 *)
 
-{$ENDREGION}
+interface
 
 uses
-  System.SysUtils, System.IOUtils, Helper.TextFile, Manager.Intf;
+  System.SysUtils, System.IOUtils, Manager.Intf;
 
 const
   TEMPLATE_PATH = '..\..\template';
@@ -4002,8 +4783,10 @@ end;
 function TEdgeInjection.LoadTemplate(const FileName: string): string;
 begin
   var GetHtmlPath := TPath.Combine(GetPath(FPath), FileName);
-
-  Result := TFileIOHelper.LoadFromFile(GetHtmlPath);
+  if TFile.Exists(GetHtmlPath) then
+    Result := TFile.ReadAllText(GetHtmlPath, TEncoding.UTF8)
+  else
+    raise Exception.CreateFmt('The template file was not found : %s', [GetHtmlPath]);
 end;
 
 procedure TEdgeInjection.SetTemplatePath(const Value: string);
@@ -4177,6 +4960,9 @@ implementation
 { TUtf8Mapping }
 
 class function TUtf8Mapping.CleanTextAsUTF8(const Value: string): string;
+var
+  i: Integer;
+  c: Char;
 begin
   {--- Replace NBSP (U+00A0) with a normal space }
   Result := StringReplace(Value, #$00A0, ' ', [rfReplaceAll]);
@@ -4187,9 +4973,9 @@ begin
 
   {--- Removes isolated surrogates and unicode noncharacters}
   var San := '';
-  for var i := 1 to Length(Result) do
+  for i := 1 to Length(Result) do
     begin
-      var c := Result[i];
+      c := Result[i];
       {--- isolated surrogates }
       if (Ord(c) >= $D800) and (Ord(c) <= $DFFF) then Continue;
       {--- unicode noncharacters }
@@ -4421,10 +5207,6 @@ end.
 
 unit Startup.Context;
 
-interface
-
-{$REGION  'Dev notes : Startup.Context'}
-
 (*
   Unit: Startup.Context
 
@@ -4450,7 +5232,7 @@ interface
   Conventions follow File2knowledgeAI best practices for modular design, maintainability, and clear documentation.
 *)
 
-{$ENDREGION}
+interface
 
 uses
   Manager.Intf, System.SysUtils;
@@ -4552,11 +5334,8 @@ end;
 
 end.
 
+
 unit Startup.Service;
-
-interface
-
-{$REGION  'Dev notes : Startup.Service'}
 
 (*
   Unit: Startup.Service
@@ -4585,7 +5364,7 @@ interface
     throughout the codebase.
 *)
 
-{$ENDREGION}
+interface
 
 uses
   System.Threading, System.SysUtils, System.Classes, System.IOUtils, Winapi.Windows,
@@ -4680,11 +5459,8 @@ end;
 
 end.
 
+
 unit UserSettings.Persistence;
-
-interface
-
-{$REGION  'Dev notes : UserSettings.Persistence'}
 
 (*
   Unit: UserSettings.Persistence
@@ -4715,7 +5491,7 @@ interface
     and interact fluently with the <c>TSettings</c> object to load, query, modify, or save user configuration.
 *)
 
-{$ENDREGION}
+interface
 
 uses
   System.SysUtils, System.Classes, System.JSON, REST.Json.Types, REST.Json,
@@ -4996,10 +5772,6 @@ Cette partie contient:
 
 unit CancellationButton.VCL;
 
-interface
-
-{$REGION  'Dev notes : CancellationButton.VCL'}
-
 (*
   Unit: CancellationButton.VCL
 
@@ -5034,9 +5806,10 @@ interface
 
   This unit is intended for easy drop-in cancellation support in Delphi VCL applications,
   promoting clarity, user feedback, and minimal code coupling for cancellation functionality.
+
 *)
 
-{$ENDREGION}
+interface
 
 uses
   System.Classes, Vcl.StdCtrls, Vcl.Controls, Manager.Intf, UI.Styles.VCL, Vcl.Buttons;
@@ -5044,6 +5817,9 @@ uses
 type
   /// <summary>
   /// Provides a reusable VCL component for user-initiated cancellation actions in Delphi applications.
+  /// <para>
+  /// ____________
+  /// </para>
   /// <para>
   /// - TCancellationVCL manages a TSpeedButton for workflow cancellation requests. It implements the ICancellation interface
   /// for standardized cancellation signaling and state detection. This class visually indicates the cancellation state,
@@ -5080,7 +5856,7 @@ type
     /// <summary>
     /// Marks the cancellation as requested, restores the original button caption and click handler.
     /// </summary>
-    procedure Cancel(isDone: Boolean = False);
+    procedure Cancel;
 
     /// <summary>
     /// Returns True if a cancellation has been requested; otherwise, returns False.
@@ -5109,10 +5885,9 @@ implementation
 
 { TCancellationVCL }
 
-procedure TCancellationVCL.Cancel(isDone: Boolean);
+procedure TCancellationVCL.Cancel;
 begin
-  if not isDone then
-    FCancelled := True;
+  FCancelled := True;
   FCancelButton.Caption := FOldCaption;
   FCancelButton.OnClick := FOldOnclick;
 end;
@@ -5147,10 +5922,6 @@ end;
 end.
 
 unit Displayer.Edge.VCL;
-
-interface
-
-{$REGION  'Dev notes : Displayer.Edge.VCL'}
 
 (*
   Unit: Displayer.Edge.VCL
@@ -5191,7 +5962,7 @@ interface
 
 *)
 
-{$ENDREGION}
+interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.JSON,
@@ -5762,11 +6533,8 @@ end;
 
 end.
 
+
 unit Displayer.Memo.VCL;
-
-interface
-
-{$REGION  'Dev notes : Displayer.Memo.VCL'}
 
 (*
   Unit: Displayer.Memo.VCL
@@ -5798,9 +6566,10 @@ interface
 
   This unit is designed for clarity and minimalism, making text and annotation display effortless
   in Delphi VCL apps, whether for user interaction, logging, or developer-facing output.
+
 *)
 
-{$ENDREGION}
+interface
 
 uses
   System.SysUtils, System.Classes, Winapi.Messages, Winapi.Windows, Vcl.StdCtrls,
@@ -5955,6 +6724,7 @@ end;
 
 end.
 
+
 unit Helper.ListView.VCL;
 
 interface
@@ -6073,11 +6843,8 @@ end.
 
 unit Helper.OpenDialog.VCL;
 
-interface
-
-{$REGION  'Dev notes : Helper.OpenDialog.VCL'}
-
 (*
+
 A. Returns a boolean with True if successful.
 
   1. Only one file is returned
@@ -6126,9 +6893,10 @@ B. Returns a string and -1 on abort. Don't test if the file exists.
       for var Item in FileName1.Split([#10]) do
         if FileExists(Item) then
            ShowMessage(Item);
+
 *)
 
-{$ENDREGION}
+interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
@@ -6334,6 +7102,7 @@ end;
 
 end.
 
+
 unit Helper.ScrollBoxMouseWheel.VCL;
 
 interface
@@ -6452,10 +7221,6 @@ end.
 
 unit Introducer.UserSettings.VCL;
 
-interface
-
-{$REGION  'Dev notes : UI.VectorResourceManager.VCL'}
-
 (*
   Unit: Introducer.UserSettings.VCL
 
@@ -6478,12 +7243,13 @@ interface
 
 *)
 
-{$ENDREGION}
+
+interface
 
 uses
   System.SysUtils, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.Mask,
-  Vcl.Buttons, Vcl.Forms, Vcl.Dialogs;
+  Vcl.Forms, Vcl.Dialogs;
 
 type
   TSettingsIntroducer = record
@@ -6502,8 +7268,6 @@ type
     TimeOut: TComboBox;
     Country: TMaskEdit;
     City: TMaskEdit;
-    ClearResponseButton: TSpeedButton;
-    DashBoardLabel: TLabel;
     class function Empty: TSettingsIntroducer; static;
   end;
 
@@ -6523,8 +7287,6 @@ type
     function SetTimeOut(Value: TComboBox): TSettingsIntroducer; inline;
     function SetCountry(Value: TMaskEdit): TSettingsIntroducer; inline;
     function SetCity(Value: TMaskEdit): TSettingsIntroducer; inline;
-    function SetClearResponseButton(Value: TSpeedButton): TSettingsIntroducer; inline;
-    function SetDashBoardLabel(Value: TLabel): TSettingsIntroducer; inline;
   end;
 
 implementation
@@ -6552,24 +7314,10 @@ begin
   Result := Self;
 end;
 
-function TSettingsIntroducerHelper.SetClearResponseButton(
-  Value: TSpeedButton): TSettingsIntroducer;
-begin
-  Self.ClearResponseButton := Value;
-  Result := Self;
-end;
-
 function TSettingsIntroducerHelper.SetCountry(
   Value: TMaskEdit): TSettingsIntroducer;
 begin
   Self.Country := Value;
-  Result := Self;
-end;
-
-function TSettingsIntroducerHelper.SetDashBoardLabel(
-  Value: TLabel): TSettingsIntroducer;
-begin
-  Self.DashBoardLabel := Value;
   Result := Self;
 end;
 
@@ -6659,11 +7407,8 @@ end;
 
 end.
 
+
 unit UI.AlertService.VCL;
-
-interface
-
-{$REGION  'Dev notes : UI.AlertService.VCL'}
 
 (*
   Unit: UI.AlertService.VCL
@@ -6693,7 +7438,7 @@ interface
 
 *)
 
-{$ENDREGION}
+interface
 
 uses
   System.SysUtils, System.UITypes, VCL.Dialogs, Manager.Intf;
@@ -6780,10 +7525,6 @@ end.
 
 unit UI.AnimatedVectorLeftPanel.VCL;
 
-interface
-
-{$REGION  'Dev notes : UI.AnimatedVectorLeftPanel.VCL'}
-
 (*
   Unit: UI.AnimatedVectorLeftPanel.VCL
 
@@ -6825,7 +7566,7 @@ interface
 
 *)
 
-{$ENDREGION}
+interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.Threading,
@@ -6957,59 +7698,53 @@ implementation
 procedure TLeftPanelControl.AnimatePanelAsync(APanel: TPanel;
   const TargetWidth: Integer);
 const
-  MaxStep = 84;
-  MinStep = 4;
-  FRAME_PAUSE = 22; // ms
-var
-  StartWidth, TotalDelta: Integer;
+  PIXEL_STEP   = 24;
+  FRAME_PAUSE  = 22;   // ms
 begin
-  StartWidth := APanel.Width;
-  TotalDelta := TargetWidth - StartWidth;
-
-  if TotalDelta = 0 then
-    Exit;
+  var StartWidth := APanel.Width;
 
   TTask.Run(
     procedure
     var
-      CurW, Remaining, Step: Integer;
-      Ratio: Double;
+      CurW, Step: Integer;
     begin
       CurW := StartWidth;
 
+      if CurW = TargetWidth then
+        Exit;
+
+      if CurW < TargetWidth then
+        Step := PIXEL_STEP else
+        Step := -PIXEL_STEP;
+
       while CurW <> TargetWidth do
-        begin
-          Remaining := TargetWidth - CurW;
-          Ratio := Abs(Remaining) / Abs(TotalDelta);
-          Step := Round(MinStep + (MaxStep - MinStep) * Ratio);
-          if Step > Abs(Remaining) then
-            Step := Abs(Remaining);
+      begin
+        Inc(CurW, Step);
+        if ((Step > 0) and (CurW > TargetWidth)) or
+           ((Step < 0) and (CurW < TargetWidth)) then
+          CurW := TargetWidth;
 
-          if Remaining < 0 then
-            Step := -Step;
-
-          Inc(CurW, Step);
-
-          TThread.Queue(nil,
-            procedure
-            begin
-              APanel.DisableAlign;
+        TThread.Queue(nil,
+          procedure
+          begin
+            APanel.DisableAlign;
+            try
+              APanel.Parent.DisableAlign;
               try
-                APanel.Parent.DisableAlign;
-                try
-                  APanel.SetBounds(APanel.Left, APanel.Top, CurW, APanel.Height);
-                  APanel.Update;
-                  FResize(nil);
-                finally
-                  APanel.Parent.EnableAlign;
-                end;
+                APanel.SetBounds(APanel.Left, APanel.Top, CurW, APanel.Height);
+                APanel.Update;
+                FResize(nil);
               finally
-                APanel.EnableAlign;
+                APanel.Parent.EnableAlign;
               end;
-            end);
+            finally
+              APanel.EnableAlign;
+            end;
+          end);
 
-          Sleep(FRAME_PAUSE);
-        end;
+        Sleep(FRAME_PAUSE);
+
+      end;
     end);
 end;
 
@@ -7128,6 +7863,7 @@ end;
 
 procedure TLeftPanelControl.HandleClose;
 begin
+  EdgeDisplayer.Hide;
   FCaptionPanel.Visible := True;
   FCloseBtn.Visible := False;
   FNewLeftBnt.Visible := False;
@@ -7137,7 +7873,6 @@ end;
 procedure TLeftPanelControl.HandleNew(Sender: TObject);
 begin
   try
-    EdgeDisplayer.Hide;
     PersistentChat.Clear;
     EdgeDisplayer.Clear;
     FileSearchDisplayer.Clear;
@@ -7292,10 +8027,6 @@ end.
 
 unit UI.ChatSession.VCL;
 
-interface
-
-{$REGION  'Dev notes : UI.ChatSession.VCL'}
-
 (*
   Unit: UI.ChatSession.VCL
 
@@ -7328,7 +8059,7 @@ interface
   Conventions follow File2knowledgeAI UI, chaining, and session storage best practices.
 *)
 
-{$ENDREGION}
+interface
 
 uses
   Winapi.Windows, Winapi.ShellAPI,
@@ -7514,14 +8245,7 @@ begin
       if Item.Checked then
         begin
           if not Matched then
-            begin
-              Matched := TChatSession(Item.Data) = PersistentChat.CurrentChat;
-              if Matched then
-                begin
-                  for var Turn in PersistentChat.CurrentChat.Data do
-                    OpenAI.DeleteResponse(Turn.Id);
-                end;
-            end;
+            Matched := (*TDataChat*)TChatSession(Item.Data) = PersistentChat.CurrentChat;
           HandleDeletion(nil, Item);
         end;
     end;
@@ -7896,11 +8620,8 @@ end;
 
 end.
 
+
 unit UI.Container.VCL;
-
-interface
-
-{$REGION  'Dev notes : UI.Container.VCL'}
 
 (*
     Note on the Implementation of the Internal Registry in TContainer
@@ -7927,7 +8648,7 @@ interface
     simplicity, and practical effectiveness in the example.
 *)
 
-{$ENDREGION}
+interface
 
 uses
   Winapi.Windows, Winapi.Messages, Winapi.ShellAPI,
@@ -8385,10 +9106,6 @@ end.
 
 unit UI.PageSelector.VCL;
 
-interface
-
-{$REGION  'Dev notes : UI.PageSelector.VCL'}
-
 (*
   Unit: UI.PageSelector.VCL
 
@@ -8425,7 +9142,7 @@ interface
 
 *)
 
-{$ENDREGION}
+interface
 
 uses
   Winapi.Windows, Winapi.Messages, Winapi.CommCtrl,
@@ -8618,10 +9335,6 @@ end.
 
 unit UI.PromptEditor.VCL;
 
-interface
-
-{$REGION  'Dev notes : UI.PromptEditor.VCL'}
-
 {*
   Unit: UI.PromptEditor.VCL
 
@@ -8644,19 +9357,19 @@ interface
 
 *}
 
-{$ENDREGION}
+interface
 
 uses
   System.SysUtils, System.Classes, Winapi.Windows, System.Generics.Collections,
   Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Controls, Vcl.Buttons,
   System.Character, System.UITypes,
-  Manager.Intf, GenAI.Async.Promise, Manager.Utf8Mapping, Manager.Types,
+  Manager.Intf, Manager.Async.Promise, Manager.Utf8Mapping, Manager.Types,
   UI.Styles.VCL;
 
 const
   NEW_CHAT_TITLE = 'New chat ...';
   NAMING_INSTRUCTION =
-    'For each prompt and answer provided, generate in ≤6 words the main idea of the “QR” (question-answer).';
+    'For each prompt and answer provided, generate in ≤6 words the main idea of ​​the “QR” (question-answer).';
 
 type
   /// <summary>
@@ -8758,8 +9471,8 @@ begin
             .&Then<string>(
               function (Value: string): string
               begin
-                VectorResourceEditor.Refresh;
                 Execute(nil);
+                VectorResourceEditor.Refresh;
               end);
           Exit(False);
         end;
@@ -8815,7 +9528,8 @@ begin
             .&Catch(
               procedure(E: Exception)
               begin
-                AlertService.ShowError(E.Message);
+//                AlertService.ShowError(E.Message);
+//                EdgeDisplayer.DisplayStream(E.Message);
               end);
         end;
     end;
@@ -8954,10 +9668,6 @@ end.
 
 unit UI.PromptSelector.VCL;
 
-interface
-
-{$REGION  'Dev notes : UI.PromptSelector.VCL'}
-
 (*
   Unit: UI.PromptSelector.VCL
 
@@ -8989,12 +9699,12 @@ interface
   This unit is provided as a ready-to-integrate component following File2knowledgeAI UI and architecture conventions, facilitating clear prompt history navigation and extensible, maintainable code structure.
 *)
 
-{$ENDREGION}
+interface
 
 uses
   System.SysUtils, System.Classes, Winapi.Windows,
   Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Controls, Vcl.Buttons, Vcl.ExtCtrls,
-  Manager.Intf, Manager.Types, Manager.Utf8Mapping,
+  Manager.Intf, Manager.Async.Promise, Manager.Types, Manager.Utf8Mapping,
   UI.Styles.VCL;
 
 type
@@ -9216,11 +9926,8 @@ end;
 
 end.
 
+
 unit UI.ServiceFeatureSelector.VCL;
-
-interface
-
-{$REGION  'Dev notes : UI.ServiceFeatureSelector.VCL'}
 
 (*
   Unit: UI.ServiceFeatureSelector.VCL
@@ -9261,7 +9968,8 @@ interface
     around the new v1/responses endpoint and the product’s multimodal capabilities.
 *)
 
-{$ENDREGION}
+
+interface
 
 uses
   Winapi.Windows, Winapi.Messages, Winapi.CommCtrl,
@@ -9625,7 +10333,6 @@ type
     class procedure ApplyUserSettingsComboBoxStyle(Value: TComboBox; Proc: TProc = nil);
     class procedure ApplyUserSettingsComboBoxStyleStar(Value: TComboBox; Proc: TProc = nil);
     class procedure ApplyUserSettingsMaskEditStyle(Value: TMaskEdit; Proc: TProc; Password: Boolean = False);
-    class procedure ApplyUserSettingsDashboardLabel(Value: TLabel; Proc: TProc = nil);
 
     {--- Refer to UI.PageSelector.VCL }
     class procedure ApplyPageSelectorLabelStyle(Value: TLabel; Proc: TProc = nil);
@@ -9699,21 +10406,6 @@ begin
   Value.Font.Color := clYellow;
   Value.Font.Size := 11;
   Value.TabStop := False;
-
-  if Assigned(Proc) then
-    Proc();
-end;
-
-class procedure TAppStyle.ApplyUserSettingsDashboardLabel(Value: TLabel;
-  Proc: TProc);
-begin
-  if not Assigned(Value) then
-    Exit;
-
-  Value.Cursor := crHandPoint;
-  Value.Font.Color := clGray;
-  Value.Font.Style := [fsUnderline];
-  Value.StyleElements := [seClient, seBorder];
 
   if Assigned(Proc) then
     Proc();
@@ -10351,10 +11043,6 @@ end.
 
 unit UI.UserSettings.VCL;
 
-interface
-
-{$REGION  'Dev notes : UI.UserSettings.VCL'}
-
 (*
   Unit: UI.UserSettings.VCL
 
@@ -10397,16 +11085,15 @@ interface
   persistence, and rendering responsibilities, following the latest Delphi VCL best practices.
 *)
 
-{$ENDREGION}
+interface
 
 uses
   Winapi.Windows, Winapi.Messages, Winapi.CommCtrl,
   System.SysUtils, System.Classes, System.Generics.Collections,
   Vcl.Graphics, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.Mask,
-  Vcl.Buttons, Vcl.Forms, Vcl.Dialogs,
+  Vcl.Forms, Vcl.Dialogs,
   Manager.Intf, Manager.IoC, JSON.Resource, UserSettings.Persistence, UI.Styles.VCL,
-  Helper.ScrollBoxMouseWheel.VCL, Helper.UserSettings, Introducer.UserSettings.VCL,
-  ChatSession.Controller, Manager.WebServices;
+  Helper.ScrollBoxMouseWheel.VCL, Helper.UserSettings, Introducer.UserSettings.VCL;
 
 type
   /// <summary>
@@ -10443,8 +11130,6 @@ type
     FTimeOut: TComboBox;
     FCountry: TMaskEdit;
     FCity: TMaskEdit;
-    FClearResponseButton: TSpeedButton;
-    FDashBoardLabel: TLabel;
     procedure ReloadFromJSONFile;
     procedure SearchModelCostUpdate;
     procedure ReasoningModelCostUpdate;
@@ -10463,8 +11148,6 @@ type
     procedure SetTimeOut(const Value: TComboBox);
     procedure SetCountry(const Value: TMaskEdit);
     procedure SetCity(const Value: TMaskEdit);
-    procedure SetClearResponseButton(const Value: TSpeedButton);
-    procedure SetDashBoardLabel(const Value: TLabel);
 
     procedure InitializeComponent(Component: TControl; ChangeHandler: TNotifyEvent = nil);
   protected
@@ -10484,8 +11167,6 @@ type
     procedure HandleCityChange(Sender: TObject);
     procedure HandleMaskEditKeyPressed(Sender: TObject; var Key: Char);
     procedure HandleMaskEditExit(Sender: TObject);
-    procedure HandleClearResponseIds(Sender: TObject);
-    procedure HandleDashboard(Sender: TObject);
   public
     /// <summary>
     /// Prompts the user to enter their OpenAI API key if it is not already set.
@@ -10646,8 +11327,6 @@ begin
     SetTimeOut(Introducer.TimeOut);
     SetCountry(Introducer.Country);
     SetCity(Introducer.City);
-    SetClearResponseButton(Introducer.ClearResponseButton);
-    SetDashBoardLabel(Introducer.DashBoardLabel);
   finally
     FLock := False;
   end;
@@ -10682,28 +11361,11 @@ begin
       .Apply(TSettingsProp.City, FCity.Text).Save;
 end;
 
-procedure TSettingsVCL.HandleClearResponseIds(Sender: TObject);
-begin
-  var Message :=
-    'Please note that this operation will delete orphaned responses and clean up your OpenAI dashboard.' + sLineBreak +
-    'Do you confirm this action?';
-  if AlertService.ShowConfirmation(Message) = mrYes then
-    begin
-      for var id in ResponseTracking.GetOrphans(PersistentChat.GetResponseIds) do
-        OpenAI.DeleteResponse(id);
-    end;
-end;
-
 procedure TSettingsVCL.HandleCountryChange(Sender: TObject);
 begin
   if not FLock then
     FSettings.Chain
       .Apply(TSettingsProp.Country, FCountry.Text).Save;
-end;
-
-procedure TSettingsVCL.HandleDashboard(Sender: TObject);
-begin
-  TWebUrlManager.Open('https://platform.openai.com/logs');
 end;
 
 procedure TSettingsVCL.HandleLeave(Sender: TObject);
@@ -10889,14 +11551,6 @@ begin
     FSettings.Chain.Apply(TSettingsProp.SearchModel, mtSearch.GetDefaultModel);
   if FSettings.ReasoningModel.IsEmpty then
     FSettings.Chain.Apply(TSettingsProp.ReasoningModel, mtReasoning.GetDefaultModel);
-  if FSettings.ReasoningEffort.IsEmpty then
-    FSettings.Chain.Apply(TSettingsProp.ReasoningEffort, TIntensity.Default.ToString);
-  if FSettings.ReasoningSummary.IsEmpty then
-    FSettings.Chain.Apply(TSettingsProp.ReasoningSummary, TSummary.Default.ToString);
-  if FSettings.WebContextSize.IsEmpty then
-    FSettings.Chain.Apply(TSettingsProp.WebContextSize, TIntensity.Default.ToString);
-  if FSettings.TimeOut.IsEmpty then
-    FSettings.Chain.Apply(TSettingsProp.TimeOut, TTimeOut.Default.ToString);
 end;
 
 function TSettingsVCL.SearchModel: string;
@@ -10930,13 +11584,6 @@ begin
     end);
 end;
 
-procedure TSettingsVCL.SetClearResponseButton(const Value: TSpeedButton);
-begin
-  FClearResponseButton := Value;
-  if Assigned(Value) then
-    Value.OnClick := HandleClearResponseIds;
-end;
-
 procedure TSettingsVCL.SetCountry(const Value: TMaskEdit);
 begin
   FCountry := Value;
@@ -10944,17 +11591,6 @@ begin
     procedure
     begin
       InitializeComponent(Value, HandleCountryChange);
-    end);
-end;
-
-procedure TSettingsVCL.SetDashBoardLabel(const Value: TLabel);
-begin
-  FDashBoardLabel := Value;
-  TAppStyle.ApplyUserSettingsDashboardLabel(Value,
-    procedure
-    begin
-      FDashBoardLabel.Caption := 'Dashboard OpenAI';
-      FDashBoardLabel.OnClick := HandleDashboard;
     end);
 end;
 
@@ -11146,7 +11782,7 @@ end;
 
 function TSettingsVCL.UseSummary: Boolean;
 begin
-  Result := not FSettings.ReasoningSummary.Trim.ToLower.Contains('none');
+  Result := not FSettings.ReasoningSummary.Trim.Contains('none');
 end;
 
 function TSettingsVCL.WebContextSize: string;
@@ -11156,11 +11792,8 @@ end;
 
 end.
 
+
 unit UI.VectorResourceEditor.VCL;
-
-interface
-
-{$REGION  'Dev notes : UI.VectorResourceEditor.VCL'}
 
 (*
   Unit: UI.VectorResourceEditor.VCL
@@ -11194,7 +11827,7 @@ interface
       and several helper units for dialogs, popups, rounded panels, uploads, etc.
 *)
 
-{$ENDREGION}
+interface
 
 uses
   Winapi.Windows,
@@ -11627,29 +12260,9 @@ begin
 
   if TOpenDialogHelper.Create(nil)
        .Filter(
-         'text (*.txt)|*.txt|' +
-         'markdown (*.md)|*.md|' +
-         'text & markdown (*.txt;*.md)|*.txt;*.md|' +
-         'PDF files (*.pdf)|*.pdf|' +
-         'office document (*.doc;*.docx;*.pptx)|*.doc;*.docx;*.pptx|' +
-         'text/x-c (*.c)|*.c|' +
-         'text/x-c++ (*.cpp)|*.cpp|' +
-         'text/x-csharp (*.cs)|*.cs|' +
-         'text/css (*.css)|*.css|' +
-         'Msword (*.doc)|*.doc|' +
-         'office document (*.docx)|*.docx|' +
-         'Golang (*.go)|*.go|' +
-         'Html (*.html)|*.html|' +
-         'Java (*.java)|*.java|' +
-         'Javascript (*.js)|*.js|' +
-         'Json (*.json)|*.json|' +
-         'Php (*.php)|*.php|' +
-         'office document (*.pptx)|*.pptx|' +
-         'Python (*.py)|*.py|' +
-         'Ruby (*.rb)|*.rb|' +
-         'application/x-sh (*.sh)|*.sh|' +
-         'text/x-tex (*.tex)|*.tex|' +
-         'Typescript (*.ts)|*.ts|')
+         'Text Files (*.txt)|*.txt|' +
+         'Markdown Files (*.md)|*.md|' +
+         'Text & Markdown (*.txt;*.md)|*.txt;*.md')
        .InitialDir(FileName)
        .FilterIndex(3)
        .Execute(FileName)
@@ -12092,11 +12705,8 @@ end;
 
 end.
 
+
 unit UI.VectorResourceManager.VCL;
-
-interface
-
-{$REGION  'Dev notes : UI.VectorResourceManager.VCL'}
 
 (*
   Unit: UI.VectorResourceManager.VCL
@@ -12137,11 +12747,11 @@ interface
   VCL applications, prioritizing clarity, maintainability, and ease of adding or updating resource wrappers.
 *)
 
-{$ENDREGION}
+interface
 
 uses
   System.SysUtils, System.Classes, System.JSON, REST.Json, System.IOUtils, System.Threading,
-  Manager.Intf, GenAI.Async.Promise, Model.VectorResource, UI.Container.VCL;
+  Manager.Intf, Manager.Async.Promise, Model.VectorResource, UI.Container.VCL;
 
 type
   EFileCountNull = class(Exception);
@@ -12616,12 +13226,12 @@ begin
        function: TVectorResourceItem
        begin
          Result := TVectorResourceItem.Create;
-         Result.Image := '..\..\logos\File2knowledge_logo.png';
+         Result.Image := '..\..\logos\File2knowledgeAI_logo.png';
          Result.Name := 'file2knowledge';
-         Result.Description := 'GenAI implementation project through File2knowledge to highlight best practices around the v1/responses endpoint';
-         Result.Github := 'https://github.com/MaxiDonkey/file2knowledge';
+         Result.Description := 'Projet de mise en application de GenAI à travers File2knowledgeAI pour mettre en avant les bonnes pratiques autour du nouveau point de terminaison v1\/responses';
+         Result.Github := 'https://github.com/MaxiDonkey/File2knowledgeAI';
          Result.Getit := '';
-         Result.Files := ['..\..\data\File2knowledge_documentation.txt', '..\..\data\GenAI_documentation.txt'];
+         Result.Files := ['..\..\data\File2knowledgeAI_part4.txt', '..\..\data\GenAI_documentation.txt'];
        end
     ]);
 end;
@@ -12777,7 +13387,6 @@ end;
 
 end.
 
-
 ## La partie de communication avec le LLM - situé dans le dossier 'providers' du projet
 
 Le LLM en question ici est OpenAI avec le point de terminaison v1/responses et les modèles qui le supportent ainsi que les outils.
@@ -12856,11 +13465,8 @@ end;
 
 end.
 
+
 unit Provider.OpenAI.ExecutionEngine;
-
-interface
-
-{$REGION 'Dev notes'}
 
 (*
   Unit: Provider.OpenAI.ExecutionEngine
@@ -12872,17 +13478,17 @@ interface
 
   Architecture and approach:
     - TPromptExecutionEngine is the key orchestrator for executing user prompts:
-        • Handles prompt formatting, parameter building, and contextual instructions (tools, web/file search, reasoning, etc).
-        • Coordinates asynchronous streaming of results via the GenAI client, managing cancellation, error chains, file/web search and UI callbacks.
-        • Delegates all event processing during response streaming to an event engine manager (IEventEngineManager).
-        • Integrates with persistent session objects for chat continuity, storage, and history tracking.
+        - Handles prompt formatting, parameter building, and contextual instructions (tools, web/file search, reasoning, etc).
+        - Coordinates asynchronous streaming of results via the GenAI client, managing cancellation, error chains, file/web search and UI callbacks.
+        - Delegates all event processing during response streaming to an event engine manager (IEventEngineManager).
+        - Integrates with persistent session objects for chat continuity, storage, and history tracking.
     - Modularity and extensibility:
-        • Designed for dependency injection; all external collaborations are interface-driven (GenAI, system prompt builder, etc).
-        • Implements async promise patterns for non-blocking UI and workflow chaining.
-        • All event/stream-specific logic is delegated to pluggable managers (cf. Provider.OpenAI.StreamEvents).
+        - Designed for dependency injection; all external collaborations are interface-driven (GenAI, system prompt builder, etc).
+        - Implements async promise patterns for non-blocking UI and workflow chaining.
+        - All event/stream-specific logic is delegated to pluggable managers (cf. Provider.OpenAI.StreamEvents).
     - Robust lifecycle management:
-        • Explicit control over chat turn creation, prompt history, intermediate/finalization states, cancellation, and error handling.
-        • All UI and session feedback is routed explicitly for user experience and recoverability.
+        - Explicit control over chat turn creation, prompt history, intermediate/finalization states, cancellation, and error handling.
+        - All UI and session feedback is routed explicitly for user experience and recoverability.
 
   Developer highlights:
     - To use, instantiate TPromptExecutionEngine via IoC or directly, providing required dependencies.
@@ -12897,16 +13503,16 @@ interface
 
   This unit is designed for robustness, modularity, and scalability in prompt execution and streaming scenarios,
   enabling maintainable and extensible Delphi OpenAI/GenAI integrations aligned with best architecture practices (SOLID, async, DI).
+
 *)
 
-{$ENDREGION}
+interface
 
 uses
   System.SysUtils, System.classes, System.Generics.Collections, System.DateUtils, System.Threading,
-  GenAI, GenAI.Types, GenAI.Async.Promise,
-  Manager.Intf, Manager.IoC, ChatSession.Controller, Manager.Utf8Mapping,
-  Helper.UserSettings, Manager.Types, Provider.InstructionManager, Provider.OpenAI.StreamEvents,
-  Helper.TextFile;
+  GenAI, GenAI.Types,
+  Manager.Async.Promise, Manager.Intf, Manager.IoC, ChatSession.Controller, Manager.Utf8Mapping,
+  Helper.UserSettings, Manager.Types, Provider.InstructionManager, Provider.OpenAI.StreamEvents;
 
 type
   /// <summary>
@@ -12945,13 +13551,6 @@ type
   ///   </code>
   /// </remarks>
   TPromptExecutionEngine = class(TInterfacedObject, IPromptExecutionEngine)
-  strict private
-    procedure TurnUpdate;
-    procedure ServiceClearUI;
-    function UpdateAnnotation(const Displayer: IAnnotationsDisplayer): string;
-    function CreateStreamParamsConfigurator(const Turn: TChatTurn): TProc<TResponsesParams>;
-    function CreateErrorHandlerCallback(const StreamBuffer: string): TFunc<TObject, string, string>;
-    function CreateCancellationHandlerCallback(const StreamBuffer: string): TFunc<TObject, string>;
   private
     /// <summary>
     /// The GenAI client instance used for all API communications.
@@ -13003,7 +13602,7 @@ type
     /// <summary>
     ///   Finalizes the current chat turn, updating stored search and reasoning results and saving session state.
     /// </summary>
-    procedure FinalizeTurn;
+    procedure FinalizeCurrentTurn;
 
     /// <summary>
     ///   Adds a new chat turn to the persistent session, stamping it with the current timestamp.
@@ -13029,7 +13628,7 @@ type
     /// <param name="Sender">
     /// The sender of the completion notification (engine, promise, etc.).
     /// </param>
-    function OnTurnSuccess(Sender: TObject): string;
+    procedure OnTurnSuccess(Sender: TObject);
 
     /// <summary>
     /// Event handler triggered when an error occurs during prompt execution or streaming.
@@ -13051,62 +13650,6 @@ type
     /// The context object triggering cancellation.
     /// </param>
     procedure OnTurnCancelled(Sender: TObject);
-
-    /// <summary>
-    /// Determines whether the current chat turn should be canceled and updates the UI if so.
-    /// </summary>
-    /// <returns>
-    /// <c>True</c> if a cancellation has been requested; otherwise, <c>False</c>.
-    /// </returns>
-    /// <remarks>
-    /// Used as the OnDoCancel callback during streaming.
-    /// When <c>True</c>, it hides the reasoning bubble and displays an "Operation canceled" message.
-    /// </remarks>
-    function OnTurnDoCancel: Boolean;
-
-    /// <summary>
-    /// Initializes the HTTP client’s response timeout based on the current application settings.
-    /// </summary>
-    /// <remarks>
-    /// Reads the timeout value from <c>Settings.TimeOut</c>, converts it into a cardinal number,
-    /// and assigns it to the underlying GenAI client’s <c>HttpClient.ResponseTimeout</c> property.
-    /// </remarks>
-    procedure InitClientTimeOut;
-
-    /// <summary>
-    /// Configures the chat turn before execution by enabling storage and assigning the user prompt.
-    /// </summary>
-    /// <param name="Turn">The chat turn object that will be populated with the prompt and marked for storage.</param>
-    /// <param name="Prompt">The text of the user’s prompt to send to the AI engine.</param>
-    /// <remarks>
-    /// Sets <c>Turn.Storage</c> to <c>True</c> and assigns <c>Turn.Prompt</c> to the provided <c>Prompt</c> string.
-    /// This ensures the prompt is stored and ready for processing by the execution engine.
-    /// </remarks>
-    procedure ConfigureRequest(const Turn: TChatTurn; const Prompt: string);
-
-    /// <summary>
-    /// Creates and configures an asynchronous streaming request for the specified chat turn.
-    /// </summary>
-    /// <param name="Turn">
-    /// The <c>TChatTurn</c> instance that contains the prompt text and storage flag;
-    /// this turn will be used to build request parameters and track response progress.
-    /// </param>
-    /// <returns>
-    /// A <c>TPromise&lt;string&gt;</c> that resolves with the AI’s full response text when streaming completes,
-    /// or is rejected if an error or cancellation occurs.
-    /// </returns>
-    /// <remarks>
-    /// - Evaluates active feature flags (reasoning, web search, file search) to choose the correct AI model and tools.
-    /// - Sets <c>Params.Input</c> to <c>Turn.Prompt</c> and <c>Params.Instructions</c> via the system‐prompt builder.
-    /// - Configures <c>Params.Tools</c> based on context (web search or file search) when reasoning is disabled.
-    /// - Enables streaming (<c>Params.Stream(True)</c>) and persistence (<c>Params.Store(Turn.Storage)</c>),
-    ///   linking to a previous response ID if one exists.
-    /// - Serializes the prompt into <c>Turn.JsonPrompt</c> and immediately saves the chat to disk.
-    /// - Assigns callbacks (<c>OnStart</c>, <c>OnProgress</c>, <c>OnSuccess</c>, <c>OnError</c>, <c>OnDoCancel</c>, <c>OnCancellation</c>)
-    ///   to drive UI updates, error handling, and finalization logic as chunks stream in.
-    /// </remarks>
-    function BuildStreamPromise(const Turn: TChatTurn): TPromise<string>;
-
   public
     /// <summary>
     /// Submits a prompt for execution via the OpenAI/GenAI engine, handling streaming
@@ -13141,73 +13684,10 @@ begin
   PersistentChat.CurrentChat.ModifiedAt := DateTimeToUnix(Now, False);
 end;
 
-function TPromptExecutionEngine.BuildStreamPromise(
-  const Turn: TChatTurn): TPromise<string>;
-{$REGION  'Dev notes : Contexte SSE & Streambuffer'}
-(*
-  - In the context of SSE reception, the promise associated with a canceled operation must be rejected,
-    as it is not possible to guarantee the availability of a valid TResponseStream.
-
-  - The "StreamBuffer" variable cannot be declared within the lambda "function TPromiseResponseStream",
-    because although it can be captured, it would not have sufficient scope to ensure its integrity
-    during the execution of the "OnError" and "OnCancellation" callbacks.
-*)
-{$ENDREGION}
-var
-  StreamBuffer: string;
-begin
-  var DisplayedChunkCount := 0;
-
-  Result := FClient.Responses
-    .AsyncAwaitCreateStream(
-        CreateStreamParamsConfigurator(Turn),
-        function : TPromiseResponseStream
-        begin
-          Result.Sender := Turn;
-          Result.OnStart := OnTurnStart;
-
-          {--- Chunk aggregation and error handling }
-          Result.OnProgress :=
-            procedure (Sender: TObject; Chunk: TResponseStream)
-            begin
-              if not FEventEngineManager.AggregateStreamEvents(Chunk, StreamBuffer, DisplayedChunkCount) then
-                begin
-                  {--- Error Event }
-                  ResponseTracking.Cancel;
-                  CreateErrorHandlerCallback(StreamBuffer)(Sender, #10#10 + Chunk.Code + ': ' + Chunk.Message);
-                end;
-
-              {--- Last event recieved : It will be resolved by default
-                   => This implies that the OnSuccess cannot be invoked }
-              if Chunk.&Type = TResponseStreamType.completed then
-                begin
-                  OnTurnSuccess(Sender);
-                end;
-            end;
-
-          Result.OnError := CreateErrorHandlerCallback(StreamBuffer);
-          Result.OnDoCancel := OnTurnDoCancel;
-          Result.OnCancellation := CreateCancellationHandlerCallback(StreamBuffer);
-        end)
-    .&Then<string>(
-        function (Value: TResponseStream): string
-        begin
-          for var Item in Value.Response.Output do
-            for var SubItem in Item.Content do
-              Result := Result + SubItem.Text;
-        end);
-end;
-
 function TPromptExecutionEngine.BuildWebSearchToolChoiceParams: THostedToolParams;
 begin
   Result := THostedToolParams.Create
     .&Type('web_search_preview')
-end;
-
-procedure TPromptExecutionEngine.ConfigureRequest(const Turn: TChatTurn; const Prompt: string);
-begin
-  Turn.Storage := True;
-  Turn.Prompt := Prompt;
 end;
 
 constructor TPromptExecutionEngine.Create(const GenAIClient: IGenAI;
@@ -13217,16 +13697,6 @@ begin
   FClient := GenAIClient;
   FSystemPromptBuilder := AystemPromptBuilder;
   FEventEngineManager := TEventEngineManager.Create;
-end;
-
-function TPromptExecutionEngine.CreateCancellationHandlerCallback(
-  const StreamBuffer: string): TFunc<TObject, string>;
-begin
-  Result := function (Sender: TObject): string
-    begin
-      (Sender as TChatTurn).Response := StreamBuffer + #10#10 + 'Aborted';
-      OnTurnCancelled(Sender);
-    end;
 end;
 
 function TPromptExecutionEngine.CreateFileSearchToolParamsWithStore: TResponseToolParams;
@@ -13246,403 +13716,261 @@ begin
     Result.Summary(Settings.ReasoningSummary);
 end;
 
-function TPromptExecutionEngine.CreateStreamParamsConfigurator(
-  const Turn: TChatTurn): TProc<TResponsesParams>;
-begin
-  Result := procedure (Params: TResponsesParams)
-    begin
-      {--- Evaluate active service-feature flags for this call }
-      var hasReasoning := sf_reasoning in ServiceFeatureSelector.FeatureModes;
-      var hasWebSearch := sf_webSearch in ServiceFeatureSelector.FeatureModes;
-      var fileSearchDisabled := sf_fileSearchDisabled in ServiceFeatureSelector.FeatureModes;
-      var hasFileStore := Length(FileStoreManager.VectorStore) > 0;
-
-      {--- Choose the proper AI model (reasoning vs. search) }
-      if hasReasoning then
-        begin
-          Params.Model(Settings.ReasoningModel);
-          Params.Reasoning(CreateReasoningEffortParams);
-        end
-      else
-        begin
-          {$REGION '400 Bad Request'}
-          (*
-             If the previous round of the session used a reasoning model, then this round will return:
-
-                 400 Bad Request
-                     Reasoning input items can only be provided to a reasoning or computer use model.
-                     Remove reasoning items from your input and try again.
-
-             As soon as you chain a reasoning-model call → non-reasoning-model call using previousResponseId,
-             all input items—including those labeled type: "reasoning"—get passed back into gpt-4.1, triggering:
-
-               - Reasoning input items can only be provided to a reasoning or computer use model
-
-             Bug reported to OpenAI support on 05/29/2025
-             https://community.openai.com/t/400-error-when-chaining-sessions-between-4-1-and-o4-mini/1272381/1
-          *)
-         {$ENDREGION}
-          Params.Model(Settings.SearchModel);
-        end;
-
-      {--- Set user prompt }
-      Params.Input(Turn.Prompt);
-
-      {--- Set developer instructions }
-      Params.Instructions(FSystemPromptBuilder.BuildSystemPrompt);
-
-      {--- Set explicit tool choice }
-      if hasWebSearch then
-        Params.ToolChoice(BuildWebSearchToolChoiceParams);
-
-      {--- Tool selection according to feature flags }
-      if not hasReasoning then
-        begin
-          if not fileSearchDisabled and hasFileStore and hasWebSearch then
-            begin
-              Params.Tools([
-                CreateFileSearchToolParamsWithStore,
-                CreateWebSearchToolParamsWithContext
-              ]);
-            end
-          else
-            if not fileSearchDisabled and hasFileStore then
-              begin
-                Params.Tools([ CreateFileSearchToolParamsWithStore ]);
-              end
-            else if hasWebSearch then
-              begin
-                Params.Tools([ CreateWebSearchToolParamsWithContext ]);
-              end;
-        end;
-
-      Params.Include([ TOutputIncluding.file_search_result ]);
-
-      {--- Enable streaming mode }
-      Params.Stream(True);
-
-      {--- Enable or disable storage based on configuration }
-      Params.Store(Turn.Storage);
-
-      {--- Link the request to a previous response ID }
-      if Turn.Storage and not ResponseTracking.LastId.IsEmpty then
-        Params.PreviousResponseId(ResponseTracking.LastId);
-
-      {--- Serialize the request to the prompt data collector }
-      Turn.JsonPrompt := Params.ToJsonString();
-
-      {--- Persistently save the current turn to JSON }
-      PersistentChat.SaveToFile;
-    end;
-end;
-
 function TPromptExecutionEngine.CreateWebSearchToolParamsWithContext: TResponseToolParams;
 begin
   Result := TResponseWebSearchParams.New
     .SearchContextSize(Settings.WebContextSize);
 
   if not Settings.Country.Trim.IsEmpty or not Settings.City.Trim.IsEmpty then
-    (Result as TResponseWebSearchParams)
-      .UserLocation(
-        TResponseUserLocationParams.New
-          .Country(Settings.Country)
-          .City(Settings.City)
-       );
+    (Result as TResponseWebSearchParams).UserLocation(
+      TResponseUserLocationParams.New
+        .Country(Settings.Country)
+        .City(Settings.City)
+    );
 end;
 
 function TPromptExecutionEngine.Execute(const Prompt: string): TPromise<string>;
+var
+  StreamBuffer: string;
 begin
-  {--- Initialize the HTTP client’s response timeout using the current Settings.TimeOut value }
-  InitClientTimeOut;
-
-  {--- Create a new TChatTurn with the current timestamp and add it to the persistent chat session }
-  var Turn := AddChatTurnWithTimestamp;
-
-  {--- Mark the turn for storage and assign the user’s prompt text to the turn object }
-  ConfigureRequest(Turn, Prompt);
-
-  {--- Build and return the asynchronous streaming promise based on the configured turn }
-  Result := BuildStreamPromise(Turn);
-end;
-
-procedure TPromptExecutionEngine.FinalizeTurn;
-begin
-  {--- Update FileSearch annotation in current prompt }
-  PersistentChat.CurrentPrompt.FileSearch := UpdateAnnotation(FileSearchDisplayer);
-
-  {--- Update WebSearch annotation in current prompt }
-  PersistentChat.CurrentPrompt.WebSearch := UpdateAnnotation(WebSearchDisplayer);
-
-  {--- Update Reasoning annotation in current prompt }
-  PersistentChat.CurrentPrompt.Reasoning := UpdateAnnotation(ReasoningDisplayer);
-
-  {--- Service persistent chat : Save to file as JSON }
-  PersistentChat.SaveToFile;
-end;
-
-function TPromptExecutionEngine.CreateErrorHandlerCallback(
-  const StreamBuffer: string): TFunc<TObject, string, string>;
-begin
-  Result := function (Sender: TObject; Error: string): string
-    begin
-      (Sender as TChatTurn).Response := StreamBuffer + #10#10 + Error;
-      OnTurnError(Sender, Error);
-      Result := Error;
-    end;
-end;
-
-procedure TPromptExecutionEngine.InitClientTimeOut;
-begin
-  {--- Service GenAI client HTTP: set response timeout from user settings }
   FClient.API.HttpClient.ResponseTimeout := TTimeOut.TextToCardinal(Settings.TimeOut);
+
+  var CurrentTurn := AddChatTurnWithTimestamp;
+  CurrentTurn.Storage := True;
+  CurrentTurn.Prompt := Prompt;
+
+  var ChunkDisplayedCount := 0;
+
+  Result := TPromise<string>.Create(
+    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
+    begin
+      FClient.Responses.AsynCreateStream(
+        procedure (Params: TResponsesParams)
+        begin
+          {--- Set the AI model based on the enabled mode }
+          if sf_reasoning in ServiceFeatureSelector.FeatureModes then
+            begin
+              Params.Model(Settings.ReasoningModel);
+              Params.Reasoning(CreateReasoningEffortParams);
+            end
+          else
+            begin
+              Params.Model(Settings.SearchModel);
+            end;
+
+          {--- Configure the main user prompt input }
+          Params.Input(CurrentTurn.Prompt);
+
+          {--- Apply contextual system instructions }
+          Params.Instructions(FSystemPromptBuilder.BuildSystemPrompt);
+
+          {--- Explicitly specify tool choices based on active mode }
+          if sf_webSearch in ServiceFeatureSelector.FeatureModes then
+            begin
+              Params.ToolChoice(BuildWebSearchToolChoiceParams);
+            end;
+
+          {--- Define the set of available tools according to current feature modes }
+          if not (sf_reasoning in ServiceFeatureSelector.FeatureModes) then
+            begin
+              if sf_fileSearchDisabled in ServiceFeatureSelector.FeatureModes then
+                begin
+                  if sf_webSearch in ServiceFeatureSelector.FeatureModes then
+                    begin
+                      Params.Tools([CreateWebSearchToolParamsWithContext]);
+                    end;
+                end
+              else
+                begin
+                  if sf_webSearch in ServiceFeatureSelector.FeatureModes then
+                    begin
+                      if Length(FileStoreManager.VectorStore) > 0 then
+                        begin
+                          Params.Tools([
+                            CreateFileSearchToolParamsWithStore,
+                            CreateWebSearchToolParamsWithContext
+                          ]);
+                        end
+                      else
+                        begin
+                          Params.Tools([
+                            CreateWebSearchToolParamsWithContext
+                          ]);
+                        end;
+                    end
+                  else
+                    begin
+                      if Length(FileStoreManager.VectorStore) > 0 then
+                        begin
+                          Params.Tools([CreateFileSearchToolParamsWithStore]);
+                        end;
+                    end;
+                end
+            end
+          else
+            begin
+              {--- No web search tool available for reasoning model }
+            end;
+
+          {--- Enable file_search results inclusion }
+          Params.Include([TOutputIncluding.file_search_result]);
+
+          {--- Enable streaming mode for the response }
+          Params.Stream(True);
+
+          {--- Enable or disable conversation storage based on configuration }
+          Params.Store(CurrentTurn.Storage);
+
+          {--- Link the request to a previous response ID for contextual thread management }
+          if CurrentTurn.Storage and not ResponseTracking.LastId.IsEmpty then
+            begin
+              Params.PreviousResponseId(ResponseTracking.LastId);
+            end;
+
+          {--- Serialize the final request to the prompt data collector }
+          CurrentTurn.JsonPrompt := Params.ToJsonString();
+
+          {--- Persistently save the current prompt to file }
+          PersistentChat.SaveToFile;
+        end,
+
+        function : TAsynResponseStream
+        begin
+          Result.Sender := CurrentTurn;
+
+          Result.OnStart := OnTurnStart;
+
+          Result.OnProgress :=
+            procedure (Sender: TObject; Chunk: TResponseStream)
+            begin
+              try
+                if not FEventEngineManager.AggregateStreamEvents(Chunk, StreamBuffer, ChunkDisplayedCount) then
+                  begin
+                    {--- Event error }
+                    ResponseTracking.Cancel;
+                    Reject(Exception.Create('(' + Chunk.Code + ')' + Chunk.Message));
+                  end;
+              except
+                {--- Silent Exception - To avoid RSS-391 error for unpatched 12.1.
+                     And also if a processing in AggregateStreamEvents generated an error }
+              end;
+            end;
+
+          Result.OnSuccess :=
+            procedure (Sender: TObject)
+            begin
+              OnTurnSuccess(Sender);
+              Resolve(CurrentTurn.Response);
+            end;
+
+          Result.OnError :=
+            procedure (Sender: TObject; Error: string)
+            begin
+              CurrentTurn.Response := StreamBuffer;
+              OnTurnError(Sender, Error);
+              Reject(Exception.Create(Error));
+            end;
+
+          Result.OnDoCancel :=
+            function : Boolean
+            begin
+              Result := Cancellation.IsCancelled;
+              if Result then
+                begin
+                  EdgeDisplayer.HideReasoning;
+                  EdgeDisplayer.Display('Operation canceled');
+                end;
+            end;
+
+          Result.OnCancellation :=
+            procedure (Sender: TObject)
+            begin
+              CurrentTurn.Response := StreamBuffer + #10#10 + 'Aborted';
+              OnTurnCancelled(Sender);
+              Reject(Exception.Create('Aborted'));
+            end;
+        end);
+    end);
+end;
+
+procedure TPromptExecutionEngine.FinalizeCurrentTurn;
+begin
+  var CurrentTurn := PersistentChat.CurrentPrompt;
+
+  if FileSearchDisplayer.Text.IsEmpty then
+    FileSearchDisplayer.Display('no item found');
+  CurrentTurn.FileSearch := FileSearchDisplayer.Text;
+
+  if WebSearchDisplayer.Text.IsEmpty then
+    WebSearchDisplayer.Display('no item found');
+  CurrentTurn.WebSearch := WebSearchDisplayer.Text;
+
+  if ReasoningDisplayer.Text.IsEmpty then
+    ReasoningDisplayer.Display('no item found');
+  CurrentTurn.Reasoning := ReasoningDisplayer.Text;
+
+  PersistentChat.SaveToFile;
 end;
 
 procedure TPromptExecutionEngine.OnTurnCancelled(Sender: TObject);
 begin
-  {--- Service cancellation : disarm cancellation token }
+  FinalizeCurrentTurn;
+  ResponseTracking.Cancel;
   Cancellation.Cancel;
-
-  {--- Finalize current chat turn (persist annotations, reset cancellation, refresh history view) }
-  TurnUpdate;
-end;
-
-function TPromptExecutionEngine.OnTurnDoCancel: Boolean;
-begin
-  Result := Cancellation.IsCancelled;
-  if Result then
-    begin
-      EdgeDisplayer.HideReasoning;
-      EdgeDisplayer.Display(#10'Operation canceled');
-    end;
+  PersistentChat.SaveToFile;
+  ChatSessionHistoryView.Refresh(nil);
 end;
 
 procedure TPromptExecutionEngine.OnTurnError(Sender: TObject; Error: string);
 begin
-  {--- Service tracking : cancel last response Id }
-  ResponseTracking.Cancel;
-
-    {--- Service cancellation : disarm cancellation token }
-  Cancellation.Cancel(True);
-
-  {--- Finalize current chat turn (persist annotations, reset cancellation, refresh history view) }
-  TurnUpdate;
-
-  {--- Service Edge browser : hide reasoning bubble }
+  FinalizeCurrentTurn;
   EdgeDisplayer.HideReasoning;
-
-  {--- Service Edge browser : display error message }
   EdgeDisplayer.Display(TUtf8Mapping.CleanTextAsUTF8(Error));
+  Cancellation.Cancel;
+  PersistentChat.SaveToFile;
+  ChatSessionHistoryView.Refresh(nil);
 end;
 
 procedure TPromptExecutionEngine.OnTurnStart(Sender: TObject);
 begin
-  {--- Service cancellation : reset cancellation token }
   Cancellation.Reset;
-
-  {--- Service prompt + Edge browser : display the current user input in the chat bubble }
   EdgeDisplayer.Prompt(ServicePrompt.Text);
-
-  {--- Clear previous annotations/displays for file search, web search and reasoning }
-  ServiceClearUI;
-
-  {--- Service Edge browser : show reasoning bubble }
+  ServicePrompt.Clear;
+  FileSearchDisplayer.Clear;
+  WebSearchDisplayer.Clear;
+  ReasoningDisplayer.Clear;
   EdgeDisplayer.ShowReasoning;
 end;
 
-function TPromptExecutionEngine.OnTurnSuccess(Sender: TObject): string;
+procedure TPromptExecutionEngine.OnTurnSuccess(Sender: TObject);
 begin
-  {--- Service cancellation : disarm cancellation token }
-  Cancellation.Cancel(True);
-
-  {--- Finalize current chat turn (persist annotations, reset cancellation, refresh history view) }
-  TurnUpdate;
-
-  {--- Service Edge browser: add gap between chat turns }
+  FinalizeCurrentTurn;
   EdgeDisplayer.DisplayStream(sLineBreak + sLineBreak);
-
-  {--- Service prompt selector: update prompt navigation/history UI }
+  Cancellation.Cancel;
+  PersistentChat.SaveToFile;
+  ChatSessionHistoryView.Refresh(nil);
   PromptSelector.Update;
 end;
 
-procedure TPromptExecutionEngine.ServiceClearUI;
-begin
-  {--- Service prompt : clear input editor }
-  ServicePrompt.Clear;
-
-  {--- Service file search displayer : clear previous file search results }
-  FileSearchDisplayer.Clear;
-
-  {--- Service web search displayer : clear previous web search results }
-  WebSearchDisplayer.Clear;
-
-  {--- Service reasoning displayer : clear previous reasoning logs }
-  ReasoningDisplayer.Clear;
-end;
-
-procedure TPromptExecutionEngine.TurnUpdate;
-begin
-  {--- Finalize current chat turn (persist file/web/reasoning annotations, save session) }
-  FinalizeTurn;
-
-  {--- Service chat history view : refresh conversation history UI }
-  ChatSessionHistoryView.Refresh(nil);
-end;
-
-function TPromptExecutionEngine.UpdateAnnotation(const Displayer: IAnnotationsDisplayer): string;
-begin
-  if Displayer.Text.IsEmpty then
-    Displayer.Display('no item found');
-
-  Result := Displayer.Text;
-end;
 
 end.
+
 
 unit Provider.OpenAI.FileStore;
 
 interface
 
-{$REGION 'dev notes : Provider.OpenAI.FileStore'}
-
-(*
-  Unit: Provider.OpenAI.FileStore
-
-  Purpose:
-    Handle uploading, existence-checking, and ID management of files
-    in OpenAI’s file store via the GenAI client.
-
-  Context & Architecture:
-    - Wraps access to the OpenAI Files API.
-    - Provides methods to:
-        • Check if a specific file (by name and ID) is already uploaded.
-        • Upload a file asynchronously if it’s not present.
-        • Ensure that a file ID is available for a given filename.
-    - Uses TPromise for asynchronous workflows and clean chaining of operations.
-    - Centralized error handling via AlertService to report exceptions.
-
-  Key Points:
-    - CheckFileUploaded lists user_data files and matches on filename & ID.
-    - UploadFileAsync performs the actual upload with the correct purpose.
-    - EnsureFileId combines check + upload in a single fluent promise chain.
-    - Promises bubble errors to HandleError, preventing unhandled exceptions.
-
-  External Dependencies:
-    - GenAI (IGenAI)
-    - GenAI.Types
-    - GenAI.Async.Promise
-    - Manager.Intf (IFileStoreManager)
-    - AlertService for UI feedback
-
-  Usage:
-    Register via IoC as a singleton, then call:
-      • EnsureFileId to get or create the file ID.
-      • CheckFileUploaded to verify presence without uploading.
-      • UploadFileAsync to force a new upload.
-    No direct API calls should be made outside this manager.
-*)
-
-{$ENDREGION}
-
 uses
-  System.SysUtils, GenAI, GenAI.Types, Manager.Intf, GenAI.Async.Promise;
+  System.SysUtils, GenAI, GenAI.Types, Manager.Intf, Manager.Async.Promise;
 
 type
-  /// <summary>
-  /// Manages uploading, existence checks, and identifier resolution for files
-  /// in the OpenAI file store via the GenAI client.
-  /// </summary>
-  /// <remarks>
-  /// Encapsulates all interactions with the OpenAI Files API, providing asynchronous
-  /// methods to list existing user_data files, upload new files, and ensure that
-  /// a valid remote file ID is available for a given local filename.
-  /// Uses TPromise for fluent chaining of operations and forwards non-404 errors
-  /// to <see cref="HandleError"/> for centralized reporting.
-  /// Designed to be registered as a singleton service via IoC, adhering to SOLID principles
-  /// for testability and modularity.
-  /// </remarks>
   TFileStoreManager = class(TInterfacedObject, IFileStoreManager)
   private
     FClient: IGenAI;
-    procedure HandleError(E: Exception);
-    function HandleThenUploadFile(Value: TFile): string;
   public
-    /// <summary>
-    /// Asynchronously checks whether a file with the specified name and identifier
-    /// already exists in the OpenAI file store.
-    /// </summary>
-    /// <param name="FileName">
-    /// The full path or name of the local file to verify in the remote store.
-    /// Only the filename portion is compared against stored entries.
-    /// </param>
-    /// <param name="Id">
-    /// The expected remote file identifier. If a stored entry matches both the filename
-    /// and this ID, the method resolves to this ID.
-    /// </param>
-    /// <returns>
-    /// A <c>TPromise&lt;string&gt;</c> that resolves to the matching file ID if found,
-    /// or to an empty string if no matching upload entry exists.
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// - Retrieves the list of user_data files via <c>AsyncAwaitList</c> on the GenAI client.
-    /// </para>
-    /// <para>
-    /// - Performs a case-insensitive filename match using <c>ExtractFileName</c>.
-    /// </para>
-    /// <para>
-    /// - Any exceptions are forwarded to <see cref="HandleError"/> for centralized reporting.
-    /// </para>
-    /// </remarks>
     function CheckFileUploaded(const FileName, Id: string): TPromise<string>;
-
-    /// <summary>
-    /// Asynchronously uploads the specified local file to the OpenAI file store.
-    /// </summary>
-    /// <param name="FileName">
-    /// The full path or name of the local file to upload.
-    /// </param>
-    /// <returns>
-    /// A <c>TPromise&lt;string&gt;</c> that resolves to the identifier of the newly uploaded file.
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// - Invokes the GenAI client's <c>AsyncAwaitUpload</c> method with purpose set to "user_data".
-    /// </para>
-    /// <para>
-    /// - On success, extracts and returns the <c>Id</c> from the <c>TFile</c> response.
-    /// </para>
-    /// <para>
-    /// - Any exceptions during upload are forwarded to <see cref="HandleError"/> for centralized reporting.
-    /// </para>
-    /// </remarks>
     function UploadFileAsync(const FileName: string): TPromise<string>;
-
-    /// <summary>
-    /// Ensures that the specified file is present in the OpenAI file store.
-    /// </summary>
-    /// <param name="FileName">
-    /// The full path or name of the local file to verify or upload.
-    /// </param>
-    /// <param name="Id">
-    /// The known remote file identifier, if any.
-    /// If this is empty or no matching entry is found, the file will be uploaded.
-    /// </param>
-    /// <returns>
-    /// A <c>TPromise&lt;string&gt;</c> that resolves to the existing or newly created file ID.
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// - Internally calls <see cref="CheckFileUploaded"/> to look for an existing upload.
-    /// </para>
-    /// <para>
-    /// - If no match is found, invokes <see cref="UploadFileAsync"/> to upload the file.
-    /// </para>
-    /// <para>
-    /// - Any errors are caught and forwarded to <see cref="HandleError"/> for centralized reporting.
-    /// </para>
-    /// </remarks>
     function EnsureFileId(const FileName: string; const Id: string): TPromise<string>;
-
     constructor Create(const GenAIClient: IGenAI);
   end;
 
@@ -13653,21 +13981,39 @@ implementation
 function TFileStoreManager.CheckFileUploaded(const FileName,
   Id: string): TPromise<string>;
 begin
-  Result := FClient.Files
-    .AsyncAwaitList
-    .&Then<string>(
-      function (Value: TFiles): string
-      begin
-        Result := EmptyStr;
-        for var Item in Value.Data do
-          if (Item.Purpose = TFilesPurpose.user_data) and
-             SameText(Item.Filename, ExtractFileName(FileName)) and
-             (Item.Id = Id) then
+  Result := TPromise<string>.Create(
+    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
+    begin
+      FClient.Files.AsynList(
+        function : TAsynFiles
+        begin
+          Result.OnSuccess :=
+            procedure (Sender: TObject; Value: TFiles)
             begin
-              Exit(Id)
+              var Matched := False;
+
+              for var Item in Value.Data do
+                if (Item.Purpose = TFilesPurpose.user_data) and
+                   (Item.Filename = ExtractFileName(FileName)) and
+                   (Item.Id = Id) then
+                  begin
+                    Matched := True;
+                    Break;
+                  end;
+
+              if Matched then
+                Resolve(Id)
+              else
+                Resolve(EmptyStr);
             end;
-      end)
-    .&Catch(HandleError);
+
+          Result.OnError :=
+            procedure (Sender: TObject; Error: string)
+            begin
+              Reject(Exception.Create(Error));
+            end;
+        end);
+    end);
 end;
 
 constructor TFileStoreManager.Create(const GenAIClient: IGenAI);
@@ -13686,44 +14032,47 @@ begin
       begin
         if Value.IsEmpty then
           {--- The file does not exist. Upload the file and obtain its ID. }
-          Exit(UploadFileAsync(FileName))
+          Result := UploadFileAsync(FileName)
         else
           {--- The file exists, so do nothing }
-          Exit(TPromise<string>.Resolved(Value));
+          Result := TPromise<string>.Resolved(Value);
       end);
-end;
-
-procedure TFileStoreManager.HandleError(E: Exception);
-begin
-  AlertService.ShowError(E.Message);
-end;
-
-function TFileStoreManager.HandleThenUploadFile(Value: TFile): string;
-begin
-  Result := Value.Id;
 end;
 
 function TFileStoreManager.UploadFileAsync(
   const FileName: string): TPromise<string>;
 begin
-  Result := FClient.Files
-    .AsyncAwaitUpload(
+  Result := TPromise<string>.Create(
+    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
+    begin
+      FClient.Files.AsynUpload(
         procedure (Params: TFileUploadParams)
         begin
           Params.&File(FileName);
           Params.Purpose('user_data');
-        end)
-    .&Then<string>(HandleThenUploadFile)
-    .&Catch(HandleError);
+        end,
+
+        function : TAsynFile
+        begin
+          Result.OnSuccess :=
+            procedure (Sender: TObject; Value: TFile)
+            begin
+              Resolve(Value.Id);
+            end;
+
+          Result.OnError :=
+            procedure (Sender: TObject; Error: string)
+            begin
+              Reject(Exception.Create(Error));
+            end;
+        end);
+    end);
 end;
 
 end.
 
+
 unit Provider.OpenAI;
-
-interface
-
-{$REGION  'Dev notes : Provider.OpenAI'}
 
 (*
   Unit: Provider.OpenAI
@@ -13766,11 +14115,12 @@ interface
   making it easy to maintain, extend, and adapt to new OpenAI and GenAI usage scenarios or workflows.
 *)
 
-{$ENDREGION}
+
+interface
 
 uses
-  System.SysUtils, System.classes, GenAI, GenAI.Types, GenAI.Async.Promise, GenAI.Exceptions,
-  Manager.Intf, Manager.IoC, Provider.OpenAI.FileStore,
+  System.SysUtils, System.classes, GenAI, GenAI.Types,
+  Manager.Async.Promise, Manager.Intf, Manager.IoC, Provider.OpenAI.FileStore,
   Provider.OpenAI.VectorStore, Provider.OpenAI.ExecutionEngine, Provider.InstructionManager;
 
 type
@@ -13792,10 +14142,6 @@ type
     FVectorStoreManager: IVectorStoreManager;
     FPromptExecutionEngine: IPromptExecutionEngine;
     procedure InitializeProviderOpenAI(const GenAIClient: IGenAI);
-    procedure HandleError(E: Exception);
-    function HandleThenSilently(Value: TResponse): string;
-    function HandleThenDeleteResponse(Value: TResponseDelete): string;
-    function HandleThenDeleteFile(Value: TDeletion): string;
   protected
     /// <summary>
     /// Deletes a response from the OpenAI backend.
@@ -13921,7 +14267,7 @@ implementation
 
 function TOpenAIProvider.EnsureVectorStoreFileLinked(const FileName, FileId,
   VectorStoreId: string): TPromise<string>;
-{$REGION 'limitation restricts to five files'}
+
 (*
    A current limitation restricts processing to five files, due to constraints in the Delphi compiler.
    Specifically, the compiler is unable to perform self-invocation within recursively nested closures
@@ -13933,7 +14279,7 @@ function TOpenAIProvider.EnsureVectorStoreFileLinked(const FileName, FileId,
    The current implementation leads to a pyramid of doom due to deeply nested closures and lack of proper
    promise chaining. :(
 *)
-{$ENDREGION}
+
 var
   LFileId: string;
   LVectorStoreId: string;
@@ -13948,7 +14294,7 @@ begin
   LVectorStoreId := VectorStoreId;
 
   Result :=
-    {--- Checks if the file already exists on the remote FileStore. }
+    {--- Checks if the file already exists on the remote FileStore }
     FFileStoreManager.EnsureFileId(FileName, LFileId)
       .&Then<string>(
         function (Value: string): string
@@ -13973,22 +14319,27 @@ begin
       .&Then(
         function (Value: string): TPromise<string>
         begin
-          {--- Check that this file is linked to this vector store (create the link if necessary). }
+          {--- Check that this file is linked to this vector store (create the link if necessary) }
           Result := FVectorStoreManager.EnsureVectorStoreFileId(LVectorStoreId, LFileId);
         end)
       .&Then(
         function (Value: string): TPromise<string>
         begin
-          {--- Final resolution: the promise returns the two concatenated ids. }
+          {--- Final resolution: the promise returns the two concatenated ids }
           Result := TPromise<string>.Resolved(LVectorStoreId + #10 + LFileId);
         end)
-      .&Catch(HandleError);
+      .&Catch(
+        procedure(E: Exception)
+        begin
+          {--- Promises chain error handling (display and rejection) }
+          AlertService.ShowWarning('Error : ' + E.Message);
+        end
+      );
 end;
 
 constructor TOpenAIProvider.Create;
 begin
-  {$REGION  'Dev notes'}
-  (*
+  {
     IMPORTANT: This class is designed to be used as a singleton.
 
     - Only one instance of TOpenAIProvider should exist in the application lifecycle.
@@ -14000,8 +14351,7 @@ begin
       with a valid IGenAI client to properly register all required dependencies in the IoC.
     - The singleton pattern centralizes OpenAI API access, state, and resource coordination, improving
       stability, maintainability, and resource usage throughout the application.
-  *)
-  {$ENDREGION}
+  }
   inherited;
   FClient := IoC.Resolve<IGenAI>;
   InitializeProviderOpenAI(FClient);
@@ -14012,19 +14362,50 @@ end;
 
 function TOpenAIProvider.DeleteFile(FileId: string): TPromise<string>;
 begin
-  Result := FClient.Files
-    .AsyncAwaitDelete(FileId)
-    .&Then<string>(HandleThenDeleteFile)
-    .&Catch(HandleError);
+  Result := TPromise<string>.Create(
+    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
+    begin
+      FClient.Files.AsynDelete(FileId,
+        function : TAsynDeletion
+        begin
+          Result.Sender := nil;
+          Result.OnStart := nil;
+          Result.OnSuccess :=
+            procedure (Sender: TObject; Value: TDeletion)
+            begin
+              Resolve(Value.Id + ' deleted');
+            end;
+          Result.OnError :=
+            procedure (Sender: TObject; Error: string)
+            begin
+              Reject(Exception.Create(Error));
+            end;
+        end);
+    end);
 end;
 
 function TOpenAIProvider.DeleteResponse(ResponseId: string): TPromise<string>;
 begin
-  ResponseTracking.RemoveId(ResponseId);
-  Result := FClient.Responses
-    .AsyncAwaitDelete(ResponseId)
-    .&Then<string>(HandleThenDeleteResponse)
-    .&Catch(HandleError);
+  Result := TPromise<string>.Create(
+    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
+    begin
+      FClient.Responses.AsynDelete(ResponseId,
+        function : TAsynResponseDelete
+        begin
+          Result.Sender := nil;
+          Result.OnStart := nil;
+          Result.OnSuccess :=
+            procedure (Sender: TObject; Value: TResponseDelete)
+            begin
+              Resolve(Value.Id + ' deleted');
+            end;
+          Result.OnError :=
+            procedure (Sender: TObject; Error: string)
+            begin
+              Reject(Exception.Create(Error));
+            end;
+        end);
+    end);
 end;
 
 function TOpenAIProvider.DeleteVectorStore(const VectorStoreId,
@@ -14045,44 +14426,42 @@ begin
 end;
 
 function TOpenAIProvider.ExecuteSilently(const Prompt, Instructions: string): TPromise<string>;
+var
+ Buffer: string;
 begin
-  Result := FClient.Responses.AsyncAwaitCreate(
-      procedure (Params: TResponsesParams)
-      begin
-         Params.Model(Settings.SearchModel);
-         Params.Input(Prompt);
-         Params.Instructions(Instructions);
-         Params.Store(False);
-         Params.Stream(False);
-      end)
-   .&Then<string>(HandleThenSilently)
-   .&Catch(HandleError);
-end;
-
-procedure TOpenAIProvider.HandleError(E: Exception);
-begin
-  if not E.Message.StartsWith('error 404') then
+  Result := TPromise<string>.Create(
+    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
     begin
-      AlertService.ShowError(E.ClassName + ' : ' + E.Message);
-    end;
-end;
+      FClient.Responses.AsynCreate(
+        procedure (Params: TResponsesParams)
+        begin
+           Params.Model(Settings.SearchModel);
+           Params.Input(Prompt);
+           Params.Instructions(Instructions);
+           Params.Store(False);
+        end,
+        function : TASynResponse
+        begin
+          Result.Sender := nil;
 
-function TOpenAIProvider.HandleThenDeleteFile(Value: TDeletion): string;
-begin
-  Result := Value.Id + ' deleted';
-end;
+          Result.OnStart := nil;
 
-function TOpenAIProvider.HandleThenDeleteResponse(
-  Value: TResponseDelete): string;
-begin
-  Result := Value.Id + ' deleted';
-end;
+          Result.OnSuccess :=
+            procedure (Sender: TObject; Response: TResponse)
+            begin
+              for var Item in Response.Output do
+                for var SubItem in Item.Content do
+                  Buffer := Buffer + SubItem.Text;
+              Resolve(Buffer);
+            end;
 
-function TOpenAIProvider.HandleThenSilently(Value: TResponse): string;
-begin
-  for var Item in Value.Output do
-    for var SubItem in Item.Content do
-      Result := Result + SubItem.Text;
+          Result.OnError :=
+            procedure (Sender: TObject; Error: string)
+            begin
+              Reject(Exception.Create(Error));
+            end;
+        end)
+    end);
 end;
 
 procedure TOpenAIProvider.InitializeProviderOpenAI(const GenAIClient: IGenAI);
@@ -14130,10 +14509,6 @@ end.
 
 unit Provider.OpenAI.StreamEvents;
 
-interface
-
-{$REGION  'Dev notes'}
-
 (*
   Unit: Provider.OpenAI.StreamEvents
 
@@ -14172,7 +14547,7 @@ interface
 
 *)
 
-{$ENDREGION}
+interface
 
 uses
   System.SysUtils, System.Classes, Manager.Intf, GenAI, GenAI.Types, ChatSession.Controller,
@@ -14606,7 +14981,6 @@ end;
 function TEHCreate.Handle(const Chunk: TResponseStream; var StreamBuffer: string;
   var ChunkDisplayedCount: Integer): Boolean;
 begin
-  PersistentChat.CurrentPrompt.Id := Chunk.Response.Id;
   ResponseTracking.Add(Chunk.Response.Id);
   Result := True;
 end;
@@ -14637,7 +15011,10 @@ begin
   Result := True;
   EdgeDisplayer.HideReasoning;
   var Delta := TUtf8Mapping.CleanTextAsUTF8(Chunk.Delta);
-  EdgeDisplayer.DisplayStream(Delta, (ChunkDisplayedCount < 20) );
+  try
+    EdgeDisplayer.DisplayStream(Delta, (ChunkDisplayedCount < 20) );
+  except
+  end;
   ChunkDisplayedCount := ChunkDisplayedCount + 1;
   StreamBuffer := StreamBuffer + Delta;
 end;
@@ -14774,7 +15151,6 @@ function TEHOutputItemDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
-
   if Chunk.Item.Id.ToLower.StartsWith('msg_') then
     begin
       if PersistentChat.CurrentPrompt.JsonResponse.Trim.IsEmpty then
@@ -15116,254 +15492,24 @@ unit Provider.OpenAI.VectorStore;
 
 interface
 
-{$REGION 'Dev notes : Provider.OpenAI.VectorStore'}
-
-(*
-  Unit: Provider.OpenAI.VectorStore
-
-  Purpose:
-    Manage creation, retrieval, and deletion of vector stores
-    and their associated files via the GenAI client.
-
-  Context & Architecture:
-    - Encapsulates all access to the OpenAI VectorStore and VectorStoreFiles services.
-    - Provides methods to:
-        • Create a vector store or link a file to a vector store.
-        • Check for existence of a vector store or linked file.
-        • Delete a vector store or remove a file from a store.
-    - Uses TPromise for orchestrating async calls and explicitly handles
-      404 errors (not found) without throwing uncaught exceptions.
-    - Error handling delegates to AlertService for centralized user feedback.
-
-  Key Points:
-    - Ensure* methods verify presence and create the resource if needed.
-    - Retrieve* methods perform fine-grained lookup with non-blocking error handling.
-    - Promises resolve to an empty string when an item is missing, allowing flow continuity.
-    - Adheres to SRP: this manager focuses solely on vector access and delegates UI/alerting to AlertService.
-
-  External Dependencies:
-    - GenAI (IGenAI)
-    - GenAI.Types
-    - GenAI.Async.Promise
-    - Manager.Intf (IVectorStoreManager)
-
-  Usage:
-    Resolve via IoC (singleton) and invoke Ensure*, Retrieve*, Create*, or Delete*
-    methods as appropriate. No direct API calls should occur outside this manager.
-*)
-
-{$ENDREGION}
-
 uses
-  System.SysUtils, GenAI, GenAI.Types, Manager.Intf, GenAI.Async.Promise;
+  System.SysUtils, GenAI, GenAI.Types, Manager.Intf, Manager.Async.Promise;
 
 type
-  /// <summary>
-  /// Manages the lifecycle and file associations of vector stores in the OpenAI backend.
-  /// </summary>
-  /// <remarks>
-  /// Encapsulates creation, retrieval, linking, and deletion of vector stores and their associated files
-  /// via the GenAI client. Uses promise-based asynchronous calls to handle API interactions, converting
-  /// 404 (not found) errors into empty results for callers to decide on resource creation.
-  /// Errors other than 404 are forwarded to <see cref="HandleError"/> for centralized reporting.
-  /// Designed as a singleton service resolved through dependency injection, adhering to SOLID principles
-  /// for modularity and testability.
-  /// </remarks>
   TVectorStoreManager = class(TInterfacedObject, IVectorStoreManager)
   private
     FClient: IGenAI;
-    procedure HandleError(E: Exception);
-    function HandleThenVectorStore(Value: TVectorStore): string;
-    function HandleThenVectorStoreFile(Value: TVectorStoreFile): string;
-    function HandleThenDeleteVectorStoreFile(Value: TDeletion): string;
   public
     {--- Vector store }
-
-    /// <summary>
-    /// Asynchronously retrieves the ID of the specified vector store.
-    /// </summary>
-    /// <param name="Value">
-    /// The ID of the vector store to look up. If this string is empty, the method will
-    /// still resolve gracefully without creating a new store.
-    /// </param>
-    /// <returns>
-    /// A <c>TPromise&lt;string&gt;</c> which resolves to the existing vector store ID,
-    /// or to an empty string if the store does not exist (including 404 errors) or if
-    /// the input value is empty.
-    /// </returns>
-    /// <remarks>
-    /// Uses a custom promise wrapper to intercept 404 errors and convert them into
-    /// a successful resolution with an empty string, allowing callers to decide
-    /// whether to create a new vector store.
-    /// </remarks>
     function RetrieveVectorStoreId(const Value: string): TPromise<string>;
-
-    /// <summary>
-    /// Creates a new vector store in the OpenAI backend.
-    /// </summary>
-    /// <returns>
-    /// A <c>TPromise&lt;string&gt;</c> that resolves to the identifier of the newly created
-    /// vector store.
-    /// </returns>
-    /// <remarks>
-    /// Invokes the GenAI client's vector store creation API with default parameters.
-    /// Any errors are caught and forwarded to <see cref="HandleError"/> for centralized handling.
-    /// </remarks>
     function CreateVectorStore: TPromise<string>;
-
-    /// <summary>
-    /// Ensures that a valid vector store exists for the given identifier.
-    /// </summary>
-    /// <param name="VectorStoreId">
-    /// The identifier of an existing vector store.
-    /// If this string is empty or does not correspond to an existing store, a new one will be created.
-    /// </param>
-    /// <returns>
-    /// A <c>TPromise&lt;string&gt;</c> which resolves to the identifier of the confirmed or newly created vector store.
-    /// </returns>
-    /// <remarks>
-    /// - If <paramref name="VectorStoreId"/> is empty, invokes <see cref="CreateVectorStore"/> immediately.
-    /// - Otherwise, attempts to retrieve the store; on 404 (not found) or empty result, falls back to creation.
-    /// - Any other errors are propagated to <see cref="HandleError"/> for centralized handling.
-    /// </remarks>
     function EnsureVectorStoreId(const VectorStoreId: string): TPromise<string>;
-
     {--- Vector store file }
-
-    /// <summary>
-    /// Asynchronously retrieves the linkage ID for a file within a specific vector store.
-    /// </summary>
-    /// <param name="VectorStoreId">
-    /// The identifier of the vector store to query.
-    /// </param>
-    /// <param name="FileId">
-    /// The identifier of the file whose association you want to retrieve.
-    /// </param>
-    /// <returns>
-    /// A <c>TPromise&lt;string&gt;</c> that resolves to the vector‐store‐file association ID
-    /// if found, or to an empty string if the association does not exist (including 404 errors).
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// - Uses a custom promise wrapper to catch 404 (not found) errors and convert them into
-    ///   a successful resolution with an empty string, enabling callers to decide whether
-    ///   to create the association.
-    /// </para>
-    /// <para>
-    /// - Other errors are propagated to <see cref="HandleError"/> for centralized handling.
-    /// </para>
-    /// </remarks>
     function RetrieveVectorStoreFileId(const VectorStoreId: string; const FileId: string): TPromise<string>;
-
-    /// <summary>
-    /// Creates a new file association within the specified vector store.
-    /// </summary>
-    /// <param name="VectorStoreId">
-    /// The identifier of the vector store to which the file will be linked.
-    /// </param>
-    /// <param name="FileId">
-    /// The identifier of the file to link into the vector store.
-    /// </param>
-    /// <returns>
-    /// A <c>TPromise&lt;string&gt;</c> that resolves to the identifier of the newly created
-    /// vector‐store‐file link.
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// - Invokes the GenAI client's VectorStoreFiles create API for the given store and file IDs.
-    /// </para>
-    /// <para>
-    /// - On success, extracts and returns the association ID via <see cref="HandleThenVectorStoreFile"/>.
-    /// </para>
-    /// <para>
-    /// - Any errors (other than 404) are forwarded to <see cref="HandleError"/> for centralized handling.
-    /// </para>
-    /// </remarks>
     function CreateVectorStoreFile(const VectorStoreId: string; const FileId: string): TPromise<string>;
-
-    /// <summary>
-    /// Ensures that a link between the specified file and vector store exists.
-    /// </summary>
-    /// <param name="VectorStoreId">
-    /// The identifier of the target vector store.
-    /// </param>
-    /// <param name="FileId">
-    /// The identifier of the file to associate with the vector store.
-    /// </param>
-    /// <returns>
-    /// A <c>TPromise&lt;string&gt;</c> which resolves to:
-    /// <para>
-    /// - the existing association ID if the link is already present, or
-    /// </para>
-    /// <para>
-    /// - a newly created association ID if the link was missing.
-    /// </para>
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// - First calls <see cref="RetrieveVectorStoreFileId"/> to check for an existing link.
-    /// </para>
-    /// <para>
-    /// - If no association is found (empty result or 404), invokes <see cref="CreateVectorStoreFile"/>.
-    /// </para>
-    /// <para>
-    /// - Errors other than 404 are propagated to <see cref="HandleError"/> for centralized handling.
-    /// </para>
-    /// </remarks>
     function EnsureVectorStoreFileId(const VectorStoreId, FileId: string): TPromise<string>;
-
-    /// <summary>
-    /// Asynchronously deletes the association between a file and the specified vector store.
-    /// </summary>
-    /// <param name="VectorStoreId">
-    /// The identifier of the vector store from which the file association will be removed.
-    /// </param>
-    /// <param name="FileId">
-    /// The identifier of the file to unlink from the vector store.
-    /// </param>
-    /// <returns>
-    /// A <c>TPromise&lt;string&gt;</c> that resolves to a confirmation message (typically "deleted")
-    /// when the association has been removed successfully.
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// - Invokes the GenAI client's VectorStoreFiles delete API via <c>AsyncAwaitDelete</c>.
-    /// </para>
-    /// <para>
-    /// - On success, the association ID is passed to <see cref="HandleThenDeleteVectorStoreFile"/>
-    ///   to format the confirmation message.
-    /// </para>
-    /// <para>
-    /// - Any exceptions (other than 404) are caught and forwarded to <see cref="HandleError"/>
-    ///   for centralized error reporting.
-    /// </para>
-    /// </remarks>
     function DeleteVectorStoreFile(const VectorStoreId, FileId: string): TPromise<string>;
-
-    /// <summary>
-    /// Asynchronously deletes the specified vector store from the OpenAI backend.
-    /// </summary>
-    /// <param name="VectorStoreId">
-    /// The identifier of the vector store to remove.
-    /// </param>
-    /// <returns>
-    /// A <c>TPromise&lt;string&gt;</c> that resolves to a confirmation message (typically "deleted")
-    /// when the vector store has been removed successfully.
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// - Invokes the GenAI client's VectorStore delete API via <c>AsyncAwaitDelete</c>.
-    /// </para>
-    /// <para>
-    /// - On success, matches the deleted store ID and returns "deleted".
-    /// </para>
-    /// <para>
-    /// - Any exceptions (other than 404) are caught and forwarded to <see cref="HandleError"/>
-    ///   for centralized error reporting.
-    /// </para>
-    /// </remarks>
     function DeleteVectorStore(const VectorStoreId: string): TPromise<string>;
-
     constructor Create(const GenAIClient: IGenAI);
   end;
 
@@ -15379,50 +15525,110 @@ end;
 
 function TVectorStoreManager.CreateVectorStore: TPromise<string>;
 begin
-  Result := FClient.VectorStore
-    .AsyncAwaitCreate(
+  Result := TPromise<string>.Create(
+    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
+    begin
+      FClient.VectorStore.AsynCreate(
         procedure (Params: TVectorStoreCreateParams)
         begin
           Params.Name('Helper for wrapper Assistant');
-        end)
-    .&Then<string>(HandleThenVectorStore)
-    .&Catch(HandleError);
+        end,
+        function : TAsynVectorStore
+        begin
+          Result.OnSuccess :=
+            procedure (Sender: TObject; Value: TVectorStore)
+            begin
+              Resolve(Value.Id);
+            end;
+
+          Result.OnError :=
+            procedure (Sender: TObject; Error: string)
+            begin
+              Reject(Exception.Create(Error));
+            end;
+        end);
+    end);
 end;
 
 function TVectorStoreManager.CreateVectorStoreFile(const VectorStoreId,
   FileId: string): TPromise<string>;
 begin
-  Result := FClient.VectorStoreFiles
-    .AsyncAwaitCreate(
-        VectorStoreId,
-        procedure (Params: TVectorStoreFilesCreateParams) begin
+  Result := TPromise<string>.Create(
+    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
+    begin
+      FClient.VectorStoreFiles.AsynCreate(VectorStoreId,
+        procedure (Params: TVectorStoreFilesCreateParams)
+        begin
           Params.FileId(FileId);
-        end)
-    .&Then<string>(HandleThenVectorStoreFile)
-    .&Catch(HandleError);
+        end,
+        function : TAsynVectorStoreFile
+        begin
+          Result.OnSuccess :=
+            procedure (Sender: TObject; VectorStoreFile: TVectorStoreFile)
+            begin
+              Resolve('created');
+            end;
+
+          Result.OnError :=
+            procedure (Sender: TObject; Error: string)
+            begin
+              Reject(Exception.Create(Error));
+            end;
+        end);
+    end);
 end;
 
 function TVectorStoreManager.DeleteVectorStore(
   const VectorStoreId: string): TPromise<string>;
 begin
-  Result := FClient.VectorStore
-    .AsyncAwaitDelete(VectorStoreId)
-    .&Then<string>(
-      function (Value: TDeletion): string
-      begin
-        if VectorStoreId = Value.Id then
-          Result := 'deleted';
-      end)
-    .&Catch(HandleError);
+  Result := TPromise<string>.Create(
+    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
+    begin
+      FClient.VectorStore.AsynDelete(
+        VectorStoreId,
+        function : TAsynDeletion
+        begin
+          Result.Sender := nil;
+          Result.OnStart := nil;
+          Result.OnSuccess :=
+            procedure (Sender: TObject; Value: TDeletion)
+            begin
+              Resolve('deleted');
+            end;
+          Result.OnError :=
+            procedure (Sender: TObject; Error: string)
+            begin
+              Reject(Exception.Create(Error));
+            end;
+        end);
+    end);
 end;
 
 function TVectorStoreManager.DeleteVectorStoreFile(const VectorStoreId,
   FileId: string): TPromise<string>;
 begin
-  Result := FClient.VectorStoreFiles
-    .AsyncAwaitDelete(VectorStoreId, FileId)
-    .&Then<string>(HandleThenDeleteVectorStoreFile)
-    .&Catch(HandleError);
+  Result := TPromise<string>.Create(
+    procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
+    begin
+      FClient.VectorStoreFiles.AsynDelete(
+        VectorStoreId,
+        FileId,
+        function : TAsynDeletion
+        begin
+          Result.Sender := nil;
+          Result.OnStart := nil;
+          Result.OnSuccess :=
+            procedure (Sender: TObject; Value: TDeletion)
+            begin
+              Resolve('deleted');
+            end;
+          Result.OnError :=
+            procedure (Sender: TObject; Error: string)
+            begin
+              Reject(Exception.Create(Error));
+            end;
+        end);
+    end);
 end;
 
 function TVectorStoreManager.EnsureVectorStoreFileId(const VectorStoreId,
@@ -15461,36 +15667,8 @@ begin
         end);
 end;
 
-procedure TVectorStoreManager.HandleError(E: Exception);
-begin
-  AlertService.ShowError(E.Message);
-end;
-
-function TVectorStoreManager.HandleThenDeleteVectorStoreFile(
-  Value: TDeletion): string;
-begin
-  Result := 'deleted';
-end;
-
-function TVectorStoreManager.HandleThenVectorStore(Value: TVectorStore): string;
-begin
-  Result := Value.Id;
-end;
-
-function TVectorStoreManager.HandleThenVectorStoreFile(
-  Value: TVectorStoreFile): string;
-begin
-  Result := Value.Id;
-end;
-
 function TVectorStoreManager.RetrieveVectorStoreFileId(const VectorStoreId,
   FileId: string): TPromise<string>;
-{$REGION  'Dev notes'}
-(*  Notes :
-    1. We are not using the AsyncAwaitRetrieve method here because we want to define an
-       onError handler that allows the promise to be resolved explicitly.
-*)
-{$ENDREGION}
 begin
   Result := TPromise<string>.Create(
     procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
@@ -15509,14 +15687,7 @@ begin
           Result.OnError :=
             procedure (Sender: TObject; Error: string)
             begin
-              {$REGION  'Dev notes'}
-              (* 1. The promise is still resolved, even if no ID is provided or
-                    if the vector store file cannot be found, since a new vector
-                    store will be created in the next step.
-                 2. error 404: when vector store file not found.
-              *)
-              {$ENDREGION}
-              if Error.StartsWith('error 404') then
+              if Error.Trim.ToLower.StartsWith('error 404:') then
                 Resolve(EmptyStr)
               else
                 Reject(Exception.Create(Error));
@@ -15527,39 +15698,40 @@ end;
 
 function TVectorStoreManager.RetrieveVectorStoreId(
   const Value: string): TPromise<string>;
-{$REGION  'Dev notes'}
-(*  Notes :
-    1. Empty string handling (value = '') is retained, even though the EnsureVectorStoreId
-       method excludes them to improve processing efficiency.
-    2. We are not using the AsyncAwaitRetrieve method here because we want to define an
-       onError handler that allows the promise to be resolved explicitly.
+  (*
+    Empty string handling (value = '') is retained, even though the EnsureVectorStoreId
+    method excludes them to improve processing efficiency.
 *)
-{$ENDREGION}
 begin
-  var EmptyValue := Value.Trim.IsEmpty;
+  var EmptyValue := False;
   Result := TPromise<string>.Create(
     procedure(Resolve: TProc<string>; Reject: TProc<Exception>)
     begin
       FClient.VectorStore.AsynRetrieve(Value,
         function : TAsynVectorStore
         begin
+          Result.OnStart :=
+            procedure (Sender: TObject)
+            begin
+              EmptyValue := Value.Trim.IsEmpty;
+            end;
+
           Result.OnSuccess :=
             procedure (Sender: TObject; Vector: TVectorStore)
             begin
-              Resolve(Vector.Id);
+              if not EmptyValue then
+                Resolve(Vector.Id);
             end;
 
           Result.OnError :=
             procedure (Sender: TObject; Error: string)
             begin
-              {$REGION  'Dev notes'}
-              (* 1. The promise is still resolved, even if no ID is provided or
-                    if the vector store cannot be found, since a new vector store
-                    will be created in the next step.
-                 2. error 404: when vector store not found.
-              *)
-              {$ENDREGION}
-              if EmptyValue or Error.StartsWith('error 404') then
+              if EmptyValue then
+                begin
+                  Resolve(EmptyStr);
+                  Exit;
+                end;
+              if Error.Trim.ToLower.StartsWith('error 404:') then
                 Resolve(EmptyStr)
               else
                 Reject(Exception.Create(Error));
@@ -15571,10 +15743,6 @@ end;
 end.
 
 unit Provider.ResponseIdTracker;
-
-interface
-
-{$REGION  'Dev notes'}
 
 (*
   Unit: Provider.ResponseIdTracker
@@ -15605,10 +15773,10 @@ interface
   Conventions follow File2knowledgeAI project and OpenAI chaining best practices.
 *)
 
-{$ENDREGION}
+interface
 
 uses
-  System.SysUtils, System.Generics.Collections, Helper.TextFile, Manager.Intf;
+  System.SysUtils, System.Generics.Collections, Manager.Intf;
 
 type
   /// <summary>
@@ -15633,16 +15801,11 @@ type
   /// </para>
   /// </remarks>
   TOpenAIChatTracking = class(TInterfacedObject, IOpenAIChatTracking)
-  const
-    LOGIDS_FILENAME = 'LogIds.txt';
   private
     FIds: TList<string>;
     FLastId: string;
     FDeleteProc: TProc<string>;
-    FLogIds: TList<string>;
     function GetLastId: string;
-    procedure LoadLog(const FileName: string);
-    procedure SaveLog(const FileName: string);
   public
     /// <summary>
     /// Initializes a new instance of the <c>TOpenAIChatTracking</c> class.
@@ -15683,21 +15846,6 @@ type
     procedure Cancel;
 
     /// <summary>
-    /// Remove the responseId from LogId
-    /// </summary>
-    procedure RemoveId(const ResponseId: string);
-
-    /// <summary>
-    /// Get the list of the responseId
-    /// </summary>
-    function GetLogIds: string;
-
-    /// <summary>
-    /// Get the orphaned responseId
-    /// </summary>
-    function GetOrphans(const SessionIds: TArray<string>): TArray<string>;
-
-    /// <summary>
     /// Gets the last tracked unique identifier.
     /// </summary>
     property LastId: string read GetLastId;
@@ -15712,9 +15860,7 @@ begin
   if not Value.Trim.IsEmpty and (FIds.LastIndexOf(Value) = -1) then
     begin
       FIds.add(Value);
-      FLogIds.Add(Value);
       FLastId := Value;
-      SaveLog(LOGIDS_FILENAME);
     end;
 end;
 
@@ -15737,9 +15883,7 @@ constructor TOpenAIChatTracking.Create(const DeleteProc: TProc<string>);
 begin
   inherited Create;
   FIds := TList<string>.Create;
-  FLogIds := TList<string>.Create;
   FDeleteProc := DeleteProc;
-  LoadLog(LOGIDS_FILENAME);
 end;
 
 procedure TOpenAIChatTracking.Delete(const Value: string);
@@ -15753,7 +15897,6 @@ end;
 destructor TOpenAIChatTracking.Destroy;
 begin
   FIds.Free;
-  FLogIds.Free;
   inherited;
 end;
 
@@ -15762,339 +15905,7 @@ begin
   Result := FLastId;
 end;
 
-function TOpenAIChatTracking.GetLogIds: string;
-begin
-  Result := string.Join(sLineBreak, FLogIds.ToArray);
-end;
-
-function TOpenAIChatTracking.GetOrphans(
-  const SessionIds: TArray<string>): TArray<string>;
-var
-  SessionSet: TDictionary<string, Byte>;
-  item: string;
-begin
-  SessionSet := TDictionary<string, Byte>.Create;
-  try
-    for item in SessionIds do
-      SessionSet.AddOrSetValue(item, 0);
-
-    for item in FLogIds do
-      if not SessionSet.ContainsKey(item) then
-        Result := Result + [item];
-  finally
-    SessionSet.Free;
-  end;
-end;
-
-procedure TOpenAIChatTracking.LoadLog(const FileName: string);
-begin
-  if FileExists(FileName) then
-    begin
-      var Raw := TFileIOHelper.LoadFromFile(FileName);
-      FLogIds.AddRange(Raw.Split([sLineBreak], TStringSplitOptions.ExcludeEmpty));
-    end;
-end;
-
-procedure TOpenAIChatTracking.RemoveId(const ResponseId: string);
-begin
-  if FLogIds.Remove(ResponseId) <> -1 then
-    SaveLog(LOGIDS_FILENAME);
-end;
-
-procedure TOpenAIChatTracking.SaveLog(const FileName: string);
-begin
-  TFileIOHelper.SaveToFile(FileName, GetLogIds);
-end;
-
 end.
-
-
-
-## Les templates HTML/JS - situés dans le dossier 'template' du projet
-
-### DisplayTemplate.js
-
-// renderMarkdown.js
-(() => {
-  // 'md' doit être défini avant d'exécuter ce script, par exemple :
-  //   window.md = "## Mon markdown…";
-  // ou en passant md en global depuis votre host.
-  const md   = %s;
-  const html = marked.parse(md);
-  const root = document.getElementById("ResponseContent");
-  root.innerHTML = html;
-
-  document
-    .querySelectorAll("pre > code[class^=\"language-\"]")
-    .forEach(codeEl => {
-      const pre  = codeEl.parentNode;
-      const lang = codeEl.className.replace("language-", "");
-
-      // Container et header
-      const container = document.createElement("div");
-      container.className = "code-container";
-
-      const header = document.createElement("div");
-      header.className  = "code-header";
-      header.textContent = lang.toUpperCase();
-
-      // Bouton Copy
-      const btn = document.createElement("button");
-      btn.className  = "copy-btn";
-      btn.textContent = "Copy";
-      header.appendChild(btn);
-
-      // Insertion dans le DOM
-      pre.parentNode.insertBefore(container, pre);
-      container.appendChild(header);
-      container.appendChild(pre);
-
-      // Gestion du clic
-      btn.onclick = () => {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(codeEl.textContent)
-            .catch(() => {
-              const ta = document.createElement("textarea");
-              ta.value = codeEl.textContent;
-              document.body.appendChild(ta);
-              ta.select();
-              document.execCommand("copy");
-              ta.remove();
-            });
-        } else {
-          const ta = document.createElement("textarea");
-          ta.value = codeEl.textContent;
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand("copy");
-          ta.remove();
-        }
-
-        // Message vers WebView (si utilisé)
-        if (window.chrome && window.chrome.webview && window.chrome.webview.postMessage) {
-          window.chrome.webview.postMessage({
-            event: "copy",
-            lang: lang,
-            text: codeEl.textContent
-          });
-        }
-      };
-
-      // Highlight.js
-      if (window.hljs) window.hljs.highlightElement(codeEl);
-    });
-
-  // Scroll tout en bas
-  // window.scrollTo(0, document.body.scrollHeight);
-})();
-
-### InitialHtml.htm
-
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8"/>
-
-  <!-- marked.js for Markdown -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-  <!-- Highlight.js core + GitHub Dark theme -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css"
-  />
-  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/delphi.min.js"></script>
-
-  <!-- updated CSS styles -->
-  <style>
-    body {
-      margin: 0;
-      padding: 1em;
-      font-family: Segoe UI, sans-serif;
-      background: #272727;
-      color: #ddd;
-    }
-
-    html, body, #ResponseContent,
-      .chat-bubble, .code-container pre,
-      .code-header, code, pre {
-        font-size: 17px !important;   /* le !important supplante les valeurs déjà fixées */
-        line-height: 1.6;             /* conservez une hauteur de ligne lisible */
-      }
-
-    /* Transparent container + tone-on-tone border */
-    .code-container {
-      background: transparent;
-      border: 1px solid #0d1117;
-      border-radius: 8px;
-      margin: 1em 0;
-      overflow: hidden;
-    }
-
-    /* Dark header unchanged */
-    .code-header {
-      font-family: Consolas, monospace;
-      font-size: 0.85em;
-      padding: 0.4em 0.8em;
-      background: #333;
-      color: #f5f5f5;
-      border-bottom: 1px solid #444;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .copy-btn {
-      font: inherit;
-      border: none;
-      padding: 0.2em 0.6em;
-      border-radius: 4px;
-      background: #007acc;
-      color: #fff;
-      cursor: pointer;
-    }
-    .copy-btn:active {
-      transform: scale(0.96);
-    }
-
-    /* le <pre> reste transparent pour laisser le <code.hljs> afficher son propre fond */
-    .code-container pre {
-      margin: 0;
-      padding: 1em;
-      background: transparent !important;
-      overflow-x: auto;
-      overflow-y: hidden;
-      white-space: pre;
-    }
-
-    .chat-bubble {
-      max-width: 60%;
-      padding: 0.6em 0.8em;
-      margin: 0.3em 0;
-      border-radius: 10px;
-      line-height: 1.4;
-
-      /* conservez les sauts de ligne */
-      white-space: pre-wrap;
-
-      /* découpe n’importe quel mot trop long pour le faire revenir à la ligne */
-      overflow-wrap: anywhere;
-      word-break: break-word;
-    }
-
-    .chat-bubble.user {
-      margin-left: auto;
-      background: #007acc;
-      color: #fff;
-    }
-    .chat-bubble.assistant {
-      margin-right: auto;
-      background: #2d2d2d;
-      color: #ddd;
-    }
-    .chat-bubble {
-      margin: 4.2em 0;
-    }
-    .chat-bubble + * {
-      margin-top: 4.2em;
-    }
-
-    /* --- style de la bulle “loading” --- */
-  .chat-bubble.assistant.loading {
-      position: relative;
-      background: #2d2d2d;
-      color: #ddd;
-      overflow: hidden;
-    }
-    .chat-bubble.assistant.loading::after {
-      content: '';
-      position: absolute;
-      top: 0; left: -150%;
-      width: 50%; height: 100%;
-
-      /* gradient “lumière” */
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255,255,255,0.2),
-        transparent
-      );
-      animation: shimmer 1.2s infinite;
-    }
-    @keyframes shimmer {
-      0%   { left: -150%; }
-      100% { left: 150%; }
-    }
-
-   /* 1) Couleur des liens non cliqués */
-   a:link {
-     color: #58a6ff;           /* bleu clair */
-     text-decoration: none;    /* ou underline si vous voulez */
-   }
-
-   /* 2) Couleur des liens déjà visités */
-   a:visited {
-     color: #c792ea;           /* violet pastel */
-   }
-
-   /* 3) Couleur au survol */
-   a:hover {
-      color: #1f6feb;           /* bleu plus foncé */
-     text-decoration: underline;
-   }
-
-   /* 4) Couleur au clic */
-   a:active {
-     color: #bf5fff;           /* violet foncé */
-   }
-  </style>
-</head>
-<body>
-  <div id="ResponseContent"></div>
-  <script>
-    window.onload = () => window.chrome.webview.postMessage("ready");
-  </script>
-</body>
-</html>
-
-### PromptTemplate.js
-
-// Create a bubble fot the prompt
-(() => {
-    const root = document.getElementById("ResponseContent");
-    const bubble = document.createElement("div");
-    bubble.className = "chat-bubble user";
-    bubble.style.whiteSpace = "pre-wrap";
-    bubble.textContent = %s;
-    root.appendChild(bubble);
-    // window.scrollTo(0, document.body.scrollHeight);
-    setTimeout(() => {
-        window.scrollTo(0, document.body.scrollHeight);
-    }, 0);
-  })();
-
-
-### ReasoningTemplate.js
-
-
-(() => {
-      const root  = document.getElementById("ResponseContent");
-      let bubble  = document.getElementById("loadingBubble");
-
-      if (!bubble) {
-        bubble = document.createElement("div");
-        bubble.id = "loadingBubble";
-        bubble.className = "chat-bubble assistant loading";
-        bubble.textContent = "Developing a response";
-        root.appendChild(bubble);
-        window.scrollTo(0, document.body.scrollHeight);
-      }
-
-      // Hide the bubble after 10 minutes
-      setTimeout(() => { bubble.remove(); }, 600000);
-    })();
-
 
 
 ## L'unité à la racine du projet (le main) L'initiateur et l'orchestrateur général de file2knowledge
@@ -16112,7 +15923,7 @@ uses
 
 
   GenAI, GenAI.Types, Helper.PanelRoundedCorners.VCL, Helper.ScrollBoxMouseWheel.VCL,
-  GenAI.Async.Promise, Vcl.Menus, Vcl.WinXCtrls;
+  Manager.Async.Promise, Vcl.Menus, Vcl.WinXCtrls;
 
 const
   PROMPT_MAX_WIDTH = 800;
@@ -16229,13 +16040,10 @@ type
     Label31: TLabel;
     SpeedButton10: TSpeedButton;
     Panel26: TPanel;
-    SpeedButton11: TSpeedButton;
-    Label32: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormResize(Sender: TObject);
-    procedure Label2Click(Sender: TObject);
   private
     FInit: Boolean;
     procedure InitState;
@@ -16263,7 +16071,7 @@ uses
   UI.VectorResourceManager.VCL, UI.Container.VCL, UI.ChatSession.VCL, UI.PageSelector.VCL,
   UI.UserSettings.VCL, UI.PromptSelector.VCL, UI.ServiceFeatureSelector.VCL,
   UI.VectorResourceEditor.VCL, Introducer.UserSettings.VCL, Provider.ResponseIdTracker,
-  Model.VectorResource, Manager.FileUploadID.Controler, Manager.WebServices;
+  Model.VectorResource, Manager.FileUploadID.Controler;
 
 {$R *.dfm}
 
@@ -16369,11 +16177,6 @@ begin
   FInit := True;
 end;
 
-procedure TForm1.Label2Click(Sender: TObject);
-begin
-  TWebUrlManager.Open('https://github.com/MaxiDonkey/file2knowledge')
-end;
-
 procedure TForm1.RegisterIniAndSettings;
 begin
   {--- Registers persistent storage for loading/saving user settings (file-based configuration). }
@@ -16404,9 +16207,7 @@ begin
         .SetWebContextSize(Combobox7)
         .SetTimeOut(Combobox8)
         .SetCountry(MaskEdit8)
-        .SetCity(MaskEdit9)
-        .SetClearResponseButton(SpeedButton11)
-        .SetDashBoardLabel(Label32);
+        .SetCity(MaskEdit9);
       Result := TSettingsVCL.Create(Introducer);
     end,
     TLifetime.Singleton
@@ -16732,6 +16533,299 @@ initialization
   ReportMemoryLeaksOnShutdown := True;
 end.
 
+## Les templates HTML/JS - situés dans le dossier 'template' du projet
+
+Ces scripts sont injectés dans TEdge browser et cela dans l'unité Displayer.Edge. Ces scripts sont externe ce qui signifie qu'ils peuvent être modifiés sans relancer l'application, et encore moins recompiler le projet.
+
+Les scripts sont au nombre de 4:
+
+ - InitialHtml.htm
+ - PromptTemplate.js
+ - ReasoningTemplate.js
+ - DisplayTemplate.js 
+
+Voici le contenu de InitialHtml.htm :
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+
+  <!-- marked.js for Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Highlight.js core + GitHub Dark theme -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css"
+  />
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/delphi.min.js"></script>
+
+  <!-- updated CSS styles -->
+  <style>
+    body {
+      margin: 0;
+      padding: 1em;
+      font-family: Segoe UI, sans-serif;
+      background: #272727;
+      color: #ddd;
+    }
+
+    html, body, #ResponseContent,
+      .chat-bubble, .code-container pre,
+      .code-header, code, pre {
+        font-size: 17px !important;   /* le !important supplante les valeurs déjà fixées */
+        line-height: 1.6;             /* conservez une hauteur de ligne lisible */
+      }
+
+    /* Transparent container + tone-on-tone border */
+    .code-container {
+      background: transparent;
+      border: 1px solid #0d1117;
+      border-radius: 8px;
+      margin: 1em 0;
+      overflow: hidden;
+    }
+
+    /* Dark header unchanged */
+    .code-header {
+      font-family: Consolas, monospace;
+      font-size: 0.85em;
+      padding: 0.4em 0.8em;
+      background: #333;
+      color: #f5f5f5;
+      border-bottom: 1px solid #444;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .copy-btn {
+      font: inherit;
+      border: none;
+      padding: 0.2em 0.6em;
+      border-radius: 4px;
+      background: #007acc;
+      color: #fff;
+      cursor: pointer;
+    }
+    .copy-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* le <pre> reste transparent pour laisser le <code.hljs> afficher son propre fond */
+    .code-container pre {
+      margin: 0;
+      padding: 1em;
+      background: transparent !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: pre;
+    }
+
+    .chat-bubble {
+      max-width: 60%;
+      padding: 0.6em 0.8em;
+      margin: 0.3em 0;
+      border-radius: 10px;
+      line-height: 1.4;
+
+      /* conservez les sauts de ligne */
+      white-space: pre-wrap;
+
+      /* découpe n’importe quel mot trop long pour le faire revenir à la ligne */
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .chat-bubble.user {
+      margin-left: auto;
+      background: #007acc;
+      color: #fff;
+    }
+    .chat-bubble.assistant {
+      margin-right: auto;
+      background: #2d2d2d;
+      color: #ddd;
+    }
+    .chat-bubble {
+      margin: 4.2em 0;
+    }
+    .chat-bubble + * {
+      margin-top: 4.2em;
+    }
+
+    /* --- style de la bulle “loading” --- */
+  .chat-bubble.assistant.loading {
+      position: relative;
+      background: #2d2d2d;
+      color: #ddd;
+      overflow: hidden;
+    }
+    .chat-bubble.assistant.loading::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -150%;
+      width: 50%; height: 100%;
+
+      /* gradient “lumière” */
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.2),
+        transparent
+      );
+      animation: shimmer 1.2s infinite;
+    }
+    @keyframes shimmer {
+      0%   { left: -150%; }
+      100% { left: 150%; }
+    }
+
+   /* 1) Couleur des liens non cliqués */
+   a:link {
+     color: #58a6ff;           /* bleu clair */
+     text-decoration: none;    /* ou underline si vous voulez */
+   }
+
+   /* 2) Couleur des liens déjà visités */
+   a:visited {
+     color: #c792ea;           /* violet pastel */
+   }
+
+   /* 3) Couleur au survol */
+   a:hover {
+      color: #1f6feb;           /* bleu plus foncé */
+     text-decoration: underline;
+   }
+
+   /* 4) Couleur au clic */
+   a:active {
+     color: #bf5fff;           /* violet foncé */
+   }
+  </style>
+</head>
+<body>
+  <div id="ResponseContent"></div>
+  <script>
+    window.onload = () => window.chrome.webview.postMessage("ready");
+  </script>
+</body>
+</html>
+
+
+Le contenu de DisplayTemplate.js  :
+
+// renderMarkdown.js
+(() => {
+  // 'md' doit être défini avant d'exécuter ce script, par exemple :
+  //   window.md = "## Mon markdown…";
+  // ou en passant md en global depuis votre host.
+  const md   = %s;
+  const html = marked.parse(md);
+  const root = document.getElementById("ResponseContent");
+  root.innerHTML = html;
+
+  document
+    .querySelectorAll("pre > code[class^=\"language-\"]")
+    .forEach(codeEl => {
+      const pre  = codeEl.parentNode;
+      const lang = codeEl.className.replace("language-", "");
+
+      // Container et header
+      const container = document.createElement("div");
+      container.className = "code-container";
+
+      const header = document.createElement("div");
+      header.className  = "code-header";
+      header.textContent = lang.toUpperCase();
+
+      // Bouton Copy
+      const btn = document.createElement("button");
+      btn.className  = "copy-btn";
+      btn.textContent = "Copy";
+      header.appendChild(btn);
+
+      // Insertion dans le DOM
+      pre.parentNode.insertBefore(container, pre);
+      container.appendChild(header);
+      container.appendChild(pre);
+
+      // Gestion du clic
+      btn.onclick = () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(codeEl.textContent)
+            .catch(() => {
+              const ta = document.createElement("textarea");
+              ta.value = codeEl.textContent;
+              document.body.appendChild(ta);
+              ta.select();
+              document.execCommand("copy");
+              ta.remove();
+            });
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = codeEl.textContent;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+        }
+
+        // Message vers WebView (si utilisé)
+        if (window.chrome && window.chrome.webview && window.chrome.webview.postMessage) {
+          window.chrome.webview.postMessage({
+            event: "copy",
+            lang: lang,
+            text: codeEl.textContent
+          });
+        }
+      };
+
+      // Highlight.js
+      if (window.hljs) window.hljs.highlightElement(codeEl);
+    });
+
+  // Scroll tout en bas
+  // window.scrollTo(0, document.body.scrollHeight);
+})();
+
+le contenu de PromptTemplate.js :
+
+// Create a bubble fot the prompt
+(() => {
+    const root = document.getElementById("ResponseContent");
+    const bubble = document.createElement("div");
+    bubble.className = "chat-bubble user";
+    bubble.style.whiteSpace = "pre-wrap";
+    bubble.textContent = %s;
+    root.appendChild(bubble);
+    // window.scrollTo(0, document.body.scrollHeight);
+    setTimeout(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+    }, 0);
+  })();
+
+
+et le contenu de ReasoningTemplate.js :
+
+(() => {
+      const root  = document.getElementById("ResponseContent");
+      let bubble  = document.getElementById("loadingBubble");
+
+      if (!bubble) {
+        bubble = document.createElement("div");
+        bubble.id = "loadingBubble";
+        bubble.className = "chat-bubble assistant loading";
+        bubble.textContent = "Developing a response";
+        root.appendChild(bubble);
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+
+      // Hide the bubble after 10 minutes
+      setTimeout(() => { bubble.remove(); }, 600000);
+    })();
+
 
 ## Dans le dernier dossier du projet nommé 'Data', on trouve les fichiers qui seront vectorisés pour apporter un support aux développeurs.
 
@@ -16748,75 +16842,155 @@ dans ce répertoire on trouve :
 - Gemini_documentation.txt ; (lienGitHub: https://github.com/MaxiDonkey/DelphiGemini )
 - GenAI_documentation.txt ; (lienGitHub: https://github.com/MaxiDonkey/DelphiGenAI )
 
+
 Auteur: Maxidonkey (https://github.com/MaxiDonkey?tab=repositories)
 
-## Le readme.md à la rasine du projet
+# File2knowledgeAI
+## Introduction
+File2knowledgeAI a été conçu pour offrir une implémentation concrète du point de terminaison v1/responses de l’API OpenAI. Son objectif principal : démontrer comment exploiter les fonctionnalités avancées de recherche de fichiers (file_search) et l’utilisation de magasins vectoriels pour enrichir l’exploitation sémantique des documents. Cette approche permet de fournir des réponses plus contextuelles, pertinentes et intelligentes lors des requêtes sur de la documentation technique, du code source ou tout autre fichier textuel.
 
-# File2Knowledge
+Orientée développeurs Delphi, l’application montre comment intégrer et orchestrer efficacement les capacités GenAI/OpenAI dans des projets réels. Le projet se veut avant tout didactique : il vise à partager de bonnes pratiques et à encourager l’expérimentation autour de l’API v1/responses, des méthodes modernes de vectorisation, de l’indexation et du chaînage conversationnel. Il n’a aucune vocation concurrentielle face aux outils commerciaux, mais privilégie l’apprentissage, l’expérimentation et le plaisir de coder.
+
+## Espace Laboratoire : innovation, expérimentation et démonstration
+File2knowledgeAI a été imaginé comme un véritable laboratoire d’expérimentation dédié aux développeurs désireux de découvrir ou valider rapidement les dernières avancées proposées par l’API OpenAI. Son architecture, sa modularité et sa VCL raffinée offrent :
+
+  - Un socle prêt à l’emploi pour tester les nouveautés OpenAI
+Plus besoin de réinventer la roue ou d’assembler des briques techniques : File2knowledgeAI propose un environnement stable, découplé et entièrement mockable, centré sur l’intégration de GenAI dans Delphi.
+L’intégralité des points d’entrée OpenAI (file_search, vectorisation, chaînage, conversation, streaming d’événements…) est exposée et extensible : tout nouveau point de terminaison, nouvelle API ou méthode peut être intégrée et testée rapidement.
+
+  - Focus sur la nouveauté, pas la plomberie
+Les développeurs peuvent concentrer leur énergie uniquement sur l’exploration des features OpenAI (prompting avancé, gestion de réponses, vector store, chainage conversationnel, etc.), en s’affranchissant des contraintes d’infrastructure, de synchronisation UI/métier ou d’intégration bas niveau.
+
+  - Comparaison et inspiration face aux stacks modernes
+Ce projet prouve qu’avec Delphi — VCL, asynchronisme natif et IoC — on peut bâtir des architectures aussi robustes que celles des stacks JS/TS modernes, tout en profitant d’un environnement typé et extrêmement rapide.
+
+  - Pas de concurrence directe avec les solutions commerciales
+File2knowledgeAI n’est pas un concurrent des outils “pro” du marché : il s’agit d’un terrain de jeu, d’un outil démonstratif et d’une référence open-source pour se former, expérimenter, comprendre et valider en profondeur les usages des APIs OpenAI dans un cadre Delphi / VCL.
+
+N’hésitez pas à explorer le code et à proposer vos propres extensions.
+
+## Fonctionnalités principales
+
+### File Search et vectorisation
+- Importation de fichiers *.txt et *.md pour test des capacités de vectorisation et interrogation AI via OpenAI.
+- Génération automatique d’embeddings (stockés côté OpenAI) lors de chaque import ; toute question subit le même traitement, permettant de trouver les passages les plus pertinents dans la base de fichiers indexés.
+- Résultats retournés avec score de similarité, facilitant l’accès à l’information clé.
+- Intégration de 9 fichiers textuels comprenant code source + documentation pour wrappers API Delphi : chaque élément est vectorisé, donnant accès à un dispositif de tutorat contextuel.
+- Le projet reste pour l’instant mono-plateforme, centré sur l’écosystème Delphi.
+
+## Caractéristiques techniques
+1. Exploitation avancée du point de terminaison OpenAI v1/responses
+     - Indexation vectorielle pour recherche enrichie et contextuelle.
+     - Gestion du chaînage prompts/réponses à travers l’usage affiné des IDs de réponse OpenAI en session.
+2. Architecture modulaire, découplée et testable
+     - Usage systématique de l’IoC (Inversion of Control).
+     - Séparation stricte entre UI (VCL)/logique métier et domain logic (gestion fichiers, prompts, vector store…).
+     - Adoption des meilleures pratiques : promises asynchrones, DI (injection de dépendances), refactoring simplifié.
+3. Gestion transactionnelle et synchronisée des fichiers
+     - Dictionnaires typés pour gestion fichiers/FileUploadIds, opérations atomiques (ajout, suppression, rollback), synchronisation client/serveur.
+     - Contrôleur centralisé TFileUploadIdController pilotant tous les états des fichiers et sync avec Vector Store OpenAI.
+4. Event-driven exhaustif pour réponses GenAI
+     - Moteur événementiel couvrant chaque type d’événement du endpoint v1/responses (classes TEventEngineManager, IStreamEventHandler).
+5. Sessions de chat et chaînage conversationnel
+     - Sessions persistantes, chaînage multi-turn, historique dynamique, JSON automatique des états.
+     - Traçabilité centralisée des IDs OpenAI pour chaînage intelligent des réponses.
+6. Synchronisation UI/logique métier
+     - Logique de mode centralisée (file search, web search, reasoning) via endpoint unique.
+     - Helpers pour introspection, batch editing, synchronisation.
+7. Extensibilité et onboarding rapide
+     - Documentation abondante, code découpé : montée en compétence accélérée, extensions facilitées, modèle démonstratif épuré.
+
+## UI VCL & WebView2
+- Contrôle dédié TEdgeDisplayerVCL : encapsulation WebView2 sous VCL.
+- Rendu markdown stylé, prompts, reasoning UI avancé.
+- Templates HTML/JS dynamiques et modifiables à chaud (pas besoin de recompiler).
+- Injection/synchronisation asynchrone HTML/JS, découplage complet via Manager.Intf et IoC pour maintenance facile.
+
+## Promises Delphi (JavaScript style)
+- Classe TPromise : gestion Pending, Fulfilled, Rejected.
+- Support du chaînage (&Then, &Catch), cleanup automatique, thread-safe, conçu pour IO massif et requêtes asynchrones OpenAI.
+- Gestion des erreurs structurée : fini le callback hell.
+- Ubiquitaire dans le projet : async généralisé.
+
+## JSON Fluent & RTTI
+- Classe TJSONChain avec RTTI Delphi : manipulation fluide et chaînée des objets JSON (ajout, édition, traversée).
+- Sérialisation/désérialisation auto via properties publiques.
+- Support des structures complexes via méthodes fluentes, assignation dynamique par chemin, gestion naturelle des tableaux et propriétés imbriquées.
+
+## Architecture de l’application
+File2knowledgeAI est conçu autour d’une architecture orientée services, ultra-modulaire et pilotée par l’Inversion de Contrôle (IoC). Ce modèle garantit un découplage strict entre les composants, ce qui permet :
+
+### Injection de dépendances généralisée
+- Tous les services majeurs (exécution de prompts, gestion des fichiers, vector stores, UI, gestion de sessions, etc.) sont définis en tant qu’interfaces. Leur résolution, initialisation et cycle de vie (singleton ou transitoire) sont orchestrés via un IoC container maison (Manager.IoC).
+- Cela facilite le remplacement ou la simulation (mocking) de toute brique du système, pour du test ou de l’extension fonctionnelle sans refactor lourd.
+
+### Façade principale : TOpenAIProvider
+- Ce composant central orchestre toute l’intégration OpenAI/GenAI, déléguant via des interfaces IoC à des modules spécialisés : gestion asynchrone des prompts, chaînage de sessions, streaming, vector stores, etc.
+- Il est possible de changer de moteur d’exécution (prompt engine, storage, etc.) simplement par reconfiguration IoC.
+
+### Découplage UI/Business & testabilité accrue
+- Les interactions UI (VCL/WebView2) s’appuient sur des interfaces (par exemple, IDisplayer, IServicePrompt, IChatSessionHistoryView…), toutes interchangeables, pour une gestion unifiée des vues, prompts et historiques.
+- Cela autorise la simulation/mocking complet de l’UI et du backend métier dans les tests unitaires ou d’intégration.
+
+### Gestion transactionnelle et centralisée des ressources
+- La gestion des fichiers (associations, index, snapshots/drafts, rollback/validation) repose sur des managers dédiés injectés. Exemple : TFileUploadIdController assure la cohérence entre client, serveur et interface, avec des opérations atomiques sur les ressources jointes.
+
+### Modularité, extensibilité et robustesse
+- Toute logique critique (exécution de prompts, synchronisation asynchrone, annotation, navigation de sessions, etc.) est exposée via interfaces et adaptée pour être plug & play via le conteneur d’injection de dépendances.
+- La granularité des services et leur découplage facilitent l’intégration de nouvelles stratégies, le mocking pour tests, ou l’introduction de futures améliorations OpenAI.
+
+### Promesses (Promises) et asynchronisme natif 
+- Le moteur de promesses (Manager.Async.Promise) permet un traitement réactif, sans blocage, de toute la chaîne d’opérations OpenAI, UI ou IO (exécution chaînée, gestion d’erreur structurée, thread safety) — tout en restant mockable via les interfaces Promise pour les workflows de test.
+
+### Démarrage applicatif orchestré
+- Le cœur du boot (démarrage asynchrone, vérification de ressources, gestion de l’état UI, alerte utilisateur) est lui aussi injecté : le service TStartupService fonctionne à partir d’un IStartupContext, assemblant toutes les dépendances critiques de l’écosystème à l’app launch.
+
+### Gestion structurée des historiques et de la persistance
+- Les sessions de chat (persistance, chaînage, édition, navigation par historique) reposent sur des classes spécialisées et des interfaces (IPersistentChat, IChatSessionHistoryView), toutes interchangeables et extensibles.
+
+### Pattern “tout injectable, tout mockable”
+- Grâce à IoC, l’application n’est jamais liés en dur à une implémentation technique : tout composant peut être surchargé, prototypé ou simulé (par ex : pour “fakiser” un backend OpenAI, simuler le stockage, rediriger l’UI, etc.).
+
+Ce découplage radical assure flexibilité, robustesse face au changement, montée en compétence accélérée et une culture du test avancée. Toute évolution du socle OpenAI, refonte de workflow, ou ajout de modules (UI ou services) devient trivial à intégrer au sein de l’écosystème File2knowledgeAI.
+
+___
+
+README.md
+
+# File2KnowledgeAI
 ![Delphi Next Gen Ready](https://img.shields.io/badge/Delphi--Next--Gen-ready-brightgreen)
 ![GitHub](https://img.shields.io/badge/IDE%20Version-Delphi%2012-yellow)
-![GitHub](https://img.shields.io/badge/Updated%20on%20June%2014,%202025-blue)
+![GitHub](https://img.shields.io/badge/Updated%20on%20may%2027,%202025-blue)
 
 Mini-lab Delphi/VCL open source to experiment with the `v1/responses endpoint` of the OpenAI API in a modern environment. 
 Clone & run: the app acts as a tutor for exploring my AI wrappers through the `file_search`, `embeddings`, and `chat` features.
 
-## Changelog
-
-To review the latest changes, please refer to the [changelog](https://github.com/MaxiDonkey/file2knowledge/blob/main/Changelog.md).
-
->[!IMPORTANT]
-> To perform the update, install [DelphiGenAI](https://github.com/MaxiDonkey/DelphiGenAI) version 1.1.0 and then recompile the project.
-
 ## Introduction
-
-> **Built with Delphi 12 Community Edition**  
-> You can compile and test this app **free of charge (no purchase, no lock-in)**  
-> as long as you meet the Delphi CE licence terms  
-> *(≤ USD 5 000 annual revenue or funding, up to five developers, renewable yearly).*  
-> See the full [Delphi CE FAQ](https://www.embarcadero.com/products/delphi/starter/faq).
->
-> *Delphi* and the Delphi logo are trademarks of Embarcadero Technologies.  
-> Their mention here is purely descriptive and does **not** imply endorsement.
 
 File2knowledge was designed to provide a concrete implementation of the OpenAI API’s `v1/responses endpoint` (necessary for the agentic approach).
 Its main goal: to demonstrate how to leverage advanced file search (file_search) features and the use of vector stores to enhance the semantic processing of documents.
 This approach enables more contextual, relevant, and intelligent responses when querying technical documentation, source code, or any other textual files.
 
-![Preview](https://github.com/MaxiDonkey/file2knowledge/blob/main/Images/F2KAni.gif?raw=true "Preview")
+![Preview](https://github.com/MaxiDonkey/File2knowledgeAI/blob/main/Images/F2KAni.gif?raw=true "Preview")
+
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/MaxiDonkey/file2Knowledge.git
+cd path\to\your\OpenAIfolder
+git clone https://github.com/Maxi/File2KnowledgeAI.git
 ```
-open WrapperAssistant.dproj     # Delphi 12 Athens
+open File2KnowledgeAI.dproj     # Delphi 12 Athens
 Prerequisites: OpenAI API key
 
 ## Dependencies
-- Add [DelphiGenAI (OpenAI wrapper)](https://github.com/MaxiDonkey/DelphiGenAI) version 1.0.6 to your Delphi project **Library Path** if not globally referenced
+- [DelphiGenAI (OpenAI wrapper)](https://github.com/MaxiDonkey/DelphiGenAI)
 - Delphi 12 Athens (or later)
 - WebView2 Runtime (EdgeView2 for VCL)
 - OpenAI API key (OPENAI_API_KEY)
 - Windows 11 MineShaft (custom VCL theme)
 
 ![Preview](https://github.com/MaxiDonkey/SynkFlowAI/blob/main/Images/themis.png?raw=true "Preview")
-
-## Things You Should Know
-
-
-
->[!NOTE]
-> Make sure to correctly set the **search path** to the `DelphiGenAI` wrapper in your Delphi project settings. This is required for proper compilation and integration.
-
-![Preview](https://github.com/MaxiDonkey/file2knowledge/blob/main/Images/Genai_path.png?raw=true "Preview")
-
->Before running the client for the first time, make sure to place the appropriate DLL (32-bit or 64-bit) in the executable's directory. The required files are available in the repository.
-
->[!WARNING]
->To access reasoning visualization with o-models, you must enable this feature in the Verification section of your [OpenAI account](https://platform.openai.com/settings/organization/general). The activation process takes only a few minutes.
-
->[!NOTE]
->To access the uploaded files and active vector stores, go to the [dashboard](https://platform.openai.com/logs) then navigating to the `Storage` section.
 
 ## Features
 
@@ -16828,199 +17002,10 @@ Prerequisites: OpenAI API key
 
 - UI VCL & WebView2
 
-- Session-based conversational chaining with OpenAI response IDs
-
-- Web research and reasoning.
-
 ## License
 
 This project is licensed under the [MIT](https://choosealicense.com/licenses/mit/) License.
 
 ## Going further
 
-**Want the full architecture breakdown?**  
-
-[Read the deep-dive.md](https://github.com/MaxiDonkey/file2knowledge/blob/main/deep-dive.md)
-
-
-
-## le fichier changelog 
-
-#### 2025, June 14 version 1.0.4
-- Integrate GenAI v1.1.0 and optimize unit methods in the `Providers` directory.
-- Manager.Async.Promise replaced by GenAI.Async.Promise from GenAI wrapper.
-
-#### 2025, June 4 version 1.0.1
-- Update the DelphiGenAI documentation.
-
-#### 2025, May 27 version 1.0.1
-- Fix “No mapping for the Unicode character exists in the target multi-byte code page.” <br > 
-For the `v1/responses` endpoint, buffer the incoming chunks and process them only once they’re fully received to avoid the error. <br> 
-Refer to DelphiGenAI
-
-
-
-## La fichier deep-dive.md
-
-# File2knowledgeAI
-
-### Table of Contents
-
-  - [Introduction](#introduction)
-  - [A Laboratory Space for Innovation, Experimentation, and Demonstration](#a-laboratory-space-for-innovation-experimentation-and-demonstration)
-  - [Key Features](#key-features)
-    - [File Search and Vectorization](#file-search-and-vectorization)
-  - [Technical Features](#technical-features)
-    - [Advanced Use of OpenAI `v1/responses` Endpoint](#advanced-use-of-openai-v1responses-endpoint)
-    - [Modular, Decoupled, and Testable Architecture](#modular-decoupled-and-testable-architecture)
-    - [Transactional and Synchronized File Management](#transactional-and-synchronized-file-management)
-    - [Comprehensive Event-Driven GenAI Response Engine](#comprehensive-event-driven-genai-response-engine)
-    - [Chat Sessions and Conversational Chaining](#chat-sessions-and-conversational-chaining)
-    - [UI/Business Logic Synchronization](#uibusiness-logic-synchronization)
-    - [Extensibility and Rapid Onboarding](#extensibility-and-rapid-onboarding)
-  - [VCL UI & WebView2](#vcl-ui--webview2)
-  - [Delphi Promises (JavaScript Style)](#delphi-promises-javascript-style)
-  - [Fluent JSON & RTTI](#fluent-json--rtti)
-  - [Application Architecture](#application-architecture)
-    - [Generalized Dependency Injection](#generalized-dependency-injection)
-    - [Main Facade: `TOpenAIProvider`](#main-facade-topenaiprovider)
-    - [UI/Business Logic Decoupling & Enhanced Testability](#uibusiness-logic-decoupling--enhanced-testability)
-    - [Centralized and Transactional Resource Management](#centralized-and-transactional-resource-management)
-    - [Modularity, Extensibility, and Robustness](#modularity-extensibility-and-robustness)
-    - [Native Promises and Asynchrony](#native-promises-and-asynchrony)
-    - [Orchestrated Application Startup](#orchestrated-application-startup)
-    - [Structured History and Persistence Management](#structured-history-and-persistence-management)
-    - ["Everything Injectable, Everything Mockable" Pattern](#everything-injectable-everything-mockable-pattern)
-
-___
-
-## Introduction
-
-**File2knowledgeAI** was designed to provide a concrete implementation of OpenAI’s `v1/responses` endpoint. Its primary goal is to demonstrate how to leverage advanced file search capabilities (`file_search`) and vector store integration to enhance semantic document exploration. This approach enables more contextual, relevant, and intelligent responses when querying technical documentation, source code, or any other textual file.
-
-Aimed at Delphi developers, this application showcases how to effectively integrate and orchestrate OpenAI/GenAI capabilities in real-world projects. The project is primarily educational: it’s intended to share best practices and promote experimentation with the `v1/responses` API, modern vectorization, indexing, and conversational chaining. It’s not a competitor to commercial tools, but a platform to encourage learning, exploration, and the joy of coding.
-
-## A Laboratory Space for Innovation, Experimentation, and Demonstration
-
-**File2knowledgeAI** was conceived as a real experimental lab for developers who want to quickly explore or validate the latest advancements of the OpenAI API. Its architecture, modularity, and refined VCL provide:
-
-- **A ready-to-use foundation for testing OpenAI features**  
-  No need to reinvent the wheel or stitch together technical building blocks: File2knowledgeAI offers a stable, decoupled, and fully mockable environment focused on GenAI integration in Delphi.  
-  All OpenAI entry points (file_search, vectorization, chaining, conversation, event streaming, etc.) are exposed and extensible. Any new endpoint, API, or method can be integrated and tested quickly.
-
-- **Focus on innovation, not plumbing**  
-  Developers can focus purely on exploring OpenAI features (advanced prompting, response handling, vector store, conversational chaining, etc.) without worrying about infrastructure, UI/business synchronization, or low-level integration.
-
-- **Inspiration and comparison with modern stacks**  
-  The project demonstrates that with Delphi—VCL, native asynchrony, and IoC—you can build architectures as robust as those in modern JS/TS stacks, while benefiting from a strongly-typed and extremely fast environment.
-
-- **No direct competition with commercial solutions**  
-  File2knowledgeAI is not a competitor to “pro” market tools: it’s a playground, a demonstrative tool, and an open-source reference to learn, experiment, understand, and deeply validate OpenAI API usage within the Delphi/VCL framework.
-
-Feel free to explore the code and contribute your own extensions.
-
-## Key Features
-
-### File Search and Vectorization
-- Import of `.txt` and `.md` files to test vectorization and AI querying via OpenAI.
-- Automatic embedding generation (stored on OpenAI) upon import; each query undergoes the same treatment, enabling retrieval of the most relevant passages from the indexed file base.
-- Results returned with similarity scores, facilitating access to key information.
-- Integration of 9 textual files including source code + documentation for Delphi API wrappers: each element is vectorized, providing contextual tutoring support.
-- Currently single-platform, focused on the Delphi ecosystem.
-
-## Technical Features
-
-#### **Advanced Use of OpenAI `v1/responses` Endpoint**
-   - Vector indexing for enriched, contextual search.
-   - Prompt/response chaining via refined use of OpenAI session response IDs.
-
-#### **Modular, Decoupled, and Testable Architecture**
-   - Systematic use of IoC (Inversion of Control).
-   - Strict separation between UI (VCL), business logic, and domain logic (file management, prompts, vector store…).
-   - Adherence to best practices: async promises, DI (dependency injection), simplified refactoring.
-
-#### **Transactional and Synchronized File Management**
-   - Typed dictionaries for file/FileUploadId handling, atomic operations (add, delete, rollback), client/server sync.
-   - Centralized controller `TFileUploadIdController` managing all file states and syncing with OpenAI’s Vector Store.
-
-#### **Comprehensive Event-Driven GenAI Response Engine**
-   - Event engine covering every event type from the `v1/responses` endpoint (classes `TEventEngineManager`, `IStreamEventHandler`).
-
-#### **Chat Sessions and Conversational Chaining**
-   - Persistent sessions, multi-turn chaining, dynamic history, automatic state JSON.
-   - Centralized traceability of OpenAI IDs for intelligent response chaining.
-
-#### **UI/Business Logic Synchronization**
-   - Centralized mode logic (file search, web search, reasoning) via a unified endpoint.
-   - Helpers for introspection, batch editing, and sync.
-
-#### **Extensibility and Rapid Onboarding**
-   - Abundant documentation, modular code: fast ramp-up, easy extensions, clean demo model.
-
-## VCL UI & WebView2
-
-- Dedicated control `TEdgeDisplayerVCL`: WebView2 encapsulated under VCL.
-- Styled markdown rendering, advanced prompt and reasoning UI.
-- Dynamic HTML/JS templates hot-editable (no recompilation needed).
-- Async HTML/JS injection and synchronization, full decoupling via `Manager.Intf` and IoC for easy maintenance.
-
-## Delphi Promises (JavaScript Style)
-
-- Class `TPromise`: handles Pending, Fulfilled, Rejected states.
-- Supports chaining (`&Then`, `&Catch`), auto-cleanup, thread-safe, built for heavy IO and OpenAI async requests.
-- Structured error management: no more callback hell.
-- Used pervasively throughout the project: async by default.
-
-## Fluent JSON & RTTI
-
-- Class `TJSONChain` with Delphi RTTI: fluent, chainable manipulation of JSON objects (add, edit, traverse).
-- Auto serialization/deserialization via public properties.
-- Support for complex structures through fluent methods, dynamic path-based assignment, natural handling of arrays and nested properties.
-
-## Application Architecture
-
-**File2knowledgeAI** is built on a service-oriented, ultra-modular architecture powered by Inversion of Control (IoC). This ensures strict decoupling between components, enabling:
-
-#### Generalized Dependency Injection
-
-- All major services (prompt execution, file management, vector stores, UI, session handling, etc.) are defined as interfaces. Their resolution, initialization, and lifecycle (singleton or transient) are orchestrated via a custom IoC container (`Manager.IoC`).
-- This simplifies mocking or replacing any system component for testing or functional extensions without heavy refactoring.
-
-#### Main Facade: `TOpenAIProvider`
-
-- This central component orchestrates all OpenAI/GenAI integration, delegating via IoC interfaces to specialized modules: async prompt handling, session chaining, streaming, vector stores, etc.
-- Switching execution engines (prompt engine, storage, etc.) is as simple as reconfiguring IoC.
-
-#### UI/Business Logic Decoupling & Enhanced Testability
-
-- UI interactions (VCL/WebView2) rely on interfaces (e.g., `IDisplayer`, `IServicePrompt`, `IChatSessionHistoryView`), all interchangeable, for unified handling of views, prompts, and history.
-- Allows complete simulation/mocking of the UI and business backend for unit or integration testing.
-
-#### Centralized and Transactional Resource Management
-
-- File management (associations, indexing, snapshots/drafts, rollback/validation) relies on injected managers.  
-  Example: `TFileUploadIdController` ensures consistency between client, server, and UI, with atomic operations on attached resources.
-
-#### Modularity, Extensibility, and Robustness
-
-- All critical logic (prompt execution, async sync, annotation, session navigation, etc.) is exposed via interfaces and designed to be plug & play via the DI container.
-- Fine-grained services and their decoupling make it easy to integrate new strategies, mock components for testing, or bring in future OpenAI improvements.
-
-#### Native Promises and Asynchrony
-
-- The promise engine (`Manager.Async.Promise`) allows reactive, non-blocking processing of all OpenAI, UI, or IO chains (chained execution, structured error handling, thread safety) — while remaining mockable via promise interfaces for test workflows.
-
-#### Orchestrated Application Startup
-
-- The startup core (async launch, resource checks, UI state handling, user alerts) is also injected: the `TStartupService` works from an `IStartupContext`, assembling all critical ecosystem dependencies during app launch.
-
-#### Structured History and Persistence Management
-
-- Chat sessions (persistence, chaining, editing, history navigation) rely on specialized classes and interfaces (`IPersistentChat`, `IChatSessionHistoryView`), all interchangeable and extensible.
-
-#### "Everything Injectable, Everything Mockable" Pattern
-
-- Thanks to IoC, the app is never hardwired to any technical implementation: any component can be overridden, prototyped, or simulated (e.g., to fake an OpenAI backend, simulate storage, reroute UI, etc.).
-
-This radical decoupling ensures flexibility, robustness to change, fast learning curves, and a strong testing culture. Any OpenAI platform evolution, workflow overhaul, or module addition (UI or services) becomes trivially integrable within the File2knowledgeAI ecosystem.
-
+To view the technical specifications [Refer to deep-dive.md](https://github.com/MaxiDonkey/File2knowledgeAI/blob/main/deep-dive.md)

@@ -1,5 +1,9 @@
 unit UI.ChatSession.VCL;
 
+interface
+
+{$REGION  'Dev notes : UI.ChatSession.VCL'}
+
 (*
   Unit: UI.ChatSession.VCL
 
@@ -32,7 +36,7 @@ unit UI.ChatSession.VCL;
   Conventions follow File2knowledgeAI UI, chaining, and session storage best practices.
 *)
 
-interface
+{$ENDREGION}
 
 uses
   Winapi.Windows, Winapi.ShellAPI,

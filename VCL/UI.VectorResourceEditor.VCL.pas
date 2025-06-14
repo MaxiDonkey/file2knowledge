@@ -1,5 +1,9 @@
 unit UI.VectorResourceEditor.VCL;
 
+interface
+
+{$REGION  'Dev notes : UI.VectorResourceEditor.VCL'}
+
 (*
   Unit: UI.VectorResourceEditor.VCL
 
@@ -32,7 +36,7 @@ unit UI.VectorResourceEditor.VCL;
       and several helper units for dialogs, popups, rounded panels, uploads, etc.
 *)
 
-interface
+{$ENDREGION}
 
 uses
   Winapi.Windows,
@@ -465,9 +469,29 @@ begin
 
   if TOpenDialogHelper.Create(nil)
        .Filter(
-         'Text Files (*.txt)|*.txt|' +
-         'Markdown Files (*.md)|*.md|' +
-         'Text & Markdown (*.txt;*.md)|*.txt;*.md')
+         'text (*.txt)|*.txt|' +
+         'markdown (*.md)|*.md|' +
+         'text & markdown (*.txt;*.md)|*.txt;*.md|' +
+         'PDF files (*.pdf)|*.pdf|' +
+         'office document (*.doc;*.docx;*.pptx)|*.doc;*.docx;*.pptx|' +
+         'text/x-c (*.c)|*.c|' +
+         'text/x-c++ (*.cpp)|*.cpp|' +
+         'text/x-csharp (*.cs)|*.cs|' +
+         'text/css (*.css)|*.css|' +
+         'Msword (*.doc)|*.doc|' +
+         'office document (*.docx)|*.docx|' +
+         'Golang (*.go)|*.go|' +
+         'Html (*.html)|*.html|' +
+         'Java (*.java)|*.java|' +
+         'Javascript (*.js)|*.js|' +
+         'Json (*.json)|*.json|' +
+         'Php (*.php)|*.php|' +
+         'office document (*.pptx)|*.pptx|' +
+         'Python (*.py)|*.py|' +
+         'Ruby (*.rb)|*.rb|' +
+         'application/x-sh (*.sh)|*.sh|' +
+         'text/x-tex (*.tex)|*.tex|' +
+         'Typescript (*.ts)|*.ts|')
        .InitialDir(FileName)
        .FilterIndex(3)
        .Execute(FileName)

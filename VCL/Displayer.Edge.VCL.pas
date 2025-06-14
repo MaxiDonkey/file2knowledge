@@ -1,5 +1,9 @@
 ﻿unit Displayer.Edge.VCL;
 
+interface
+
+{$REGION  'Dev notes : Displayer.Edge.VCL'}
+
 (*
   Unit: Displayer.Edge.VCL
 
@@ -39,7 +43,7 @@
 
 *)
 
-interface
+{$ENDREGION}
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.JSON,

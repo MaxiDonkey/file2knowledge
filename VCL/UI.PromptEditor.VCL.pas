@@ -1,5 +1,9 @@
 ﻿unit UI.PromptEditor.VCL;
 
+interface
+
+{$REGION  'Dev notes : UI.PromptEditor.VCL'}
+
 {*
   Unit: UI.PromptEditor.VCL
 
@@ -22,19 +26,19 @@
 
 *}
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.Classes, Winapi.Windows, System.Generics.Collections,
   Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Controls, Vcl.Buttons,
   System.Character, System.UITypes,
-  Manager.Intf, Manager.Async.Promise, Manager.Utf8Mapping, Manager.Types,
+  Manager.Intf, GenAI.Async.Promise, Manager.Utf8Mapping, Manager.Types,
   UI.Styles.VCL;
 
 const
   NEW_CHAT_TITLE = 'New chat ...';
   NAMING_INSTRUCTION =
-    'For each prompt and answer provided, generate in ≤6 words the main idea of ​​the “QR” (question-answer).';
+    'For each prompt and answer provided, generate in ≤6 words the main idea of the “QR” (question-answer).';
 
 type
   /// <summary>
@@ -136,8 +140,8 @@ begin
             .&Then<string>(
               function (Value: string): string
               begin
-                Execute(nil);
                 VectorResourceEditor.Refresh;
+                Execute(nil);
               end);
           Exit(False);
         end;
@@ -194,7 +198,6 @@ begin
               procedure(E: Exception)
               begin
                 AlertService.ShowError(E.Message);
-//                EdgeDisplayer.DisplayStream(E.Message);
               end);
         end;
     end;

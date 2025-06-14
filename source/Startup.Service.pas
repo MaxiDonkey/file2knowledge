@@ -1,5 +1,9 @@
 unit Startup.Service;
 
+interface
+
+{$REGION  'Dev notes : Startup.Service'}
+
 (*
   Unit: Startup.Service
 
@@ -27,7 +31,7 @@ unit Startup.Service;
     throughout the codebase.
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.Threading, System.SysUtils, System.Classes, System.IOUtils, Winapi.Windows,

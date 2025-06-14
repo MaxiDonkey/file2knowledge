@@ -1,5 +1,9 @@
 unit Manager.TemplateProvider;
 
+interface
+
+{$REGION  'Dev notes : Manager.TemplateProvider'}
+
 (*
   DESIGN NOTE:
   ============
@@ -15,7 +19,7 @@ unit Manager.TemplateProvider;
 
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.IOUtils, Helper.TextFile, Manager.Intf;

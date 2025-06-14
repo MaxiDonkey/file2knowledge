@@ -1,5 +1,9 @@
 unit Introducer.UserSettings.VCL;
 
+interface
+
+{$REGION  'Dev notes : UI.VectorResourceManager.VCL'}
+
 (*
   Unit: Introducer.UserSettings.VCL
 
@@ -22,8 +26,7 @@ unit Introducer.UserSettings.VCL;
 
 *)
 
-
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.Classes,

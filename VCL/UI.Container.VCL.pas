@@ -1,5 +1,9 @@
 ﻿unit UI.Container.VCL;
 
+interface
+
+{$REGION  'Dev notes : UI.Container.VCL'}
+
 (*
     Note on the Implementation of the Internal Registry in TContainer
 
@@ -25,7 +29,7 @@
     simplicity, and practical effectiveness in the example.
 *)
 
-interface
+{$ENDREGION}
 
 uses
   Winapi.Windows, Winapi.Messages, Winapi.ShellAPI,

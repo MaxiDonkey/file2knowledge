@@ -1,7 +1,10 @@
 unit Helper.OpenDialog.VCL;
 
-(*
+interface
 
+{$REGION  'Dev notes : Helper.OpenDialog.VCL'}
+
+(*
 A. Returns a boolean with True if successful.
 
   1. Only one file is returned
@@ -50,10 +53,9 @@ B. Returns a string and -1 on abort. Don't test if the file exists.
       for var Item in FileName1.Split([#10]) do
         if FileExists(Item) then
            ShowMessage(Item);
-
 *)
 
-interface
+{$ENDREGION}
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,

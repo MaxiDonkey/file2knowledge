@@ -1,5 +1,9 @@
 ﻿unit UI.UserSettings.VCL;
 
+interface
+
+{$REGION  'Dev notes : UI.UserSettings.VCL'}
+
 (*
   Unit: UI.UserSettings.VCL
 
@@ -42,7 +46,7 @@
   persistence, and rendering responsibilities, following the latest Delphi VCL best practices.
 *)
 
-interface
+{$ENDREGION}
 
 uses
   Winapi.Windows, Winapi.Messages, Winapi.CommCtrl,

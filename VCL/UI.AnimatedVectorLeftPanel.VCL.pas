@@ -1,5 +1,9 @@
 ﻿unit UI.AnimatedVectorLeftPanel.VCL;
 
+interface
+
+{$REGION  'Dev notes : UI.AnimatedVectorLeftPanel.VCL'}
+
 (*
   Unit: UI.AnimatedVectorLeftPanel.VCL
 
@@ -41,7 +45,7 @@
 
 *)
 
-interface
+{$ENDREGION}
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.Threading,
@@ -111,7 +115,6 @@ type
     FNewRightBtn: TButton;
     FPanel: TPanel;
     FCaptionPanel: TPanel;
-    FTitlePanel: TPanel;
     FState: TOpenCloseState;
     FResize: TProc<TObject>;
     procedure SetScrollBox(const Value: TScrollBox);

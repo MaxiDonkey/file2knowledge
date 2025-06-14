@@ -1,5 +1,9 @@
 unit Manager.Intf;
 
+interface
+
+{$REGION  'Dev notes : Manager.Intf'}
+
 (*
   Unit: Manager.Intf
 
@@ -33,7 +37,7 @@ unit Manager.Intf;
   Conventions follow the File2knowledgeAI project and OpenAI v1/responses standards.
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.Classes, Manager.Types, ChatSession.Controller,

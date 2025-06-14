@@ -16,9 +16,6 @@ implementation
 { TUtf8Mapping }
 
 class function TUtf8Mapping.CleanTextAsUTF8(const Value: string): string;
-var
-  i: Integer;
-  c: Char;
 begin
   {--- Replace NBSP (U+00A0) with a normal space }
   Result := StringReplace(Value, #$00A0, ' ', [rfReplaceAll]);
@@ -29,9 +26,9 @@ begin
 
   {--- Removes isolated surrogates and unicode noncharacters}
   var San := '';
-  for i := 1 to Length(Result) do
+  for var i := 1 to Length(Result) do
     begin
-      c := Result[i];
+      var c := Result[i];
       {--- isolated surrogates }
       if (Ord(c) >= $D800) and (Ord(c) <= $DFFF) then Continue;
       {--- unicode noncharacters }

@@ -1,5 +1,9 @@
 ﻿unit JSON.Resource;
 
+interface
+
+{$REGION  'Dev notes : JSON.Resource'}
+
 (*
   Unit: JSON.Resource
 
@@ -39,10 +43,9 @@
   This unit streamlines, unifies, and secures JSON object persistence for Delphi business objects,
   making it rapid and reliable to store, modify, or restore object graphs in modern cross-platform
   applications.
-
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.IOUtils, System.JSON, System.Rtti, REST.Json;

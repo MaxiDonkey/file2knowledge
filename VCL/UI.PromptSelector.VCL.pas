@@ -1,5 +1,9 @@
 unit UI.PromptSelector.VCL;
 
+interface
+
+{$REGION  'Dev notes : UI.PromptSelector.VCL'}
+
 (*
   Unit: UI.PromptSelector.VCL
 
@@ -31,12 +35,12 @@ unit UI.PromptSelector.VCL;
   This unit is provided as a ready-to-integrate component following File2knowledgeAI UI and architecture conventions, facilitating clear prompt history navigation and extensible, maintainable code structure.
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.Classes, Winapi.Windows,
   Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Controls, Vcl.Buttons, Vcl.ExtCtrls,
-  Manager.Intf, Manager.Async.Promise, Manager.Types, Manager.Utf8Mapping,
+  Manager.Intf, Manager.Types, Manager.Utf8Mapping,
   UI.Styles.VCL;
 
 type

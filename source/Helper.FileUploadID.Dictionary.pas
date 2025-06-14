@@ -1,5 +1,9 @@
 unit Helper.FileUploadID.Dictionary;
 
+interface
+
+{$REGION  'Dev notes : Helper.FileUploadID.Dictionary'}
+
 (*
   Unit: Helper.FileUploadID.Dictionary
 
@@ -21,8 +25,7 @@ unit Helper.FileUploadID.Dictionary;
     - Extensible structure allowing for future validation logic or additional dictionary manipulation methods if necessary.
 *)
 
-
-interface
+{$ENDREGION}
 
 uses
   System.Generics.Collections, System.SysUtils;
@@ -240,8 +243,7 @@ begin
   else
     begin
       {--- If FileUploadId is not empty, invoke the Proc method (fully asynchronous,
-           fire-and-forget) to delete the corresponding file on the server.
-      }
+           fire-and-forget) to delete the corresponding file on the server. }
       if Assigned(Proc) then
         try
           Proc(FileName, FileUploadId);

@@ -1,5 +1,9 @@
 unit Displayer.Memo.VCL;
 
+interface
+
+{$REGION  'Dev notes : Displayer.Memo.VCL'}
+
 (*
   Unit: Displayer.Memo.VCL
 
@@ -30,10 +34,9 @@ unit Displayer.Memo.VCL;
 
   This unit is designed for clarity and minimalism, making text and annotation display effortless
   in Delphi VCL apps, whether for user interaction, logging, or developer-facing output.
-
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.Classes, Winapi.Messages, Winapi.Windows, Vcl.StdCtrls,

@@ -1,5 +1,9 @@
 ﻿unit UI.ServiceFeatureSelector.VCL;
 
+interface
+
+{$REGION  'Dev notes : UI.ServiceFeatureSelector.VCL'}
+
 (*
   Unit: UI.ServiceFeatureSelector.VCL
 
@@ -39,8 +43,7 @@
     around the new v1/responses endpoint and the product’s multimodal capabilities.
 *)
 
-
-interface
+{$ENDREGION}
 
 uses
   Winapi.Windows, Winapi.Messages, Winapi.CommCtrl,

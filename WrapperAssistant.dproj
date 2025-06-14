@@ -129,6 +129,8 @@
         <Icon_MainIcon>WrapperAssistant_Icon.ico</Icon_MainIcon>
         <UWP_DelphiLogo44>logos\File2knowledge_logo.png</UWP_DelphiLogo44>
         <UWP_DelphiLogo150>logos\File2knowledge_logo.png</UWP_DelphiLogo150>
+        <VerInfo_Release>4</VerInfo_Release>
+        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.4.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>

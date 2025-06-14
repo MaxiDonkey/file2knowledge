@@ -1,5 +1,9 @@
 ﻿unit CancellationButton.VCL;
 
+interface
+
+{$REGION  'Dev notes : CancellationButton.VCL'}
+
 (*
   Unit: CancellationButton.VCL
 
@@ -34,10 +38,9 @@
 
   This unit is intended for easy drop-in cancellation support in Delphi VCL applications,
   promoting clarity, user feedback, and minimal code coupling for cancellation functionality.
-
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.Classes, Vcl.StdCtrls, Vcl.Controls, Manager.Intf, UI.Styles.VCL, Vcl.Buttons;
@@ -45,9 +48,6 @@ uses
 type
   /// <summary>
   /// Provides a reusable VCL component for user-initiated cancellation actions in Delphi applications.
-  /// <para>
-  /// ____________
-  /// </para>
   /// <para>
   /// - TCancellationVCL manages a TSpeedButton for workflow cancellation requests. It implements the ICancellation interface
   /// for standardized cancellation signaling and state detection. This class visually indicates the cancellation state,
@@ -84,7 +84,7 @@ type
     /// <summary>
     /// Marks the cancellation as requested, restores the original button caption and click handler.
     /// </summary>
-    procedure Cancel;
+    procedure Cancel(isDone: Boolean = False);
 
     /// <summary>
     /// Returns True if a cancellation has been requested; otherwise, returns False.
@@ -113,9 +113,10 @@ implementation
 
 { TCancellationVCL }
 
-procedure TCancellationVCL.Cancel;
+procedure TCancellationVCL.Cancel(isDone: Boolean);
 begin
-  FCancelled := True;
+  if not isDone then
+    FCancelled := True;
   FCancelButton.Caption := FOldCaption;
   FCancelButton.OnClick := FOldOnclick;
 end;

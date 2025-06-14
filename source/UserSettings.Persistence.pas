@@ -1,5 +1,9 @@
 unit UserSettings.Persistence;
 
+interface
+
+{$REGION  'Dev notes : UserSettings.Persistence'}
+
 (*
   Unit: UserSettings.Persistence
 
@@ -29,7 +33,7 @@ unit UserSettings.Persistence;
     and interact fluently with the <c>TSettings</c> object to load, query, modify, or save user configuration.
 *)
 
-interface
+{$ENDREGION}
 
 uses
   System.SysUtils, System.Classes, System.JSON, REST.Json.Types, REST.Json,
