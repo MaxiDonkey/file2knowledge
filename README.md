@@ -39,7 +39,7 @@ open WrapperAssistant.dproj     # Delphi 12 Athens
 Prerequisites: OpenAI API key
 
 ## Dependencies
-- Add [DelphiGenAI (OpenAI wrapper)](https://github.com/MaxiDonkey/DelphiGenAI) version 1.0.6 to your Delphi project **Library Path** if not globally referenced
+- Add [DelphiGenAI (OpenAI wrapper)](https://github.com/MaxiDonkey/DelphiGenAI) version 1.1.0 to your Delphi project **Library Path** if not globally referenced
 - Delphi 12 Athens (or later)
 - WebView2 Runtime (EdgeView2 for VCL)
 - OpenAI API key (OPENAI_API_KEY)
