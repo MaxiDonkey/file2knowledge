@@ -1,7 +1,8 @@
-#### 2025
+#### 2025, June 14 version 1.0.4
+- Integrate GenAI v1.1.0 and optimize unit methods in the `Providers` directory.
 - Manager.Async.Promise replaced by GenAI.Async.Promise from GenAI wrapper.
 
-#### 2025, June 4 versio 1.0.1
+#### 2025, June 4 version 1.0.1
 - Update the DelphiGenAI documentation.
 
 #### 2025, May 27 version 1.0.1

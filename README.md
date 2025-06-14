@@ -1,7 +1,7 @@
 # File2Knowledge
 ![Delphi Next Gen Ready](https://img.shields.io/badge/Delphi--Next--Gen-ready-brightgreen)
 ![GitHub](https://img.shields.io/badge/IDE%20Version-Delphi%2012-yellow)
-![GitHub](https://img.shields.io/badge/Updated%20on%20June%2003,%202025-blue)
+![GitHub](https://img.shields.io/badge/Updated%20on%20June%2014,%202025-blue)
 
 Mini-lab Delphi/VCL open source to experiment with the `v1/responses endpoint` of the OpenAI API in a modern environment. 
 Clone & run: the app acts as a tutor for exploring my AI wrappers through the `file_search`, `embeddings`, and `chat` features.
@@ -11,7 +11,7 @@ Clone & run: the app acts as a tutor for exploring my AI wrappers through the `f
 To review the latest changes, please refer to the [changelog](https://github.com/MaxiDonkey/file2knowledge/blob/main/Changelog.md).
 
 >[!IMPORTANT]
-> To perform the update, install [DelphiGenAI](https://github.com/MaxiDonkey/DelphiGenAI) version 1.0.6 and then recompile the project.
+> To perform the update, install [DelphiGenAI](https://github.com/MaxiDonkey/DelphiGenAI) version 1.1.0 and then recompile the project.
 
 ## Introduction
 
@@ -21,6 +21,15 @@ This approach enables more contextual, relevant, and intelligent responses when 
 
 ![Preview](https://github.com/MaxiDonkey/file2knowledge/blob/main/Images/F2KAni.gif?raw=true "Preview")
 
+> **Built with Delphi 12 Community Edition**  
+> You can compile and test this app **freely and with no commitment**, thanks to Delphi CE.  
+> The CE licence itself is free for individuals, startups and non-profits  
+> *whose yearly revenue (or funding) does not exceed USD 5 000 and up to five
+> developers.*  
+> See the full [Delphi CE FAQ](https://www.embarcadero.com/products/delphi/starter/faq).
+>
+> *Delphi* and the Delphi logo are trademarks of Embarcadero Technologies;  
+> their mention here is purely descriptive and does **not** imply any endorsement.
 
 ## Quick Start
 
