@@ -15,12 +15,6 @@ To review the latest changes, please refer to the [changelog](https://github.com
 
 ## Introduction
 
-File2knowledge was designed to provide a concrete implementation of the OpenAI API’s `v1/responses endpoint` (necessary for the agentic approach).
-Its main goal: to demonstrate how to leverage advanced file search (file_search) features and the use of vector stores to enhance the semantic processing of documents.
-This approach enables more contextual, relevant, and intelligent responses when querying technical documentation, source code, or any other textual files.
-
-![Preview](https://github.com/MaxiDonkey/file2knowledge/blob/main/Images/F2KAni.gif?raw=true "Preview")
-
 > **Built with Delphi 12 Community Edition**  
 > You can compile and test this app **free of charge (no purchase, no lock-in)**  
 > as long as you meet the Delphi CE licence terms  
@@ -29,6 +23,12 @@ This approach enables more contextual, relevant, and intelligent responses when 
 >
 > *Delphi* and the Delphi logo are trademarks of Embarcadero Technologies.  
 > Their mention here is purely descriptive and does **not** imply endorsement.
+
+File2knowledge was designed to provide a concrete implementation of the OpenAI API’s `v1/responses endpoint` (necessary for the agentic approach).
+Its main goal: to demonstrate how to leverage advanced file search (file_search) features and the use of vector stores to enhance the semantic processing of documents.
+This approach enables more contextual, relevant, and intelligent responses when querying technical documentation, source code, or any other textual files.
+
+![Preview](https://github.com/MaxiDonkey/file2knowledge/blob/main/Images/F2KAni.gif?raw=true "Preview")
 
 ## Quick Start
 
