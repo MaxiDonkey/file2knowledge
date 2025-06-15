@@ -288,7 +288,7 @@ type
 
   {$ENDREGION}
 
-  {$REGION 'Handlers – Status'}
+  {$REGION 'Handlers - Status'}
 
   TSHCreate = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
@@ -322,7 +322,7 @@ type
 
   {$ENDREGION}
 
-  {$REGION 'Handlers – Output/content'}
+  {$REGION 'Handlers - Output/content'}
 
   TSHOutputItemAdded = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
@@ -372,7 +372,7 @@ type
 
   {$ENDREGION}
 
-  {$REGION 'Handlers – Refusal'}
+  {$REGION 'Handlers - Refusal'}
 
   TSHRefusalDelta = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
@@ -388,7 +388,7 @@ type
 
   {$ENDREGION}
 
-  {$REGION 'Handlers – Functions'}
+  {$REGION 'Handlers - Functions'}
 
   TSHFunctionCallArgumentsDelta = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
@@ -404,7 +404,7 @@ type
 
   {$ENDREGION}
 
-  {$REGION 'Handlers – File search'}
+  {$REGION 'Handlers - File search'}
 
   TSHFileSearchCallInProgress = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
@@ -426,7 +426,7 @@ type
 
   {$ENDREGION}
 
-  {$REGION 'Handlers – Web search'}
+  {$REGION 'Handlers - Web search'}
 
   TSHWebSearchCallInProgress = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
@@ -448,7 +448,7 @@ type
 
   {$ENDREGION}
 
-  {$REGION 'Handlers – Reasoning part I'}
+  {$REGION 'Handlers - Reasoning part I'}
 
   TSHReasoningSummaryPartAdd = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
@@ -476,7 +476,7 @@ type
 
   {$ENDREGION}
 
-  {$REGION 'Handlers – Image generation'}
+  {$REGION 'Handlers - Image generation'}
 
   TSHImageGenerationCallCompleted = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
@@ -504,7 +504,7 @@ type
 
   {$ENDREGION}
 
-  {$REGION 'Handlers – Remote MCP'}
+  {$REGION 'Handlers - Remote MCP'}
 
   TSHMcpCallArgumentsDelta = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
@@ -556,7 +556,7 @@ type
 
   {$ENDREGION}
 
-  {$REGION 'Handlers – Queued'}
+  {$REGION 'Handlers - Queued'}
 
   TSHQueued = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
@@ -566,7 +566,7 @@ type
 
   {$ENDREGION}
 
-  {$REGION 'Handlers – Reasoning part II'}
+  {$REGION 'Handlers - Reasoning part II'}
 
   TSHReasoningDelta = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
@@ -594,7 +594,7 @@ type
 
   {$ENDREGION}
 
-  {$REGION 'Handlers – Error'}
+  {$REGION 'Handlers - Error'}
 
   TSHError = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
