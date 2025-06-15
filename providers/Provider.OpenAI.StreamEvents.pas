@@ -49,7 +49,10 @@ uses
   Manager.Utf8Mapping, Manager.Types;
 
 type
-  {--- List of events as of 05/15/2023 }
+
+  {$REGION 'Types and enumeration'}
+
+  {--- List of events as of 06/15/2023 }
   TStreamEventType = (
     created,
     in_progress,
@@ -77,6 +80,23 @@ type
     reasoning_summary_part_done,
     reasoning_summary_text_delta,
     reasoning_summary_text_done,
+    image_generation_call_completed,
+    image_generation_call_generating,
+    image_generation_call_in_progress,
+    image_generation_call_partial_image,
+    mcp_call_arguments_delta,
+    mcp_call_arguments_done,
+    mcp_call_completed,
+    mcp_call_failed,
+    mcp_call_in_progress,
+    mcp_list_tools_completed,
+    mcp_list_tools_failed,
+    mcp_list_tools_in_progress,
+    queued,
+    reasoning_delta,
+    reasoning_done,
+    reasoning_summary_delta,
+    reasoning_summary_done,
     error
   );
 
@@ -93,7 +113,7 @@ type
       'response.content_part.added',
       'response.content_part.done',
       'response.output_text.delta',
-      'response.output_text.annotation.added',
+      'response.output_text_annotation.added',
       'response.output_text.done',
       'response.refusal.delta',
       'response.refusal.done',
@@ -109,6 +129,23 @@ type
       'response.reasoning_summary_part.done',
       'response.reasoning_summary_text.delta',
       'response.reasoning_summary_text.done',
+      'response.image_generation_call.completed',
+      'response.image_generation_call.generating',
+      'response.image_generation_call.in_progress',
+      'response.image_generation_call.partial_image',
+      'response.mcp_call.arguments.delta',
+      'response.mcp_call.arguments.done',
+      'response.mcp_call.completed',
+      'response.mcp_call.failed',
+      'response.mcp_call.in_progress',
+      'response.mcp_list_tools.completed',
+      'response.mcp_list_tools.failed',
+      'response.mcp_list_tools.in_progress',
+      'response.queued',
+      'response.reasoning.delta',
+      'response.reasoning.done',
+      'response.reasoning_summary.delta',
+      'response.reasoning_summary.done',
       'error'
     );
   public
@@ -117,7 +154,9 @@ type
     class function AllNames: TArray<string>; static;
   end;
 
-  {--- Interfaces }
+  {$ENDREGION}
+
+  {$REGION 'Interfaces'}
 
   /// <summary>
   ///   Interface for processing specific streaming events emitted during OpenAI/GenAI
@@ -222,7 +261,9 @@ type
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  {--- Engine and Engine manager **********************************************}
+  {$ENDREGION}
+
+  {$REGION 'Execution engine'}
 
   TEventExecutionEngine = class
   private
@@ -245,45 +286,51 @@ type
     destructor Destroy; override;
   end;
 
-  {--- Events *****************************************************************}
+  {$ENDREGION}
 
-  TEHCreate = class(TInterfacedObject, IStreamEventHandler)
+  {$REGION 'Handlers – Status'}
+
+  TSHCreate = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHInProgress = class(TInterfacedObject, IStreamEventHandler)
+  TSHInProgress = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHCompleted = class(TInterfacedObject, IStreamEventHandler)
+  TSHCompleted = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHFailed = class(TInterfacedObject, IStreamEventHandler)
+  TSHFailed = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHIncomplete = class(TInterfacedObject, IStreamEventHandler)
+  TSHIncomplete = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHOutputItemAdded = class(TInterfacedObject, IStreamEventHandler)
+  {$ENDREGION}
+
+  {$REGION 'Handlers – Output/content'}
+
+  TSHOutputItemAdded = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHOutputItemDone = class(TInterfacedObject, IStreamEventHandler)
+  TSHOutputItemDone = class(TInterfacedObject, IStreamEventHandler)
   private
     procedure DisplayFileSearchQueries(const Chunk: TResponseStream);
     procedure DisplayFileSearchResults(const Chunk: TResponseStream);
@@ -293,125 +340,269 @@ type
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHContentPartAdded = class(TInterfacedObject, IStreamEventHandler)
+  TSHContentPartAdded = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHContentPartDone = class(TInterfacedObject, IStreamEventHandler)
+  TSHContentPartDone = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHOutputTextDelta = class(TInterfacedObject, IStreamEventHandler)
+  TSHOutputTextDelta = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHOutputTextAnnotationAdded = class(TInterfacedObject, IStreamEventHandler)
+  TSHOutputTextAnnotationAdded = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHOutputTextDone = class(TInterfacedObject, IStreamEventHandler)
+  TSHOutputTextDone = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHRefusalDelta = class(TInterfacedObject, IStreamEventHandler)
+  {$ENDREGION}
+
+  {$REGION 'Handlers – Refusal'}
+
+  TSHRefusalDelta = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHRefusalDone = class(TInterfacedObject, IStreamEventHandler)
+  TSHRefusalDone = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHFunctionCallArgumentsDelta = class(TInterfacedObject, IStreamEventHandler)
+  {$ENDREGION}
+
+  {$REGION 'Handlers – Functions'}
+
+  TSHFunctionCallArgumentsDelta = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHFunctionCallArgumentsDone = class(TInterfacedObject, IStreamEventHandler)
+  TSHFunctionCallArgumentsDone = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHFileSearchCallInProgress = class(TInterfacedObject, IStreamEventHandler)
+  {$ENDREGION}
+
+  {$REGION 'Handlers – File search'}
+
+  TSHFileSearchCallInProgress = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHFileSearchCallSearching = class(TInterfacedObject, IStreamEventHandler)
+  TSHFileSearchCallSearching = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHFileSearchCallCompleted = class(TInterfacedObject, IStreamEventHandler)
+  TSHFileSearchCallCompleted = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHWebSearchCallInProgress = class(TInterfacedObject, IStreamEventHandler)
+  {$ENDREGION}
+
+  {$REGION 'Handlers – Web search'}
+
+  TSHWebSearchCallInProgress = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHWebSearchCallSearching = class(TInterfacedObject, IStreamEventHandler)
+  TSHWebSearchCallSearching = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHWebSearchCallCompleted = class(TInterfacedObject, IStreamEventHandler)
+  TSHWebSearchCallCompleted = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHReasoningSummaryPartAdd = class(TInterfacedObject, IStreamEventHandler)
+  {$ENDREGION}
+
+  {$REGION 'Handlers – Reasoning part I'}
+
+  TSHReasoningSummaryPartAdd = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHReasoningSummaryPartDone = class(TInterfacedObject, IStreamEventHandler)
+  TSHReasoningSummaryPartDone = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHReasoningSummaryTextDelta = class(TInterfacedObject, IStreamEventHandler)
+  TSHReasoningSummaryTextDelta = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHReasoningSummaryTextDone = class(TInterfacedObject, IStreamEventHandler)
+  TSHReasoningSummaryTextDone = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TEHError = class(TInterfacedObject, IStreamEventHandler)
+  {$ENDREGION}
+
+  {$REGION 'Handlers – Image generation'}
+
+  TSHImageGenerationCallCompleted = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHImageGenerationCallGenerating = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHImageGenerationCallInProgress = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHImageGenerationCallPartialImage = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  {$ENDREGION}
+
+  {$REGION 'Handlers – Remote MCP'}
+
+  TSHMcpCallArgumentsDelta = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHMcpCallArgumentsDone = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHMcpCallCompleted = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHMcpCallFailed = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHMcpCallInProgress = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHMcpListToolsCompleted = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHMcpListToolsFailed = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHMcpListToolsInProgress = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  {$ENDREGION}
+
+  {$REGION 'Handlers – Queued'}
+
+  TSHQueued = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  {$ENDREGION}
+
+  {$REGION 'Handlers – Reasoning part II'}
+
+  TSHReasoningDelta = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHReasoningDone = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHReasoningSummaryDelta = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHReasoningSummaryDone = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  {$ENDREGION}
+
+  {$REGION 'Handlers – Error'}
+
+  TSHError = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream;var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
+
+  {$ENDREGION}
 
 implementation
 
@@ -454,10 +645,14 @@ begin
         Exit;
       end;
 
-  {--- Not finding a matching event should not, on its own, cause Result to become false.
-       It should only be set to false  when an error event is encountered. Otherwise, the
-       process would  automatically fail whenever  OpenAI introduced a  new event that we
-       haven’t yet handled. }
+      {$REGION 'Dev note'}
+       (*
+         Not finding a matching event should not, on its own, cause Result to become false.
+         It should only be set to false  when an error event is encountered. Otherwise, the
+         process would  automatically fail whenever  OpenAI introduced a  new event that we
+         haven’t yet handled.
+       *)
+       {$ENDREGION}
   Result := True;
 end;
 
@@ -466,14 +661,14 @@ begin
   FHandlers := FHandlers + [AHandler];
 end;
 
-{ TEHCreate }
+{ TSHCreate }
 
-function TEHCreate.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHCreate.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.created;
 end;
 
-function TEHCreate.Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+function TSHCreate.Handle(const Chunk: TResponseStream; var StreamBuffer: string;
   var ChunkDisplayedCount: Integer): Boolean;
 begin
   PersistentChat.CurrentPrompt.Id := Chunk.Response.Id;
@@ -481,27 +676,27 @@ begin
   Result := True;
 end;
 
-{ TEHError }
+{ TSHError }
 
-function TEHError.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHError.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.error;
 end;
 
-function TEHError.Handle(const Chunk: TResponseStream;var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+function TSHError.Handle(const Chunk: TResponseStream;var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   PersistentChat.CurrentPrompt.Response := StreamBuffer;
   Result := False;
 end;
 
-{ TEHOutputTextDelta }
+{ TSHOutputTextDelta }
 
-function TEHOutputTextDelta.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHOutputTextDelta.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.output_text_delta;
 end;
 
-function TEHOutputTextDelta.Handle(const Chunk: TResponseStream;
+function TSHOutputTextDelta.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
@@ -512,15 +707,15 @@ begin
   StreamBuffer := StreamBuffer + Delta;
 end;
 
-{ TEHReasoningSummaryTextDelta }
+{ TSHReasoningSummaryTextDelta }
 
-function TEHReasoningSummaryTextDelta.CanHandle(
+function TSHReasoningSummaryTextDelta.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.reasoning_summary_text_delta;
 end;
 
-function TEHReasoningSummaryTextDelta.Handle(const Chunk: TResponseStream;
+function TSHReasoningSummaryTextDelta.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
@@ -528,15 +723,15 @@ begin
   ReasoningDisplayer.DisplayStream(Chunk.Delta);
 end;
 
-{ TEHReasoningSummaryTextDone }
+{ TSHReasoningSummaryTextDone }
 
-function TEHReasoningSummaryTextDone.CanHandle(
+function TSHReasoningSummaryTextDone.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.reasoning_summary_text_done;
 end;
 
-function TEHReasoningSummaryTextDone.Handle(const Chunk: TResponseStream;
+function TSHReasoningSummaryTextDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
@@ -545,14 +740,14 @@ begin
     ReasoningDisplayer.DisplayStream('Empty reasoning item');
 end;
 
-{ TEHOutputTextDone }
+{ TSHOutputTextDone }
 
-function TEHOutputTextDone.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHOutputTextDone.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.output_text_done;
 end;
 
-function TEHOutputTextDone.Handle(const Chunk: TResponseStream;
+function TSHOutputTextDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
@@ -560,15 +755,15 @@ begin
     PersistentChat.CurrentPrompt.Response := Chunk.Text;
 end;
 
-{ TEHOutputTextAnnotationAdded }
+{ TSHOutputTextAnnotationAdded }
 
-function TEHOutputTextAnnotationAdded.CanHandle(
+function TSHOutputTextAnnotationAdded.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.output_text_annotation_added;
 end;
 
-function TEHOutputTextAnnotationAdded.Handle(const Chunk: TResponseStream;
+function TSHOutputTextAnnotationAdded.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
@@ -599,14 +794,14 @@ begin
     end;
 end;
 
-{ TEHOutputItemDone }
+{ TSHOutputItemDone }
 
-function TEHOutputItemDone.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHOutputItemDone.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.output_item_done;
 end;
 
-procedure TEHOutputItemDone.DisplayFileSearchQueries(
+procedure TSHOutputItemDone.DisplayFileSearchQueries(
   const Chunk: TResponseStream);
 begin
   if Length(Chunk.Item.Queries) > 0 then
@@ -621,7 +816,7 @@ begin
     end;
 end;
 
-procedure TEHOutputItemDone.DisplayFileSearchResults(
+procedure TSHOutputItemDone.DisplayFileSearchResults(
   const Chunk: TResponseStream);
 begin
   if Length(Chunk.Item.Results) > 0 then
@@ -640,7 +835,7 @@ begin
     end;
 end;
 
-function TEHOutputItemDone.Handle(const Chunk: TResponseStream;
+function TSHOutputItemDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
@@ -694,287 +889,536 @@ procedure TEventEngineManager.EventExecutionEngineInitialize;
 begin
   {--- NOTE: TEventEngineManager is a singleton }
   FEngine := TEventExecutionEngine.Create;
-  FEngine.RegisterHandler(TEHCreate.Create);
-  FEngine.RegisterHandler(TEHInProgress.Create);
-  FEngine.RegisterHandler(TEHCompleted.Create);
-  FEngine.RegisterHandler(TEHFailed.Create);
-  FEngine.RegisterHandler(TEHIncomplete.Create);
-  FEngine.RegisterHandler(TEHOutputItemAdded.Create);
-  FEngine.RegisterHandler(TEHOutputItemDone.Create);
-  FEngine.RegisterHandler(TEHContentPartAdded.Create);
-  FEngine.RegisterHandler(TEHContentPartDone.Create);
-  FEngine.RegisterHandler(TEHOutputTextDelta.Create);
-  FEngine.RegisterHandler(TEHOutputTextAnnotationAdded.Create);
-  FEngine.RegisterHandler(TEHOutputTextDone.Create);
-  FEngine.RegisterHandler(TEHRefusalDelta.Create);
-  FEngine.RegisterHandler(TEHRefusalDone.Create);
-  FEngine.RegisterHandler(TEHFunctionCallArgumentsDelta.Create);
-  FEngine.RegisterHandler(TEHFunctionCallArgumentsDone.Create);
-  FEngine.RegisterHandler(TEHFileSearchCallInProgress.Create);
-  FEngine.RegisterHandler(TEHFileSearchCallSearching.Create);
-  FEngine.RegisterHandler(TEHFileSearchCallCompleted.Create);
-  FEngine.RegisterHandler(TEHWebSearchCallInProgress.Create);
-  FEngine.RegisterHandler(TEHWebSearchCallSearching.Create);
-  FEngine.RegisterHandler(TEHWebSearchCallCompleted.Create);
-  FEngine.RegisterHandler(TEHReasoningSummaryPartAdd.Create);
-  FEngine.RegisterHandler(TEHReasoningSummaryPartDone.Create);
-  FEngine.RegisterHandler(TEHReasoningSummaryTextDelta.Create);
-  FEngine.RegisterHandler(TEHReasoningSummaryTextDone.Create);
-  FEngine.RegisterHandler(TEHError.Create);
+  FEngine.RegisterHandler(TSHCreate.Create);
+  FEngine.RegisterHandler(TSHInProgress.Create);
+  FEngine.RegisterHandler(TSHCompleted.Create);
+  FEngine.RegisterHandler(TSHFailed.Create);
+  FEngine.RegisterHandler(TSHIncomplete.Create);
+  FEngine.RegisterHandler(TSHOutputItemAdded.Create);
+  FEngine.RegisterHandler(TSHOutputItemDone.Create);
+  FEngine.RegisterHandler(TSHContentPartAdded.Create);
+  FEngine.RegisterHandler(TSHContentPartDone.Create);
+  FEngine.RegisterHandler(TSHOutputTextDelta.Create);
+  FEngine.RegisterHandler(TSHOutputTextAnnotationAdded.Create);
+  FEngine.RegisterHandler(TSHOutputTextDone.Create);
+  FEngine.RegisterHandler(TSHRefusalDelta.Create);
+  FEngine.RegisterHandler(TSHRefusalDone.Create);
+  FEngine.RegisterHandler(TSHFunctionCallArgumentsDelta.Create);
+  FEngine.RegisterHandler(TSHFunctionCallArgumentsDone.Create);
+  FEngine.RegisterHandler(TSHFileSearchCallInProgress.Create);
+  FEngine.RegisterHandler(TSHFileSearchCallSearching.Create);
+  FEngine.RegisterHandler(TSHFileSearchCallCompleted.Create);
+  FEngine.RegisterHandler(TSHWebSearchCallInProgress.Create);
+  FEngine.RegisterHandler(TSHWebSearchCallSearching.Create);
+  FEngine.RegisterHandler(TSHWebSearchCallCompleted.Create);
+  FEngine.RegisterHandler(TSHReasoningSummaryPartAdd.Create);
+  FEngine.RegisterHandler(TSHReasoningSummaryPartDone.Create);
+  FEngine.RegisterHandler(TSHReasoningSummaryTextDelta.Create);
+  FEngine.RegisterHandler(TSHReasoningSummaryTextDone.Create);
+  FEngine.RegisterHandler(TSHImageGenerationCallCompleted.Create);
+  FEngine.RegisterHandler(TSHImageGenerationCallGenerating.Create);
+  FEngine.RegisterHandler(TSHImageGenerationCallInProgress.Create);
+  FEngine.RegisterHandler(TSHImageGenerationCallPartialImage.Create);
+  FEngine.RegisterHandler(TSHMcpCallArgumentsDelta.Create);
+  FEngine.RegisterHandler(TSHMcpCallArgumentsDone.Create);
+  FEngine.RegisterHandler(TSHMcpCallCompleted.Create);
+  FEngine.RegisterHandler(TSHMcpCallFailed.Create);
+  FEngine.RegisterHandler(TSHMcpCallInProgress.Create);
+  FEngine.RegisterHandler(TSHMcpListToolsCompleted.Create);
+  FEngine.RegisterHandler(TSHMcpListToolsFailed.Create);
+  FEngine.RegisterHandler(TSHMcpListToolsInProgress.Create);
+  FEngine.RegisterHandler(TSHQueued.Create);
+  FEngine.RegisterHandler(TSHReasoningDelta.Create);
+  FEngine.RegisterHandler(TSHReasoningDone.Create);
+  FEngine.RegisterHandler(TSHReasoningSummaryDelta.Create);
+  FEngine.RegisterHandler(TSHReasoningSummaryDone.Create);
+  FEngine.RegisterHandler(TSHError.Create);
 end;
 
-{ TEHInProgress }
+{ TSHInProgress }
 
-function TEHInProgress.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHInProgress.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.in_progress;
 end;
 
-function TEHInProgress.Handle(const Chunk: TResponseStream;
+function TSHInProgress.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHCompleted }
+{ TSHCompleted }
 
-function TEHCompleted.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHCompleted.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.completed;
 end;
 
-function TEHCompleted.Handle(const Chunk: TResponseStream;
+function TSHCompleted.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHFailed }
+{ TSHFailed }
 
-function TEHFailed.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHFailed.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.failed;
 end;
 
-function TEHFailed.Handle(const Chunk: TResponseStream;
+function TSHFailed.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHIncomplete }
+{ TSHIncomplete }
 
-function TEHIncomplete.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHIncomplete.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.incomplete;
 end;
 
-function TEHIncomplete.Handle(const Chunk: TResponseStream;
+function TSHIncomplete.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHOutputItemAdded }
+{ TSHOutputItemAdded }
 
-function TEHOutputItemAdded.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHOutputItemAdded.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.output_item_added;
 end;
 
-function TEHOutputItemAdded.Handle(const Chunk: TResponseStream;
+function TSHOutputItemAdded.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHContentPartAdded }
+{ TSHContentPartAdded }
 
-function TEHContentPartAdded.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHContentPartAdded.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.content_part_added;
 end;
 
-function TEHContentPartAdded.Handle(const Chunk: TResponseStream;
+function TSHContentPartAdded.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHContentPartDone }
+{ TSHContentPartDone }
 
-function TEHContentPartDone.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHContentPartDone.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.content_part_done;
 end;
 
-function TEHContentPartDone.Handle(const Chunk: TResponseStream;
+function TSHContentPartDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHRefusalDelta }
+{ TSHRefusalDelta }
 
-function TEHRefusalDelta.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHRefusalDelta.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.refusal_delta;
 end;
 
-function TEHRefusalDelta.Handle(const Chunk: TResponseStream;
+function TSHRefusalDelta.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHRefusalDone }
+{ TSHefusalDone }
 
-function TEHRefusalDone.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHRefusalDone.CanHandle(EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.refusal_done;
 end;
 
-function TEHRefusalDone.Handle(const Chunk: TResponseStream;
+function TSHRefusalDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHFunctionCallArgumentsDelta }
+{ TSHFunctionCallArgumentsDelta }
 
-function TEHFunctionCallArgumentsDelta.CanHandle(
+function TSHFunctionCallArgumentsDelta.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.function_call_arguments_delta;
 end;
 
-function TEHFunctionCallArgumentsDelta.Handle(const Chunk: TResponseStream;
+function TSHFunctionCallArgumentsDelta.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHFunctionCallArgumentsDone }
+{ TSHFunctionCallArgumentsDone }
 
-function TEHFunctionCallArgumentsDone.CanHandle(
+function TSHFunctionCallArgumentsDone.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.function_call_arguments_done;
 end;
 
-function TEHFunctionCallArgumentsDone.Handle(const Chunk: TResponseStream;
+function TSHFunctionCallArgumentsDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHFileSearchCallInProgress }
+{ TSHFileSearchCallInProgress }
 
-function TEHFileSearchCallInProgress.CanHandle(
+function TSHFileSearchCallInProgress.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.file_search_call_in_progress;
 end;
 
-function TEHFileSearchCallInProgress.Handle(const Chunk: TResponseStream;
+function TSHFileSearchCallInProgress.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHFileSearchCallSearching }
+{ TSHFileSearchCallSearching }
 
-function TEHFileSearchCallSearching.CanHandle(
+function TSHFileSearchCallSearching.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.file_search_call_searching;
 end;
 
-function TEHFileSearchCallSearching.Handle(const Chunk: TResponseStream;
+function TSHFileSearchCallSearching.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHFileSearchCallCompleted }
+{ TSHFileSearchCallCompleted }
 
-function TEHFileSearchCallCompleted.CanHandle(
+function TSHFileSearchCallCompleted.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.file_search_call_completed;
 end;
 
-function TEHFileSearchCallCompleted.Handle(const Chunk: TResponseStream;
+function TSHFileSearchCallCompleted.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHWebSearchCallInProgress }
+{ TSHWebSearchCallInProgress }
 
-function TEHWebSearchCallInProgress.CanHandle(
+function TSHWebSearchCallInProgress.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.web_search_call_in_progress;
 end;
 
-function TEHWebSearchCallInProgress.Handle(const Chunk: TResponseStream;
+function TSHWebSearchCallInProgress.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHWebSearchCallSearching }
+{ TSHWebSearchCallSearching }
 
-function TEHWebSearchCallSearching.CanHandle(
+function TSHWebSearchCallSearching.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.web_search_call_searching;
 end;
 
-function TEHWebSearchCallSearching.Handle(const Chunk: TResponseStream;
+function TSHWebSearchCallSearching.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHWebSearchCallCompleted }
+{ TSHWebSearchCallCompleted }
 
-function TEHWebSearchCallCompleted.CanHandle(
+function TSHWebSearchCallCompleted.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.web_search_call_completed;
 end;
 
-function TEHWebSearchCallCompleted.Handle(const Chunk: TResponseStream;
+function TSHWebSearchCallCompleted.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHReasoningSummaryPartAdd }
+{ TSHReasoningSummaryPartAdd }
 
-function TEHReasoningSummaryPartAdd.CanHandle(
+function TSHReasoningSummaryPartAdd.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.reasoning_summary_part_add;
 end;
 
-function TEHReasoningSummaryPartAdd.Handle(const Chunk: TResponseStream;
+function TSHReasoningSummaryPartAdd.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
 end;
 
-{ TEHReasoningSummaryPartDone }
+{ TSHReasoningSummaryPartDone }
 
-function TEHReasoningSummaryPartDone.CanHandle(
+function TSHReasoningSummaryPartDone.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.reasoning_summary_part_done;
 end;
 
-function TEHReasoningSummaryPartDone.Handle(const Chunk: TResponseStream;
+function TSHReasoningSummaryPartDone.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHImageGenerationCallCompleted }
+
+function TSHImageGenerationCallCompleted.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.image_generation_call_completed;
+end;
+
+function TSHImageGenerationCallCompleted.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHImageGenerationCallGenerating }
+
+function TSHImageGenerationCallGenerating.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.image_generation_call_generating;
+end;
+
+function TSHImageGenerationCallGenerating.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHImageGenerationCallInProgress }
+
+function TSHImageGenerationCallInProgress.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.image_generation_call_in_progress;
+end;
+
+function TSHImageGenerationCallInProgress.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHImageGenerationCallPartialImage }
+
+function TSHImageGenerationCallPartialImage.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.image_generation_call_partial_image;
+end;
+
+function TSHImageGenerationCallPartialImage.Handle(
+  const Chunk: TResponseStream; var StreamBuffer: string;
+  var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHMcpCallArgumentsDelta }
+
+function TSHMcpCallArgumentsDelta.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.mcp_call_arguments_delta;
+end;
+
+function TSHMcpCallArgumentsDelta.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHMcpCallArgumentsDone }
+
+function TSHMcpCallArgumentsDone.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.mcp_call_arguments_done;
+end;
+
+function TSHMcpCallArgumentsDone.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHMcpCallCompleted }
+
+function TSHMcpCallCompleted.CanHandle(EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.mcp_call_completed;
+end;
+
+function TSHMcpCallCompleted.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHMcpCallFailed }
+
+function TSHMcpCallFailed.CanHandle(EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.mcp_call_failed;
+end;
+
+function TSHMcpCallFailed.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHMcpCallInProgress }
+
+function TSHMcpCallInProgress.CanHandle(EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.mcp_call_in_progress;
+end;
+
+function TSHMcpCallInProgress.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHMcpListToolsCompleted }
+
+function TSHMcpListToolsCompleted.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.mcp_list_tools_completed;
+end;
+
+function TSHMcpListToolsCompleted.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHMcpListToolsFailed }
+
+function TSHMcpListToolsFailed.CanHandle(EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.mcp_list_tools_failed;
+end;
+
+function TSHMcpListToolsFailed.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHMcpListToolsInProgress }
+
+function TSHMcpListToolsInProgress.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.mcp_list_tools_in_progress;
+end;
+
+function TSHMcpListToolsInProgress.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHQueued }
+
+function TSHQueued.CanHandle(EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.queued;
+end;
+
+function TSHQueued.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHReasoningDelta }
+
+function TSHReasoningDelta.CanHandle(EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.reasoning_delta;
+end;
+
+function TSHReasoningDelta.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHReasoningDone }
+
+function TSHReasoningDone.CanHandle(EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.reasoning_done;
+end;
+
+function TSHReasoningDone.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHReasoningSummaryDelta }
+
+function TSHReasoningSummaryDelta.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.reasoning_summary_delta;
+end;
+
+function TSHReasoningSummaryDelta.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+end;
+
+{ TSHReasoningSummaryDone }
+
+function TSHReasoningSummaryDone.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.reasoning_summary_done;
+end;
+
+function TSHReasoningSummaryDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
