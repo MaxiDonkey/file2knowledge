@@ -15,14 +15,8 @@ To review the latest changes, please refer to the [changelog](https://github.com
 
 ## Introduction
 
-> **Built with Delphi 12 Community Edition**  
-> You can compile and test this app **free of charge (no purchase, no lock-in)**  
-> as long as you meet the Delphi CE licence terms  
-> *(≤ USD 5 000 annual revenue or funding, up to five developers, renewable yearly).*  
-> See the full [Delphi CE FAQ](https://www.embarcadero.com/products/delphi/starter/faq).
->
-> *Delphi* and the Delphi logo are trademarks of Embarcadero Technologies.  
-> Their mention here is purely descriptive and does **not** imply endorsement.
+> **Built with Delphi 12 Community Edition (v12.1 Patch 1)**  
+>You can compile and test it free of charge with Delphi CE; any recent commercial Delphi edition works as well.
 
 File2knowledge was designed to provide a concrete implementation of the OpenAI API’s `v1/responses endpoint` (necessary for the agentic approach).
 Its main goal: to demonstrate how to leverage advanced file search (file_search) features and the use of vector stores to enhance the semantic processing of documents.
