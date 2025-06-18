@@ -113,7 +113,7 @@ type
       'response.content_part.added',
       'response.content_part.done',
       'response.output_text.delta',
-      'response.output_text_annotation.added',
+      'response.output_text.annotation.added',
       'response.output_text.done',
       'response.refusal.delta',
       'response.refusal.done',
@@ -854,12 +854,14 @@ begin
   if Chunk.Item.Id.ToLower.StartsWith('fs_') then
     begin
       PersistentChat.CurrentPrompt.JsonFileSearch := Chunk.JSONResponse;
+      Selector.ShowPage(psFileSearch);
       DisplayFileSearchQueries(Chunk);
       DisplayFileSearchResults(Chunk);
     end
   else
   if Chunk.Item.Id.ToLower.StartsWith('ws_') then
     begin
+      Selector.ShowPage(psWebSearch);
       PersistentChat.CurrentPrompt.JsonWebSearch := Chunk.JSONResponse;
     end;
 end;
