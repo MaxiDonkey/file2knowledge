@@ -1,3 +1,6 @@
+#### 2025, August 2 version 1.0.5
+- Data update including DelphiMistralAI version 1.3.0
+
 #### 2025, June 14 version 1.0.4
 - Integrate GenAI v1.1.0 and optimize unit methods in the `Providers` directory.
 - Manager.Async.Promise replaced by GenAI.Async.Promise from GenAI wrapper.
