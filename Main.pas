@@ -130,6 +130,9 @@ type
     Panel26: TPanel;
     SpeedButton11: TSpeedButton;
     Label32: TLabel;
+    Label33: TLabel;
+    Label34: TLabel;
+    ComboBox9: TComboBox;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -304,6 +307,7 @@ begin
         .SetTimeOut(Combobox8)
         .SetCountry(MaskEdit8)
         .SetCity(MaskEdit9)
+        .SetVerbosity(ComboBox9)
         .SetClearResponseButton(SpeedButton11)
         .SetDashBoardLabel(Label32);
       Result := TSettingsVCL.Create(Introducer);

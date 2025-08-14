@@ -5,7 +5,7 @@ object Form1: TForm1
   AlphaBlendValue = 0
   Caption = 'Wrapper Assistant'
   ClientHeight = 691
-  ClientWidth = 1164
+  ClientWidth = 1159
   Color = clWindow
   Ctl3D = False
   DoubleBuffered = True
@@ -23,7 +23,7 @@ object Form1: TForm1
   object Panel9: TPanel
     Left = 0
     Top = 0
-    Width = 1164
+    Width = 1159
     Height = 662
     Align = alClient
     BevelOuter = bvNone
@@ -126,7 +126,7 @@ object Form1: TForm1
     object Panel1: TPanel
       Left = 350
       Top = 0
-      Width = 464
+      Width = 459
       Height = 662
       Align = alClient
       BevelOuter = bvNone
@@ -139,7 +139,7 @@ object Form1: TForm1
       object Panel3: TPanel
         Left = 0
         Top = 538
-        Width = 464
+        Width = 459
         Height = 124
         Align = alBottom
         BevelOuter = bvNone
@@ -150,7 +150,7 @@ object Form1: TForm1
         object Panel12: TPanel
           Left = 49
           Top = 0
-          Width = 415
+          Width = 410
           Height = 124
           Align = alClient
           BevelOuter = bvNone
@@ -293,7 +293,7 @@ object Form1: TForm1
       object Panel5: TPanel
         Left = 0
         Top = 0
-        Width = 464
+        Width = 459
         Height = 50
         Align = alTop
         BevelOuter = bvNone
@@ -302,7 +302,7 @@ object Form1: TForm1
         object Panel23: TPanel
           Left = 87
           Top = 0
-          Width = 377
+          Width = 372
           Height = 50
           Align = alClient
           BevelOuter = bvNone
@@ -373,7 +373,7 @@ object Form1: TForm1
       object Panel14: TPanel
         Left = 0
         Top = 50
-        Width = 464
+        Width = 459
         Height = 488
         Align = alClient
         BevelOuter = bvNone
@@ -393,7 +393,7 @@ object Form1: TForm1
         object Panel16: TPanel
           Left = 49
           Top = 0
-          Width = 415
+          Width = 410
           Height = 488
           Align = alClient
           BevelOuter = bvNone
@@ -403,7 +403,7 @@ object Form1: TForm1
           object EdgeBrowser1: TEdgeBrowser
             Left = 0
             Top = 0
-            Width = 505
+            Width = 361
             Height = 488
             Align = alLeft
             TabOrder = 0
@@ -415,7 +415,7 @@ object Form1: TForm1
       end
     end
     object Panel4: TPanel
-      Left = 814
+      Left = 809
       Top = 0
       Width = 350
       Height = 662
@@ -920,7 +920,6 @@ object Form1: TForm1
             Width = 342
             Height = 478
             HorzScrollBar.Visible = False
-            VertScrollBar.Position = 412
             Align = alClient
             BevelInner = bvNone
             BevelOuter = bvNone
@@ -929,23 +928,24 @@ object Form1: TForm1
             ParentColor = False
             TabOrder = 0
             StyleElements = [seFont, seBorder]
+            ExplicitLeft = 2
             object Label5: TLabel
               Left = 8
-              Top = -404
+              Top = 8
               Width = 120
               Height = 20
               Caption = 'Delphi Proficiency'
             end
             object Label6: TLabel
               Left = 8
-              Top = -328
+              Top = 84
               Width = 105
               Height = 20
               Caption = 'Preferred Name'
             end
             object Label7: TLabel
               Left = 8
-              Top = -375
+              Top = 37
               Width = 313
               Height = 20
               Alignment = taRightJustify
@@ -963,14 +963,14 @@ object Form1: TForm1
             end
             object Label8: TLabel
               Left = 8
-              Top = -288
+              Top = 124
               Width = 78
               Height = 20
               Caption = 'OpenAI Key'
             end
             object Label9: TLabel
               Left = 24
-              Top = -154
+              Top = 258
               Width = 91
               Height = 20
               Hint = 'Models that support both the file_search and web_search tools.'
@@ -980,7 +980,7 @@ object Form1: TForm1
             end
             object Label10: TLabel
               Left = 24
-              Top = -29
+              Top = 383
               Width = 93
               Height = 20
               Hint = 'Models that support both the file_search and web_search tools.'
@@ -990,7 +990,7 @@ object Form1: TForm1
             end
             object Label11: TLabel
               Left = 8
-              Top = -187
+              Top = 225
               Width = 318
               Height = 20
               AutoSize = False
@@ -1007,7 +1007,7 @@ object Form1: TForm1
             end
             object Label12: TLabel
               Left = 8
-              Top = -67
+              Top = 345
               Width = 313
               Height = 20
               AutoSize = False
@@ -1024,7 +1024,7 @@ object Form1: TForm1
             end
             object Label21: TLabel
               Left = 24
-              Top = 11
+              Top = 423
               Width = 37
               Height = 20
               Caption = 'Effort'
@@ -1033,7 +1033,7 @@ object Form1: TForm1
             end
             object Label22: TLabel
               Left = 24
-              Top = 51
+              Top = 463
               Width = 62
               Height = 20
               Caption = 'Summary'
@@ -1042,7 +1042,7 @@ object Form1: TForm1
             end
             object Label23: TLabel
               Left = 24
-              Top = 161
+              Top = 573
               Width = 80
               Height = 20
               Caption = 'Context size'
@@ -1051,7 +1051,7 @@ object Form1: TForm1
             end
             object Label24: TLabel
               Left = 8
-              Top = -92
+              Top = 320
               Width = 93
               Height = 25
               Hint = 'Models that support both the file_search and web_search tools.'
@@ -1067,7 +1067,7 @@ object Form1: TForm1
             end
             object Label25: TLabel
               Left = 8
-              Top = -212
+              Top = 200
               Width = 303
               Height = 25
               Caption = 'Flagship && Cost-optimized models'
@@ -1082,7 +1082,7 @@ object Form1: TForm1
             end
             object Label26: TLabel
               Left = 8
-              Top = 118
+              Top = 530
               Width = 101
               Height = 25
               Caption = 'Web search'
@@ -1097,7 +1097,7 @@ object Form1: TForm1
             end
             object Label27: TLabel
               Left = 24
-              Top = 200
+              Top = 612
               Width = 51
               Height = 20
               Caption = 'Country'
@@ -1106,7 +1106,7 @@ object Form1: TForm1
             end
             object Label28: TLabel
               Left = 24
-              Top = 240
+              Top = 652
               Width = 25
               Height = 20
               Caption = 'City'
@@ -1115,7 +1115,7 @@ object Form1: TForm1
             end
             object Label29: TLabel
               Left = 8
-              Top = 308
+              Top = 825
               Width = 74
               Height = 25
               Caption = 'Timeout'
@@ -1130,7 +1130,7 @@ object Form1: TForm1
             end
             object Label30: TLabel
               Left = 24
-              Top = 351
+              Top = 872
               Width = 63
               Height = 20
               Caption = 'Response'
@@ -1139,7 +1139,7 @@ object Form1: TForm1
             end
             object Label31: TLabel
               Left = 8
-              Top = 440
+              Top = 961
               Width = 305
               Height = 65
               Alignment = taCenter
@@ -1163,14 +1163,14 @@ object Form1: TForm1
             end
             object SpeedButton11: TSpeedButton
               Left = 169
-              Top = 409
+              Top = 930
               Width = 145
               Height = 25
               Caption = 'Clear Response Id'
             end
             object Label32: TLabel
               Left = 24
-              Top = 412
+              Top = 933
               Width = 127
               Height = 20
               Cursor = crHandPoint
@@ -1183,9 +1183,33 @@ object Form1: TForm1
               ParentFont = False
               StyleElements = [seClient, seBorder]
             end
+            object Label33: TLabel
+              Left = 8
+              Top = 719
+              Width = 124
+              Height = 25
+              Caption = 'Gpt-5 options'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -19
+              Font.Name = 'Segoe UI'
+              Font.Style = [fsBold]
+              ParentFont = False
+              ParentShowHint = False
+              ShowHint = True
+            end
+            object Label34: TLabel
+              Left = 32
+              Top = 762
+              Width = 61
+              Height = 20
+              Caption = 'Verbosity'
+              ParentShowHint = False
+              ShowHint = True
+            end
             object ComboBox2: TComboBox
               Left = 148
-              Top = -408
+              Top = 4
               Width = 173
               Height = 30
               Style = csOwnerDrawFixed
@@ -1210,7 +1234,7 @@ object Form1: TForm1
             end
             object MaskEdit1: TMaskEdit
               Left = 148
-              Top = -330
+              Top = 82
               Width = 173
               Height = 26
               TabOrder = 1
@@ -1219,7 +1243,7 @@ object Form1: TForm1
             end
             object MaskEdit2: TMaskEdit
               Left = 148
-              Top = -290
+              Top = 122
               Width = 173
               Height = 26
               TabOrder = 2
@@ -1228,7 +1252,7 @@ object Form1: TForm1
             end
             object ComboBox3: TComboBox
               Left = 148
-              Top = -157
+              Top = 255
               Width = 173
               Height = 28
               Hint = 'Models that support both the file_search and web_search tools.'
@@ -1247,7 +1271,7 @@ object Form1: TForm1
             end
             object ComboBox4: TComboBox
               Left = 148
-              Top = -32
+              Top = 380
               Width = 173
               Height = 28
               Hint = 'Models that support both the file_search and web_search tools.'
@@ -1266,7 +1290,7 @@ object Form1: TForm1
             end
             object ComboBox5: TComboBox
               Left = 148
-              Top = 8
+              Top = 420
               Width = 173
               Height = 28
               Hint = 'Models that support both the file_search and web_search tools.'
@@ -1285,7 +1309,7 @@ object Form1: TForm1
             end
             object ComboBox6: TComboBox
               Left = 149
-              Top = 48
+              Top = 460
               Width = 173
               Height = 28
               Hint = 'Models that support both the file_search and web_search tools.'
@@ -1304,7 +1328,7 @@ object Form1: TForm1
             end
             object ComboBox7: TComboBox
               Left = 149
-              Top = 158
+              Top = 570
               Width = 173
               Height = 28
               Hint = 'Models that support both the file_search and web_search tools.'
@@ -1323,7 +1347,7 @@ object Form1: TForm1
             end
             object MaskEdit8: TMaskEdit
               Left = 148
-              Top = 198
+              Top = 610
               Width = 173
               Height = 26
               TabOrder = 8
@@ -1332,7 +1356,7 @@ object Form1: TForm1
             end
             object MaskEdit9: TMaskEdit
               Left = 148
-              Top = 238
+              Top = 650
               Width = 173
               Height = 26
               TabOrder = 9
@@ -1341,7 +1365,7 @@ object Form1: TForm1
             end
             object ComboBox8: TComboBox
               Left = 149
-              Top = 348
+              Top = 869
               Width = 173
               Height = 28
               Hint = 'Models that support both the file_search and web_search tools.'
@@ -1357,6 +1381,25 @@ object Form1: TForm1
               ParentShowHint = False
               ShowHint = True
               TabOrder = 10
+            end
+            object ComboBox9: TComboBox
+              Left = 149
+              Top = 759
+              Width = 173
+              Height = 28
+              Hint = 'Models that support both the file_search and web_search tools.'
+              Style = csOwnerDrawFixed
+              DropDownCount = 5
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clYellow
+              Font.Height = -15
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              ItemHeight = 22
+              ParentFont = False
+              ParentShowHint = False
+              ShowHint = True
+              TabOrder = 11
             end
           end
         end
@@ -1511,7 +1554,7 @@ object Form1: TForm1
   object Panel10: TPanel
     Left = 0
     Top = 662
-    Width = 1164
+    Width = 1159
     Height = 29
     Align = alBottom
     BevelOuter = bvNone
@@ -1520,14 +1563,14 @@ object Form1: TForm1
     TabOrder = 1
     StyleElements = [seFont, seBorder]
     DesignSize = (
-      1164
+      1159
       29)
     object Label1: TLabel
       Left = 13
       Top = 6
       Width = 179
       Height = 20
-      Caption = 'v1.0.0 '#721' @2025 Maxidonkey'
+      Caption = 'v1.0.6 '#721' @2025 Maxidonkey'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = 10724259
       Font.Height = -15
@@ -1537,7 +1580,7 @@ object Form1: TForm1
       StyleElements = [seClient, seBorder]
     end
     object Label2: TLabel
-      Left = 1054
+      Left = 1049
       Top = 6
       Width = 98
       Height = 20
@@ -1556,7 +1599,7 @@ object Form1: TForm1
       ExplicitLeft = 1082
     end
     object Label3: TLabel
-      Left = 1032
+      Left = 1027
       Top = 9
       Width = 15
       Height = 15
