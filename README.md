@@ -13,7 +13,7 @@ Clone & run: the app acts as a tutor for exploring my AI wrappers through the `f
 To review the latest changes, please refer to the [changelog](https://github.com/MaxiDonkey/file2knowledge/blob/main/Changelog.md).
 
 >[!IMPORTANT]
-> To perform the update, install [DelphiGenAI](https://github.com/MaxiDonkey/DelphiGenAI) version 1.1.0 and then recompile the project.
+> To perform the update, install [DelphiGenAI](https://github.com/MaxiDonkey/DelphiGenAI) version 1.2.1 and then recompile the project.
 
 <br>
 
