@@ -67,6 +67,7 @@ type
     FTimeOut: string;
     FCountry: string;
     FCity: string;
+    FVerbosity: string;
     class var FInstance: TSettings;
   public
     property Proficiency: string read FProficiency write FProficiency;
@@ -80,6 +81,7 @@ type
     property TimeOut: string read FTimeOut write FTimeOut;
     property Country: string read FCountry write FCountry;
     property City: string read FCity write FCity;
+    property Verbosity: string read FVerbosity write FVerbosity;
     class function Instance: TSettings; static;
     class function Reload(const FileName: string = ''): TSettings; static;
     class destructor Destroy;
@@ -110,6 +112,7 @@ type
     class function TimeOut: string; static; inline;
     class function Country: string; static; inline;
     class function City: string; static; inline;
+    class function Verbosity: string; static; inline;
   end;
 
   /// <summary>
@@ -264,6 +267,11 @@ end;
 class function TSettingsProp.TimeOut: string;
 begin
   Result := 'timeOut';
+end;
+
+class function TSettingsProp.Verbosity: string;
+begin
+  Result := 'verbosity';
 end;
 
 class function TSettingsProp.WebContextSize: string;

@@ -48,7 +48,9 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.JSON,
   Winapi.WebView2, Winapi.ActiveX, Vcl.Edge, System.IOUtils,
-  Manager.Intf, Manager.IoC, Helper.WebView2.VCL, VCL.Clipbrd;
+  Manager.Intf, Manager.IoC, Helper.WebView2.VCL, VCL.Clipbrd,
+
+  System.Net.HttpClient, System.Net.HttpClientComponent, System.NetEncoding;
 
 type
   TCopyActionType = procedure (Lang, Code: string) of object;

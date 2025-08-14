@@ -122,6 +122,7 @@ type
     function GetDisplayTemplate: string;
     function GetReasoningTemplate: string;
     function GetPromptTemplate: string;
+    function GetAudioHtml: string;
 
     /// <summary>
     /// Enables automatic reloading of template files from the specified directory on each access.
@@ -177,6 +178,8 @@ type
     /// The content of the prompt JavaScript template.
     /// </returns>
     property PromptTemplate: string read GetPromptTemplate;
+
+    property AudioHtml: string read GetAudioHtml;
   end;
 
   /// <summary>
@@ -1149,6 +1152,8 @@ type
     /// The city value from user settings.
     /// </returns>
     function City: string;
+
+    function Verbosity: string;
 
     /// <summary>
     /// Indicates if a summary is to be used for the current user configuration.

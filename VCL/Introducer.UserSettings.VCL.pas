@@ -50,6 +50,7 @@ type
     TimeOut: TComboBox;
     Country: TMaskEdit;
     City: TMaskEdit;
+    Verbosity: TComboBox;
     ClearResponseButton: TSpeedButton;
     DashBoardLabel: TLabel;
     class function Empty: TSettingsIntroducer; static;
@@ -71,6 +72,7 @@ type
     function SetTimeOut(Value: TComboBox): TSettingsIntroducer; inline;
     function SetCountry(Value: TMaskEdit): TSettingsIntroducer; inline;
     function SetCity(Value: TMaskEdit): TSettingsIntroducer; inline;
+    function SetVerbosity(Value: TComboBox): TSettingsIntroducer; inline;
     function SetClearResponseButton(Value: TSpeedButton): TSettingsIntroducer; inline;
     function SetDashBoardLabel(Value: TLabel): TSettingsIntroducer; inline;
   end;
@@ -195,6 +197,13 @@ function TSettingsIntroducerHelper.SetTimeOut(
   Value: TComboBox): TSettingsIntroducer;
 begin
   Self.TimeOut := Value;
+  Result := Self;
+end;
+
+function TSettingsIntroducerHelper.SetVerbosity(
+  Value: TComboBox): TSettingsIntroducer;
+begin
+  Self.Verbosity := Value;
   Result := Self;
 end;
 

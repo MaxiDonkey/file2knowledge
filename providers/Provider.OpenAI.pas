@@ -75,6 +75,7 @@ type
     function HandleThenSilently(Value: TResponse): string;
     function HandleThenDeleteResponse(Value: TResponseDelete): string;
     function HandleThenDeleteFile(Value: TDeletion): string;
+
   protected
     /// <summary>
     /// Deletes a response from the OpenAI backend.
@@ -141,6 +142,7 @@ type
     /// or is rejected if an error occurs.
     /// </returns>
     function DeleteVectorStoreFile(const VectorStoreId, FileId: string): TPromise<string>;
+
   public
     /// <summary>
     /// Executes a prompt using the default (streamed) execution engine.

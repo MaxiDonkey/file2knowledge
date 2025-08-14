@@ -64,7 +64,6 @@ type
     content_part_added,
     content_part_done,
     output_text_delta,
-    output_text_annotation_added,
     output_text_done,
     refusal_delta,
     refusal_done,
@@ -76,10 +75,12 @@ type
     web_search_call_in_progress,
     web_search_call_searching,
     web_search_call_completed,
-    reasoning_summary_part_add,
+    reasoning_summary_part_added,
     reasoning_summary_part_done,
     reasoning_summary_text_delta,
     reasoning_summary_text_done,
+    reasoning_text_delta,
+    reasoning_text_done,
     image_generation_call_completed,
     image_generation_call_generating,
     image_generation_call_in_progress,
@@ -92,11 +93,15 @@ type
     mcp_list_tools_completed,
     mcp_list_tools_failed,
     mcp_list_tools_in_progress,
+    code_interpreter_call_in_progress,
+    code_interpreter_call_interpreting,
+    code_interpreter_call_completed,
+    code_interpreter_call_code_delta,
+    code_interpreter_call_code_done,
+    output_text_annotation_added,
     queued,
-    reasoning_delta,
-    reasoning_done,
-    reasoning_summary_delta,
-    reasoning_summary_done,
+    custom_tool_call_input_delta,
+    custom_tool_call_input_done,
     error
   );
 
@@ -113,7 +118,6 @@ type
       'response.content_part.added',
       'response.content_part.done',
       'response.output_text.delta',
-      'response.output_text.annotation.added',
       'response.output_text.done',
       'response.refusal.delta',
       'response.refusal.done',
@@ -129,23 +133,29 @@ type
       'response.reasoning_summary_part.done',
       'response.reasoning_summary_text.delta',
       'response.reasoning_summary_text.done',
+      'response.reasoning_text.delta',
+      'response.reasoning_text.done',
       'response.image_generation_call.completed',
       'response.image_generation_call.generating',
       'response.image_generation_call.in_progress',
       'response.image_generation_call.partial_image',
-      'response.mcp_call.arguments.delta',
-      'response.mcp_call.arguments.done',
+      'response.mcp_call_arguments.delta',
+      'response.mcp_call_arguments.done',
       'response.mcp_call.completed',
       'response.mcp_call.failed',
       'response.mcp_call.in_progress',
       'response.mcp_list_tools.completed',
       'response.mcp_list_tools.failed',
       'response.mcp_list_tools.in_progress',
+      'response.code_interpreter_call.in_progress',
+      'response.code_interpreter_call.interpreting',
+      'response.code_interpreter_call.completed',
+      'response.code_interpreter_call_code.delta',
+      'response.code_interpreter_call_code.done',
+      'response.output_text.annotation.added',
       'response.queued',
-      'response.reasoning.delta',
-      'response.reasoning.done',
-      'response.reasoning_summary.delta',
-      'response.reasoning_summary.done',
+      'response.custom_tool_call_input.delta',
+      'response.custom_tool_call_input.done',
       'error'
     );
   public
@@ -334,6 +344,7 @@ type
   private
     procedure DisplayFileSearchQueries(const Chunk: TResponseStream);
     procedure DisplayFileSearchResults(const Chunk: TResponseStream);
+    procedure DisplayWebSearchAction(const Chunk: TResponseStream);
   public
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
@@ -353,12 +364,6 @@ type
   end;
 
   TSHOutputTextDelta = class(TInterfacedObject, IStreamEventHandler)
-    function CanHandle(EventType: TStreamEventType): Boolean;
-    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
-      var ChunkDisplayedCount: Integer): Boolean;
-  end;
-
-  TSHOutputTextAnnotationAdded = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
@@ -450,7 +455,7 @@ type
 
   {$REGION 'Handlers - Reasoning part I'}
 
-  TSHReasoningSummaryPartAdd = class(TInterfacedObject, IStreamEventHandler)
+  TSHReasoningSummaryPartAdded = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
@@ -469,6 +474,18 @@ type
   end;
 
   TSHReasoningSummaryTextDone = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHReasoningTextDelta = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHReasoningTextDone = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
@@ -556,6 +573,40 @@ type
 
   {$ENDREGION}
 
+  {$REGION 'Handlers - Code Interpreter'}
+
+  TSHCodeInterpreterCallInProgress = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHCodeInterpreterCallInterpreting = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHCodeInterpreterCallCompleted = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHCodeInterpreterCallCodeDelta = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  TSHCodeInterpreterCallCodeDone = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
+  {$ENDREGION}
+
   {$REGION 'Handlers - Queued'}
 
   TSHQueued = class(TInterfacedObject, IStreamEventHandler)
@@ -564,29 +615,25 @@ type
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
+  {$REGION 'Handlers - Annotations'}
+
+  TSHOutputTextAnnotationAddeded = class(TInterfacedObject, IStreamEventHandler)
+    function CanHandle(EventType: TStreamEventType): Boolean;
+    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
+      var ChunkDisplayedCount: Integer): Boolean;
+  end;
+
   {$ENDREGION}
 
-  {$REGION 'Handlers - Reasoning part II'}
+  {$REGION 'Handlers - Custom tool'}
 
-  TSHReasoningDelta = class(TInterfacedObject, IStreamEventHandler)
+  TSHCustomToolCallInputDelta = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
-  TSHReasoningDone = class(TInterfacedObject, IStreamEventHandler)
-    function CanHandle(EventType: TStreamEventType): Boolean;
-    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
-      var ChunkDisplayedCount: Integer): Boolean;
-  end;
-
-  TSHReasoningSummaryDelta = class(TInterfacedObject, IStreamEventHandler)
-    function CanHandle(EventType: TStreamEventType): Boolean;
-    function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
-      var ChunkDisplayedCount: Integer): Boolean;
-  end;
-
-  TSHReasoningSummaryDone = class(TInterfacedObject, IStreamEventHandler)
+  TSHCustomToolCallInputDone = class(TInterfacedObject, IStreamEventHandler)
     function CanHandle(EventType: TStreamEventType): Boolean;
     function Handle(const Chunk: TResponseStream; var StreamBuffer: string;
       var ChunkDisplayedCount: Integer): Boolean;
@@ -671,9 +718,9 @@ end;
 function TSHCreate.Handle(const Chunk: TResponseStream; var StreamBuffer: string;
   var ChunkDisplayedCount: Integer): Boolean;
 begin
+  Result := True;
   PersistentChat.CurrentPrompt.Id := Chunk.Response.Id;
   ResponseTracking.Add(Chunk.Response.Id);
-  Result := True;
 end;
 
 { TSHError }
@@ -755,15 +802,15 @@ begin
     PersistentChat.CurrentPrompt.Response := Chunk.Text;
 end;
 
-{ TSHOutputTextAnnotationAdded }
+{ TSHOutputTextAnnotationAddeded }
 
-function TSHOutputTextAnnotationAdded.CanHandle(
+function TSHOutputTextAnnotationAddeded.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
   Result := EventType = TStreamEventType.output_text_annotation_added;
 end;
 
-function TSHOutputTextAnnotationAdded.Handle(const Chunk: TResponseStream;
+function TSHOutputTextAnnotationAddeded.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
@@ -772,7 +819,7 @@ begin
       Selector.ShowPage(psWebSearch);
       WebSearchDisplayer.Display(#10'Annotation: ');
       WebSearchDisplayer.Display(
-        Format('%s '#10'Indexes = [ start( %d ); end( %d ) ]'#10'Url: %s'#10, [
+        Format(' • %s '#10'Indexes = [ start( %d ); end( %d ) ]'#10'Url: %s'#10, [
           Chunk.Annotation.Title,
           Chunk.Annotation.StartIndex,
           Chunk.Annotation.EndIndex,
@@ -785,7 +832,7 @@ begin
       Selector.ShowPage(psFileSearch);
       FileSearchDisplayer.Display(#10'Annotation: ');
       FileSearchDisplayer.Display(
-        Format('%s [index %d]'#10'%s'#10, [
+        Format(' • %s [index %d]'#10'%s'#10, [
           Chunk.Annotation.Filename,
           Chunk.Annotation.Index,
           Chunk.Annotation.FileId
@@ -825,7 +872,7 @@ begin
       for var Item in Chunk.Item.Results do
         begin
           FileSearchDisplayer.Display(
-            Format('%s'#10'%s [score: %s]'#10, [
+            Format('%s'#10' • %s [score: %s]'#10, [
               Item.FileId,
               Item.Filename,
               Item.Score.ToString(ffNumber,3,3)
@@ -835,11 +882,20 @@ begin
     end;
 end;
 
+procedure TSHOutputItemDone.DisplayWebSearchAction(
+  const Chunk: TResponseStream);
+begin
+  if Assigned(Chunk.Item.Action) and
+     not Chunk.Item.Action.Query.IsEmpty then
+    begin
+      WebSearchDisplayer.Display(' • ' + Chunk.Item.Action.Query + #10);
+    end;
+end;
+
 function TSHOutputItemDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
-
   if Chunk.Item.Id.ToLower.StartsWith('msg_') then
     begin
       if PersistentChat.CurrentPrompt.JsonResponse.Trim.IsEmpty then
@@ -863,6 +919,7 @@ begin
     begin
       Selector.ShowPage(psWebSearch);
       PersistentChat.CurrentPrompt.JsonWebSearch := Chunk.JSONResponse;
+      DisplayWebSearchAction(Chunk);
     end;
 end;
 
@@ -901,7 +958,7 @@ begin
   FEngine.RegisterHandler(TSHContentPartAdded.Create);
   FEngine.RegisterHandler(TSHContentPartDone.Create);
   FEngine.RegisterHandler(TSHOutputTextDelta.Create);
-  FEngine.RegisterHandler(TSHOutputTextAnnotationAdded.Create);
+  FEngine.RegisterHandler(TSHOutputTextAnnotationAddeded.Create);
   FEngine.RegisterHandler(TSHOutputTextDone.Create);
   FEngine.RegisterHandler(TSHRefusalDelta.Create);
   FEngine.RegisterHandler(TSHRefusalDone.Create);
@@ -913,10 +970,12 @@ begin
   FEngine.RegisterHandler(TSHWebSearchCallInProgress.Create);
   FEngine.RegisterHandler(TSHWebSearchCallSearching.Create);
   FEngine.RegisterHandler(TSHWebSearchCallCompleted.Create);
-  FEngine.RegisterHandler(TSHReasoningSummaryPartAdd.Create);
+  FEngine.RegisterHandler(TSHReasoningSummaryPartAdded.Create);
   FEngine.RegisterHandler(TSHReasoningSummaryPartDone.Create);
   FEngine.RegisterHandler(TSHReasoningSummaryTextDelta.Create);
   FEngine.RegisterHandler(TSHReasoningSummaryTextDone.Create);
+  FEngine.RegisterHandler(TSHReasoningTextDelta.Create);
+  FEngine.RegisterHandler(TSHReasoningTextDone.Create);
   FEngine.RegisterHandler(TSHImageGenerationCallCompleted.Create);
   FEngine.RegisterHandler(TSHImageGenerationCallGenerating.Create);
   FEngine.RegisterHandler(TSHImageGenerationCallInProgress.Create);
@@ -929,11 +988,14 @@ begin
   FEngine.RegisterHandler(TSHMcpListToolsCompleted.Create);
   FEngine.RegisterHandler(TSHMcpListToolsFailed.Create);
   FEngine.RegisterHandler(TSHMcpListToolsInProgress.Create);
+  FEngine.RegisterHandler(TSHCodeInterpreterCallInProgress.Create);
+  FEngine.RegisterHandler(TSHCodeInterpreterCallInterpreting.Create);
+  FEngine.RegisterHandler(TSHCodeInterpreterCallCompleted.Create);
+  FEngine.RegisterHandler(TSHCodeInterpreterCallCodeDelta.Create);
+  FEngine.RegisterHandler(TSHCodeInterpreterCallCodeDone.Create);
   FEngine.RegisterHandler(TSHQueued.Create);
-  FEngine.RegisterHandler(TSHReasoningDelta.Create);
-  FEngine.RegisterHandler(TSHReasoningDone.Create);
-  FEngine.RegisterHandler(TSHReasoningSummaryDelta.Create);
-  FEngine.RegisterHandler(TSHReasoningSummaryDone.Create);
+  FEngine.RegisterHandler(TSHCustomToolCallInputDelta.Create);
+  FEngine.RegisterHandler(TSHCustomToolCallInputDone.Create);
   FEngine.RegisterHandler(TSHError.Create);
 end;
 
@@ -948,6 +1010,7 @@ function TSHInProgress.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHCompleted }
@@ -961,6 +1024,7 @@ function TSHCompleted.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHFailed }
@@ -974,6 +1038,7 @@ function TSHFailed.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHIncomplete }
@@ -987,6 +1052,7 @@ function TSHIncomplete.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHOutputItemAdded }
@@ -1000,6 +1066,7 @@ function TSHOutputItemAdded.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHContentPartAdded }
@@ -1013,6 +1080,7 @@ function TSHContentPartAdded.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHContentPartDone }
@@ -1026,6 +1094,7 @@ function TSHContentPartDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHRefusalDelta }
@@ -1039,6 +1108,7 @@ function TSHRefusalDelta.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHefusalDone }
@@ -1052,6 +1122,7 @@ function TSHRefusalDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHFunctionCallArgumentsDelta }
@@ -1066,6 +1137,7 @@ function TSHFunctionCallArgumentsDelta.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHFunctionCallArgumentsDone }
@@ -1080,6 +1152,7 @@ function TSHFunctionCallArgumentsDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHFileSearchCallInProgress }
@@ -1094,6 +1167,7 @@ function TSHFileSearchCallInProgress.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHFileSearchCallSearching }
@@ -1108,6 +1182,7 @@ function TSHFileSearchCallSearching.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHFileSearchCallCompleted }
@@ -1122,6 +1197,7 @@ function TSHFileSearchCallCompleted.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHWebSearchCallInProgress }
@@ -1136,6 +1212,7 @@ function TSHWebSearchCallInProgress.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHWebSearchCallSearching }
@@ -1150,6 +1227,7 @@ function TSHWebSearchCallSearching.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHWebSearchCallCompleted }
@@ -1164,20 +1242,22 @@ function TSHWebSearchCallCompleted.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
-{ TSHReasoningSummaryPartAdd }
+{ TSHReasoningSummaryPartAdded }
 
-function TSHReasoningSummaryPartAdd.CanHandle(
+function TSHReasoningSummaryPartAdded.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
-  Result := EventType = TStreamEventType.reasoning_summary_part_add;
+  Result := EventType = TStreamEventType.reasoning_summary_part_added;
 end;
 
-function TSHReasoningSummaryPartAdd.Handle(const Chunk: TResponseStream;
+function TSHReasoningSummaryPartAdded.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHReasoningSummaryPartDone }
@@ -1192,6 +1272,7 @@ function TSHReasoningSummaryPartDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHImageGenerationCallCompleted }
@@ -1206,6 +1287,7 @@ function TSHImageGenerationCallCompleted.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHImageGenerationCallGenerating }
@@ -1220,6 +1302,7 @@ function TSHImageGenerationCallGenerating.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHImageGenerationCallInProgress }
@@ -1234,6 +1317,7 @@ function TSHImageGenerationCallInProgress.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHImageGenerationCallPartialImage }
@@ -1249,6 +1333,7 @@ function TSHImageGenerationCallPartialImage.Handle(
   var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHMcpCallArgumentsDelta }
@@ -1263,6 +1348,7 @@ function TSHMcpCallArgumentsDelta.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHMcpCallArgumentsDone }
@@ -1277,6 +1363,7 @@ function TSHMcpCallArgumentsDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHMcpCallCompleted }
@@ -1290,6 +1377,7 @@ function TSHMcpCallCompleted.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHMcpCallFailed }
@@ -1303,6 +1391,7 @@ function TSHMcpCallFailed.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHMcpCallInProgress }
@@ -1316,6 +1405,7 @@ function TSHMcpCallInProgress.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHMcpListToolsCompleted }
@@ -1330,6 +1420,7 @@ function TSHMcpListToolsCompleted.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHMcpListToolsFailed }
@@ -1343,6 +1434,7 @@ function TSHMcpListToolsFailed.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHMcpListToolsInProgress }
@@ -1357,6 +1449,7 @@ function TSHMcpListToolsInProgress.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
 { TSHQueued }
@@ -1370,60 +1463,140 @@ function TSHQueued.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
-{ TSHReasoningDelta }
+{ TSHReasoningTextDelta }
 
-function TSHReasoningDelta.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHReasoningTextDelta.CanHandle(EventType: TStreamEventType): Boolean;
 begin
-  Result := EventType = TStreamEventType.reasoning_delta;
+  Result := EventType = TStreamEventType.reasoning_text_delta;
 end;
 
-function TSHReasoningDelta.Handle(const Chunk: TResponseStream;
+function TSHReasoningTextDelta.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
-{ TSHReasoningDone }
+{ TSHReasoningTextDone }
 
-function TSHReasoningDone.CanHandle(EventType: TStreamEventType): Boolean;
+function TSHReasoningTextDone.CanHandle(EventType: TStreamEventType): Boolean;
 begin
-  Result := EventType = TStreamEventType.reasoning_done;
+  Result := EventType = TStreamEventType.reasoning_text_done;
 end;
 
-function TSHReasoningDone.Handle(const Chunk: TResponseStream;
+function TSHReasoningTextDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
-{ TSHReasoningSummaryDelta }
+{ TSHCodeInterpreterCallInProgress }
 
-function TSHReasoningSummaryDelta.CanHandle(
+function TSHCodeInterpreterCallInProgress.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
-  Result := EventType = TStreamEventType.reasoning_summary_delta;
+  Result := EventType = TStreamEventType.code_interpreter_call_in_progress;
 end;
 
-function TSHReasoningSummaryDelta.Handle(const Chunk: TResponseStream;
+function TSHCodeInterpreterCallInProgress.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
 end;
 
-{ TSHReasoningSummaryDone }
+{ TSHCodeInterpreterCallInterpreting }
 
-function TSHReasoningSummaryDone.CanHandle(
+function TSHCodeInterpreterCallInterpreting.CanHandle(
   EventType: TStreamEventType): Boolean;
 begin
-  Result := EventType = TStreamEventType.reasoning_summary_done;
+  Result := EventType = TStreamEventType.code_interpreter_call_interpreting;
 end;
 
-function TSHReasoningSummaryDone.Handle(const Chunk: TResponseStream;
+function TSHCodeInterpreterCallInterpreting.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  {--- Custom event code here }
+end;
+
+{ TSHCodeInterpreterCallCompleted }
+
+function TSHCodeInterpreterCallCompleted.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.code_interpreter_call_completed;
+end;
+
+function TSHCodeInterpreterCallCompleted.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+  {--- Custom event code here }
+end;
+
+{ TSHCodeInterpreterCallCodeDelta }
+
+function TSHCodeInterpreterCallCodeDelta.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.code_interpreter_call_code_delta;
+end;
+
+function TSHCodeInterpreterCallCodeDelta.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+  {--- Custom event code here }
+end;
+
+{ TSHCodeInterpreterCallCodeDone }
+
+function TSHCodeInterpreterCallCodeDone.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.code_interpreter_call_code_done;
+end;
+
+function TSHCodeInterpreterCallCodeDone.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+  {--- Custom event code here }
+end;
+
+{ TSHCustomToolCallInputDelta }
+
+function TSHCustomToolCallInputDelta.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.custom_tool_call_input_delta;
+end;
+
+function TSHCustomToolCallInputDelta.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+  {--- Custom event code here }
+end;
+
+{ TSHCustomToolCallInputDone }
+
+function TSHCustomToolCallInputDone.CanHandle(
+  EventType: TStreamEventType): Boolean;
+begin
+  Result := EventType = TStreamEventType.custom_tool_call_input_done;
+end;
+
+function TSHCustomToolCallInputDone.Handle(const Chunk: TResponseStream;
+  var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
+begin
+  Result := True;
+  {--- Custom event code here }
 end;
 
 end.

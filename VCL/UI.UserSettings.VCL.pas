@@ -92,6 +92,7 @@ type
     FTimeOut: TComboBox;
     FCountry: TMaskEdit;
     FCity: TMaskEdit;
+    FVerbosity: TComboBox;
     FClearResponseButton: TSpeedButton;
     FDashBoardLabel: TLabel;
     procedure ReloadFromJSONFile;
@@ -112,6 +113,7 @@ type
     procedure SetTimeOut(const Value: TComboBox);
     procedure SetCountry(const Value: TMaskEdit);
     procedure SetCity(const Value: TMaskEdit);
+    procedure SetVerbosity(const Value: TComboBox);
     procedure SetClearResponseButton(const Value: TSpeedButton);
     procedure SetDashBoardLabel(const Value: TLabel);
 
@@ -131,6 +133,7 @@ type
     procedure HandleTimeOutChange(Sender: TObject);
     procedure HandleCountryChange(Sender: TObject);
     procedure HandleCityChange(Sender: TObject);
+    procedure HandleVerbosityChange(Sender: TObject);
     procedure HandleMaskEditKeyPressed(Sender: TObject; var Key: Char);
     procedure HandleMaskEditExit(Sender: TObject);
     procedure HandleClearResponseIds(Sender: TObject);
@@ -243,6 +246,8 @@ type
     /// </returns>
     function City: string;
 
+    function Verbosity: string;
+
     /// <summary>
     /// Indicates if a summary is to be used for the current user configuration.
     /// </summary>
@@ -295,6 +300,7 @@ begin
     SetTimeOut(Introducer.TimeOut);
     SetCountry(Introducer.Country);
     SetCity(Introducer.City);
+    SetVerbosity(Introducer.Verbosity);
     SetClearResponseButton(Introducer.ClearResponseButton);
     SetDashBoardLabel(Introducer.DashBoardLabel);
   finally
@@ -460,6 +466,13 @@ begin
         .Apply(TSettingsProp.TimeOut, FTimeOut.Text)
         .Save;
     end;
+end;
+
+procedure TSettingsVCL.HandleVerbosityChange(Sender: TObject);
+begin
+  if not FLock then
+    FSettings.Chain
+      .Apply(TSettingsProp.Verbosity, FVerbosity.Text).Save;
 end;
 
 procedure TSettingsVCL.HandleWebContextSizeChange(Sender: TObject);
@@ -742,6 +755,20 @@ begin
     end);
 end;
 
+procedure TSettingsVCL.SetVerbosity(const Value: TComboBox);
+begin
+  FVerbosity := Value;
+  TAppStyle.ApplyUserSettingsComboBoxStyle(Value,
+    procedure
+    begin
+      InitializeComponent(Value, HandleVerbosityChange);
+
+      FVerbosity.Items.Text := TVerbosity.AllVerbosities;
+      FVerbosity.ItemIndex := Ord(TVerbosity.Default);
+      FVerbosity.DropDownCount := TVerbosity.Count;
+    end);
+end;
+
 procedure TSettingsVCL.SetWebContextSize(const Value: TComboBox);
 begin
   FWebContextSize := Value;
@@ -782,6 +809,7 @@ begin
     FTimeOut.ItemIndex := FTimeOut.Items.IndexOf(FSettings.TimeOut);
     FCountry.Text := FSettings.Country;
     FCity.Text := FSettings.City;
+    FVerbosity.ItemIndex := FVerbosity.Items.IndexOf(FSettings.Verbosity);
     FSettings.Save;
   finally
     FLock := False;
@@ -796,6 +824,11 @@ end;
 function TSettingsVCL.UseSummary: Boolean;
 begin
   Result := not FSettings.ReasoningSummary.Trim.ToLower.Contains('none');
+end;
+
+function TSettingsVCL.Verbosity: string;
+begin
+  Result := FSettings.Verbosity;
 end;
 
 function TSettingsVCL.WebContextSize: string;

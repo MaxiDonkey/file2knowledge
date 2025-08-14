@@ -390,6 +390,8 @@ end;
 
 function TPromptExecutionEngine.CreateStreamParamsConfigurator(
   const Turn: TChatTurn): TProc<TResponsesParams>;
+var
+  isGpt5serie: Boolean;
 begin
   Result := procedure (Params: TResponsesParams)
     begin
@@ -402,11 +404,13 @@ begin
       {--- Choose the proper AI model (reasoning vs. search) }
       if hasReasoning then
         begin
+          isGpt5serie := Settings.ReasoningModel.StartsWith('gpt-5');
           Params.Model(Settings.ReasoningModel);
           Params.Reasoning(CreateReasoningEffortParams);
         end
       else
         begin
+          isGpt5serie := Settings.SearchModel.StartsWith('gpt-5');
           {$REGION '400 Bad Request'}
           (*
              If the previous round of the session used a reasoning model, then this round will return:
@@ -427,6 +431,9 @@ begin
           Params.Model(Settings.SearchModel);
         end;
 
+      if isGpt5serie then
+        Params.Text(TTextParams.Create.Verbosity(Settings.Verbosity));
+
       {--- Set user prompt }
       Params.Input(Turn.Prompt);
 
@@ -434,7 +441,7 @@ begin
       Params.Instructions(FSystemPromptBuilder.BuildSystemPrompt);
 
       {--- Set explicit tool choice }
-      if hasWebSearch then
+      if hasWebSearch and not isGpt5serie then
         Params.ToolChoice(BuildWebSearchToolChoiceParams);
 
       {--- Tool selection according to feature flags }

@@ -41,9 +41,9 @@ type
     const
       ModelNames: array[TModelType] of TArray<string> = (
         {--- mtSearch }
-        ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano'],
+        ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano'],
         {--- mtReasoning }
-        ['o1', 'o1-pro', 'o3', 'o3-mini', 'o4-mini']
+        ['o1', 'o1-pro', 'o3', 'o3-mini', 'o4-mini', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano']
       );
 
       DefaultModels: array[TModelType] of string = (
@@ -111,6 +111,23 @@ type
     class function FromIndex(Index: Integer): TIntensity; static;
     class function Count: Integer; static;
     class function AllIntensities: string; static;
+  end;
+
+  TVerbosity = (vyLow, vyMedium, vyHigh);
+
+  TVerbosityHelper = record Helper for TVerbosity
+  private
+    const
+      Verbosities : array[TVerbosity] of string = (
+        'Low', 'Medium', 'High'
+      );
+     DefaultVerbosity = vyMedium;
+  public
+    function ToString: string;
+    class function Default: TVerbosity; static;
+    class function FromIndex(Index: Integer): TVerbosity; static;
+    class function Count: Integer; static;
+    class function AllVerbosities: string; static;
   end;
 
   TSummary = (syNone, syDetailed);
@@ -225,6 +242,9 @@ begin
   FCosts.Add(Ord(mtSearch) * 1000 + 2, ['$2.00', '$8.00']);
   FCosts.Add(Ord(mtSearch) * 1000 + 3, ['$0.40', '$1.60']);
   FCosts.Add(Ord(mtSearch) * 1000 + 4, ['$0.10', '$0.40']);
+  FCosts.Add(Ord(mtSearch) * 1000 + 5, ['$1.25', '$10.00']);
+  FCosts.Add(Ord(mtSearch) * 1000 + 6, ['$0.25', '$2.00']);
+  FCosts.Add(Ord(mtSearch) * 1000 + 7, ['$0.05', '$0.40']);
 
   {--- Costs of reasoning models }
   FCosts.Add(Ord(mtReasoning) * 1000 + 0, ['$15.00', '$60.00']);
@@ -232,6 +252,9 @@ begin
   FCosts.Add(Ord(mtReasoning) * 1000 + 2, ['$10.00', '$40.00']);
   FCosts.Add(Ord(mtReasoning) * 1000 + 3, ['$1.10', '$4.40']);
   FCosts.Add(Ord(mtReasoning) * 1000 + 4, ['$1.10', '$4.40']);
+  FCosts.Add(Ord(mtReasoning) * 1000 + 5, ['$1.25', '$10.00']);
+  FCosts.Add(Ord(mtReasoning) * 1000 + 6, ['$0.25', '$2.00']);
+  FCosts.Add(Ord(mtReasoning) * 1000 + 7, ['$0.05', '$0.40']);
 end;
 
 destructor TModelCosts.Destroy;
@@ -358,6 +381,36 @@ end;
 function TTimeOutHelper.ToString: string;
 begin
   Result := TimeOuts[Self];
+end;
+
+{ TVerbosityHelper }
+
+class function TVerbosityHelper.AllVerbosities: string;
+begin
+  Result := String.Join(#10, Verbosities);
+end;
+
+class function TVerbosityHelper.Count: Integer;
+begin
+  Result := Length(Verbosities);
+end;
+
+class function TVerbosityHelper.Default: TVerbosity;
+begin
+  Result := DefaultVerbosity;
+end;
+
+class function TVerbosityHelper.FromIndex(Index: Integer): TVerbosity;
+begin
+  if (Index >= 0) and (Index < Count) then
+    Result := TVerbosity(Index)
+  else
+    Result := Default;
+end;
+
+function TVerbosityHelper.ToString: string;
+begin
+  Result := Verbosities[Self];
 end;
 
 end.
