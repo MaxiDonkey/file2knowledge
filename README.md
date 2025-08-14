@@ -1,10 +1,12 @@
 # File2Knowledge
 ![Delphi Next Gen Ready](https://img.shields.io/badge/Delphi--Next--Gen-ready-brightgreen)
 ![GitHub](https://img.shields.io/badge/IDE%20Version-Delphi%2012-yellow)
-![GitHub](https://img.shields.io/badge/Updated%20on%20June%2014,%202025-blue)
+![GitHub](https://img.shields.io/badge/Updated%20on%20August%2014,%202025-blue)
 
 Mini-lab Delphi/VCL open source to experiment with the `v1/responses endpoint` of the OpenAI API in a modern environment. 
 Clone & run: the app acts as a tutor for exploring my AI wrappers through the `file_search`, `embeddings`, and `chat` features.
+
+<br>
 
 ## Changelog
 
@@ -12,6 +14,8 @@ To review the latest changes, please refer to the [changelog](https://github.com
 
 >[!IMPORTANT]
 > To perform the update, install [DelphiGenAI](https://github.com/MaxiDonkey/DelphiGenAI) version 1.1.0 and then recompile the project.
+
+<br>
 
 ## Introduction
 
@@ -23,6 +27,8 @@ Its main goal: to demonstrate how to leverage advanced file search (file_search)
 This approach enables more contextual, relevant, and intelligent responses when querying technical documentation, source code, or any other textual files.
 
 ![Preview](https://github.com/MaxiDonkey/file2knowledge/blob/main/Images/F2KAni.gif?raw=true "Preview")
+
+<br>
 
 ## Quick Start
 
@@ -41,9 +47,9 @@ Prerequisites: OpenAI API key
 
 ![Preview](https://github.com/MaxiDonkey/SynkFlowAI/blob/main/Images/themis.png?raw=true "Preview")
 
+<br>
+
 ## Things You Should Know
-
-
 
 >[!NOTE]
 > Make sure to correctly set the **search path** to the `DelphiGenAI` wrapper in your Delphi project settings. This is required for proper compilation and integration.
@@ -57,6 +63,8 @@ Prerequisites: OpenAI API key
 
 >[!NOTE]
 >To access the uploaded files and active vector stores, go to the [dashboard](https://platform.openai.com/logs) then navigating to the `Storage` section.
+
+<br>
 
 ## Features
 
@@ -72,9 +80,13 @@ Prerequisites: OpenAI API key
 
 - Web research and reasoning.
 
+<br>
+
 ## License
 
 This project is licensed under the [MIT](https://choosealicense.com/licenses/mit/) License.
+
+<br>
 
 ## Going further
 
