@@ -615,6 +615,8 @@ type
       var ChunkDisplayedCount: Integer): Boolean;
   end;
 
+  {$ENDREGION}
+
   {$REGION 'Handlers - Annotations'}
 
   TSHOutputTextAnnotationAddeded = class(TInterfacedObject, IStreamEventHandler)

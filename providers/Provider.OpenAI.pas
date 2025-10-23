@@ -5,7 +5,7 @@ interface
 {$REGION  'Dev notes : Provider.OpenAI'}
 
 (*
-  Unit: Provider.OpenAI
+  Unit: Provider.OpenAI with GenAI v1.3.0
 
   Purpose:
     This unit serves as the central integration and orchestration point for OpenAI/GenAI capabilities

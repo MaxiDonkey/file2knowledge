@@ -465,7 +465,7 @@ begin
               end;
         end;
 
-      Params.Include([ TOutputIncluding.file_search_result ]);
+      Params.Include([ TOutputIncluding.file_search_call_results ]);
 
       {--- Enable streaming mode }
       Params.Stream(True);
