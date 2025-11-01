@@ -816,6 +816,10 @@ function TSHOutputTextAnnotationAddeded.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+
+  if not Assigned(Chunk.Annotation) then
+    Exit;
+
   if not Chunk.Annotation.Url.IsEmpty then
     begin
       Selector.ShowPage(psWebSearch);
@@ -853,6 +857,9 @@ end;
 procedure TSHOutputItemDone.DisplayFileSearchQueries(
   const Chunk: TResponseStream);
 begin
+  if not Assigned(Chunk.Item) then
+    Exit;
+
   if Length(Chunk.Item.Queries) > 0 then
     begin
       FileSearchDisplayer.Display('Queries : '#10);
@@ -868,6 +875,9 @@ end;
 procedure TSHOutputItemDone.DisplayFileSearchResults(
   const Chunk: TResponseStream);
 begin
+  if not Assigned(Chunk.Item) then
+    Exit;
+
   if Length(Chunk.Item.Results) > 0 then
     begin
       FileSearchDisplayer.Display(#10#10'The results of a file search: '#10);
@@ -887,10 +897,24 @@ end;
 procedure TSHOutputItemDone.DisplayWebSearchAction(
   const Chunk: TResponseStream);
 begin
+  if not Assigned(Chunk.Item) then
+    Exit;
+
   if Assigned(Chunk.Item.Action) and
      not Chunk.Item.Action.Query.IsEmpty then
     begin
       WebSearchDisplayer.Display(' • ' + Chunk.Item.Action.Query + #10);
+
+      for var Item in Chunk.Item.Action.Sources do
+        WebSearchDisplayer.Display('   source: ' + Item.url + #10);
+
+      if not Chunk.Item.Action.Url.IsEmpty then
+        begin
+          if Chunk.Item.Action.&Type = 'open_page' then
+            WebSearchDisplayer.Display('   open: ' + Chunk.Item.Action.Url + #10)
+          else
+            WebSearchDisplayer.Display('   find: ' + Chunk.Item.Action.Url + #10)
+        end;
     end;
 end;
 
@@ -898,6 +922,9 @@ function TSHOutputItemDone.Handle(const Chunk: TResponseStream;
   var StreamBuffer: string; var ChunkDisplayedCount: Integer): Boolean;
 begin
   Result := True;
+  if not Assigned(Chunk.Item) then
+    Exit;
+
   if Chunk.Item.Id.ToLower.StartsWith('msg_') then
     begin
       if PersistentChat.CurrentPrompt.JsonResponse.Trim.IsEmpty then

@@ -91,9 +91,13 @@ type
     procedure TurnUpdate;
     procedure ServiceClearUI;
     function UpdateAnnotation(const Displayer: IAnnotationsDisplayer): string;
-    function CreateStreamParamsConfigurator(const Turn: TChatTurn): TProc<TResponsesParams>;
+    function CreateStreamParams(const Turn: TChatTurn;
+      const Instructions: string): TProc<TResponsesParams>;
+    function CreateStreamWeakParams(const Turn: TChatTurn;
+      const Model, Instructions: string): TProc<TResponsesParams>;
     function CreateErrorHandlerCallback(const StreamBuffer: string): TFunc<TObject, string, string>;
     function CreateCancellationHandlerCallback(const StreamBuffer: string): TFunc<TObject, string>;
+
   private
     /// <summary>
     /// The GenAI client instance used for all API communications.
@@ -119,12 +123,18 @@ type
     function CreateReasoningEffortParams: TReasoningParams;
 
     /// <summary>
-    /// Constructs the parameters for web search tool integration, selecting the preview/search tool type.
+    /// Creates and configures reasoning parameters suitable for Deep Research models.
     /// </summary>
+    /// <remarks>
+    /// Deep Research models only support a medium reasoning effort level.
+    /// This method returns a <c>TReasoningParams</c> instance initialized with
+    /// <c>Effort('medium')</c>. If reasoning summaries are enabled in the user
+    /// settings, the summary text is also applied.
+    /// </remarks>
     /// <returns>
-    /// An initialized <c>THostedToolParams</c> object ready for use in request configuration.
+    /// A <c>TReasoningParams</c> instance configured for Deep Research models.
     /// </returns>
-    function BuildWebSearchToolChoiceParams: THostedToolParams;
+    function CreateReasoningEffortDeepResearchParams: TReasoningParams;
 
     /// <summary>
     /// Creates and configures file search tool parameters, supplying vector store identifiers if available.
@@ -135,12 +145,39 @@ type
     function CreateWebSearchToolParamsWithContext: TResponseToolParams;
 
     /// <summary>
+    /// Creates and configures web search preview tool parameters with contextual settings.
+    /// </summary>
+    /// <remarks>
+    /// This method builds a <c>TWebSearchPreviewParams</c> instance configured for
+    /// Deep Research models, setting the search context size to <c>'medium'</c>,
+    /// which is the only mode accepted by such models.
+    /// </remarks>
+    /// <returns>
+    /// A <c>TResponseToolParams</c> instance configured for web search preview operations.
+    /// </returns>
+    function CreateWebSearchPreviewToolParamsWithContext: TResponseToolParams;
+
+    /// <summary>
     /// Creates and configures web search tool parameters, optionally including user geolocation context.
     /// </summary>
     /// <returns>
     /// A <c>TResponseToolParams</c> object for web search tool configuration.
     /// </returns>
     function CreateFileSearchToolParamsWithStore: TResponseToolParams;
+
+    /// <summary>
+    /// Creates and configures a code interpreter container for tool execution.
+    /// </summary>
+    /// <remarks>
+    /// Initializes a <c>TResponseCodeInterpreterParams</c> instance with
+    /// <c>Container('auto')</c>, allowing the backend to choose an appropriate
+    /// execution environment for code runs (e.g., when enabled by Deep Research
+    /// or other tool-using flows).
+    /// </remarks>
+    /// <returns>
+    /// A <c>TResponseCodeInterpreterParams</c> instance configured with an automatic container.
+    /// </returns>
+    function CreateCodeInterpreterContainer: TResponseCodeInterpreterParams;
 
     /// <summary>
     ///   Finalizes the current chat turn, updating stored search and reasoning results and saving session state.
@@ -247,7 +284,31 @@ type
     /// - Assigns callbacks (<c>OnStart</c>, <c>OnProgress</c>, <c>OnSuccess</c>, <c>OnError</c>, <c>OnDoCancel</c>, <c>OnCancellation</c>)
     ///   to drive UI updates, error handling, and finalization logic as chunks stream in.
     /// </remarks>
-    function BuildStreamPromise(const Turn: TChatTurn): TPromise<string>;
+    function BuildStreamPromise(const Turn: TChatTurn;
+      const Instructions: string;
+      const ParamProc: TProc<TResponsesParams>): TPromise<string>;
+
+    /// <summary>
+    /// Executes a lightweight prompt call with an explicit model and instructions.
+    /// </summary>
+    /// <param name="Model">
+    /// Target model identifier to use for the request.
+    /// </param>
+    /// <param name="Prompt">
+    /// User input to submit for completion.
+    /// </param>
+    /// <param name="Instructions">
+    /// System or developer instructions applied to the request.
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> resolving to the streamed response text.
+    /// </returns>
+    /// <remarks>
+    /// Initializes timeouts, creates a chat turn, stores the prompt, and builds a streaming
+    /// request using simplified parameters (no feature-flag orchestration). Suitable for
+    /// auxiliary flows such as clarification or weak inference.
+    /// </remarks>
+    function ExecuteWeak(const Model, Prompt, Instructions: string): TPromise<string>; overload;
 
   public
     /// <summary>
@@ -261,10 +322,48 @@ type
     /// A <c>TPromise&lt;string&gt;</c> that resolves asynchronously with the AI's response text,
     /// or is rejected if an error or cancellation occurs.
     /// </returns>
-    function Execute(const Prompt: string): TPromise<string>;
+    function Execute(const Prompt: string): TPromise<string>; overload;
+
+    /// <summary>
+    /// Submits a prompt for execution via the OpenAI/GenAI engine, handling streaming
+    /// of results, session management, and output tracking.
+    /// </summary>
+    /// <param name="Prompt">
+    /// The user's prompt or question to be sent to the AI for completion or answer.
+    /// </param>
+    /// <returns>
+    /// <param name="Instructions">
+    /// System instructions
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> that resolves asynchronously with the AI's response text,
+    /// or is rejected if an error or cancellation occurs.
+    /// </returns>
+    function Execute(const Prompt: string; const Instructions: string): TPromise<string>; overload;
+
+    /// <summary>
+    /// Executes a clarification request based on the provided prompt.
+    /// </summary>
+    /// <param name="Prompt">
+    /// The user prompt requiring clarification.
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> resolving to the AI-generated clarification text.
+    /// </returns>
+    /// <remarks>
+    /// Uses a predefined clarifying instruction from the system prompt builder
+    /// and executes the request with a lightweight model. Intended for refining
+    /// or disambiguating user input before deeper processing.
+    /// </remarks>
+    function Clarifying(const Prompt: string): TPromise<string>; overload;
 
     constructor Create(const GenAIClient: IGenAI; const AystemPromptBuilder: ISystemPromptBuilder);
   end;
+
+resourcestring
+  DEEP_RESEARCH_NOT_APPROPRIATE =
+    'It’s not appropriate to use a deep research model for a simple web search. ' + slineBreak +
+    'Please select another model.';
 
 implementation
 
@@ -284,7 +383,9 @@ begin
 end;
 
 function TPromptExecutionEngine.BuildStreamPromise(
-  const Turn: TChatTurn): TPromise<string>;
+  const Turn: TChatTurn;
+  const Instructions: string;
+  const ParamProc: TProc<TResponsesParams>): TPromise<string>;
 {$REGION  'Dev notes : Contexte SSE & Streambuffer'}
 (*
   - In the context of SSE reception, the promise associated with a canceled operation must be rejected,
@@ -302,7 +403,7 @@ begin
 
   Result := FClient.Responses
     .AsyncAwaitCreateStream(
-        CreateStreamParamsConfigurator(Turn),
+        ParamProc,
         function : TPromiseResponseStream
         begin
           Result.Sender := Turn;
@@ -340,10 +441,10 @@ begin
         end);
 end;
 
-function TPromptExecutionEngine.BuildWebSearchToolChoiceParams: THostedToolParams;
+function TPromptExecutionEngine.Clarifying(
+  const Prompt: string): TPromise<string>;
 begin
-  Result := THostedToolParams.Create
-    .&Type('web_search_preview')
+  Result := ExecuteWeak('gpt-4.1', Prompt, FSystemPromptBuilder.GetClarifyingInstructions);
 end;
 
 procedure TPromptExecutionEngine.ConfigureRequest(const Turn: TChatTurn; const Prompt: string);
@@ -371,12 +472,27 @@ begin
     end;
 end;
 
+function TPromptExecutionEngine.CreateCodeInterpreterContainer: TResponseCodeInterpreterParams;
+begin
+  Result := TResponseCodeInterpreterParams.New
+    .Container('auto');
+end;
+
 function TPromptExecutionEngine.CreateFileSearchToolParamsWithStore: TResponseToolParams;
 begin
   Result := TResponseFileSearchParams.New;
 
   if Length(FileStoreManager.VectorStore) > 0 then
     (Result as TResponseFileSearchParams).VectorStoreIds([FileStoreManager.VectorStore]);
+end;
+
+function TPromptExecutionEngine.CreateReasoningEffortDeepResearchParams: TReasoningParams;
+begin
+  {--- Create reasoning effort - Medium effort is the only mode accepted by Deep Research.}
+  Result := TReasoningParams.Create.Effort('medium');
+
+  if Settings.UseSummary then
+    Result.Summary(Settings.ReasoningSummary);
 end;
 
 function TPromptExecutionEngine.CreateReasoningEffortParams: TReasoningParams;
@@ -388,11 +504,14 @@ begin
     Result.Summary(Settings.ReasoningSummary);
 end;
 
-function TPromptExecutionEngine.CreateStreamParamsConfigurator(
-  const Turn: TChatTurn): TProc<TResponsesParams>;
+function TPromptExecutionEngine.CreateStreamParams(
+  const Turn: TChatTurn;
+  const Instructions: string): TProc<TResponsesParams>;
 var
   isGpt5serie: Boolean;
+  isDeepResearch: Boolean;
 begin
+  isDeepResearch := False;
   Result := procedure (Params: TResponsesParams)
     begin
       {--- Evaluate active service-feature flags for this call }
@@ -429,6 +548,17 @@ begin
           *)
          {$ENDREGION}
           Params.Model(Settings.SearchModel);
+
+          isDeepResearch := Helper.UserSettings.IsDeepResearchModel(Settings.SearchModel);
+
+          if isDeepResearch or isGpt5serie then
+            begin
+              if isDeepResearch then
+                {--- It is essential to activate reasoning with Deep Research. }
+                Params.Reasoning(CreateReasoningEffortDeepResearchParams)
+              else
+                Params.Reasoning(CreateReasoningEffortParams);
+            end;
         end;
 
       if isGpt5serie then
@@ -438,34 +568,52 @@ begin
       Params.Input(Turn.Prompt);
 
       {--- Set developer instructions }
-      Params.Instructions(FSystemPromptBuilder.BuildSystemPrompt);
+      Params.Instructions(Instructions); //FSystemPromptBuilder.GetInstructions);
 
       {--- Set explicit tool choice }
-      if hasWebSearch and not isGpt5serie then
-        Params.ToolChoice(BuildWebSearchToolChoiceParams);
+      Params.ToolChoice('auto');
 
       {--- Tool selection according to feature flags }
       if not hasReasoning then
         begin
           if not fileSearchDisabled and hasFileStore and hasWebSearch then
             begin
-              Params.Tools([
-                CreateFileSearchToolParamsWithStore,
-                CreateWebSearchToolParamsWithContext
-              ]);
+              if isDeepResearch then
+                Params.Tools([
+                  CreateWebSearchPreviewToolParamsWithContext,
+                  CreateFileSearchToolParamsWithStore,
+                  CreateCodeInterpreterContainer
+                ])
+              else
+                Params.Tools([
+                  CreateFileSearchToolParamsWithStore,
+                  CreateWebSearchToolParamsWithContext
+                ]);
             end
           else
             if not fileSearchDisabled and hasFileStore then
               begin
-                Params.Tools([ CreateFileSearchToolParamsWithStore ]);
+                if isDeepResearch then
+                  {--- It is necessary to enable web search with Deep Research. }
+                  Params.Tools([
+                    CreateWebSearchPreviewToolParamsWithContext,
+                    CreateFileSearchToolParamsWithStore,
+                    CreateCodeInterpreterContainer
+                  ])
+                else
+                  Params.Tools([ CreateFileSearchToolParamsWithStore ]);
               end
             else if hasWebSearch then
               begin
-                Params.Tools([ CreateWebSearchToolParamsWithContext ]);
+                if isDeepResearch then
+                  {--- A deep research model is not suitable for a simple web search. }
+                  raise Exception.Create(DEEP_RESEARCH_NOT_APPROPRIATE)
+                else
+                  Params.Tools([ CreateWebSearchToolParamsWithContext ]);
               end;
         end;
 
-      Params.Include([ TOutputIncluding.file_search_call_results ]);
+      Params.Include([ file_search_call_results, web_search_call_action_sources]);
 
       {--- Enable streaming mode }
       Params.Stream(True);
@@ -485,6 +633,32 @@ begin
     end;
 end;
 
+function TPromptExecutionEngine.CreateStreamWeakParams(const Turn: TChatTurn;
+  const Model, Instructions: string): TProc<TResponsesParams>;
+begin
+  Result := procedure (Params: TResponsesParams)
+    begin
+      Params
+        .Model(Model)
+        .Instructions(Instructions)
+        .Input(Turn.Prompt)
+        .Stream(True)
+        .Store(Turn.Storage);
+
+      if Turn.Storage and not ResponseTracking.LastId.IsEmpty then
+        Params.PreviousResponseId(ResponseTracking.LastId);
+      Turn.JsonPrompt := Params.ToJsonString();
+      PersistentChat.SaveToFile;
+    end;
+end;
+
+function TPromptExecutionEngine.CreateWebSearchPreviewToolParamsWithContext: TResponseToolParams;
+begin
+  Result := TWebSearchPreviewParams.New
+    {--- Medium is the only mode accepted by Deep Research. }
+    .SearchContextSize('medium');
+end;
+
 function TPromptExecutionEngine.CreateWebSearchToolParamsWithContext: TResponseToolParams;
 begin
   Result := TResponseWebSearchParams.New
@@ -499,7 +673,8 @@ begin
        );
 end;
 
-function TPromptExecutionEngine.Execute(const Prompt: string): TPromise<string>;
+function TPromptExecutionEngine.Execute(const Prompt,
+  Instructions: string): TPromise<string>;
 begin
   {--- Initialize the HTTP client’s response timeout using the current Settings.TimeOut value }
   InitClientTimeOut;
@@ -511,7 +686,28 @@ begin
   ConfigureRequest(Turn, Prompt);
 
   {--- Build and return the asynchronous streaming promise based on the configured turn }
-  Result := BuildStreamPromise(Turn);
+  Result := BuildStreamPromise(Turn, Instructions, CreateStreamParams(Turn, Instructions));
+end;
+
+function TPromptExecutionEngine.Execute(const Prompt: string): TPromise<string>;
+begin
+  Result := Execute(Prompt, FSystemPromptBuilder.GetInstructions)
+end;
+
+function TPromptExecutionEngine.ExecuteWeak(const Model, Prompt,
+  Instructions: string): TPromise<string>;
+begin
+  {--- Initialize the HTTP client’s response timeout using the current Settings.TimeOut value }
+  InitClientTimeOut;
+
+  {--- Create a new TChatTurn with the current timestamp and add it to the persistent chat session }
+  var Turn := AddChatTurnWithTimestamp;
+
+  {--- Mark the turn for storage and assign the user’s prompt text to the turn object }
+  ConfigureRequest(Turn, Prompt);
+
+  {--- Build and return the asynchronous streaming promise based on the configured turn }
+  Result := BuildStreamPromise(Turn, Instructions, CreateStreamWeakParams(Turn, Model, Instructions));
 end;
 
 procedure TPromptExecutionEngine.FinalizeTurn;
@@ -589,7 +785,7 @@ begin
   Cancellation.Reset;
 
   {--- Service prompt + Edge browser : display the current user input in the chat bubble }
-  EdgeDisplayer.Prompt(ServicePrompt.Text);
+  EdgeDisplayer.Prompt((Sender as TChatTurn).Prompt);  //ServicePrompt.Text);
 
   {--- Clear previous annotations/displays for file search, web search and reasoning }
   ServiceClearUI;

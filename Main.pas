@@ -245,7 +245,7 @@ begin
   {--- Main form constraints }
   var Rect := Screen.MonitorFromWindow(Handle).WorkAreaRect;
   Constraints.MaxWidth := Rect.Width;
-  Constraints.MinWidth := 870;
+  Constraints.MinWidth := 970; //870;
   Constraints.MaxHeight := Rect.Height;
   Constraints.MinHeight := 370;
 

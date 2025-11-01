@@ -561,9 +561,10 @@ begin
     sLineBreak;
 
   {--- Building and injecting the JS that creates the user bubble }
-  ExecuteScript(
-    Format(TemplateProvider.PromptTemplate, [TEscapeHelper.EscapeJSString(AText)])
-  );
+  if not AText.Trim.IsEmpty then
+    ExecuteScript(
+      Format(TemplateProvider.PromptTemplate, [TEscapeHelper.EscapeJSString(AText)])
+    );
 end;
 
 { TEscapeHelper }

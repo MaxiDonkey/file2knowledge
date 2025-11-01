@@ -41,9 +41,11 @@ type
     const
       ModelNames: array[TModelType] of TArray<string> = (
         {--- mtSearch }
-        ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano'],
+        ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-5', 'gpt-5-mini',
+         'gpt-5-nano', 'gpt-5-chat-latest', 'gpt-5-pro', 'o3-deep-research', 'o4-mini-deep-research'],
         {--- mtReasoning }
-        ['o1', 'o1-pro', 'o3', 'o3-mini', 'o4-mini', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano']
+        ['o1', 'o1-pro', 'o3', 'o3-mini', 'o4-mini', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano',
+         'gpt-5-pro']
       );
 
       DefaultModels: array[TModelType] of string = (
@@ -164,7 +166,7 @@ type
         18000000, 43200000, 86400000
       );
 
-      DefaultTimeOut = t30s;
+      DefaultTimeOut = t60m;
   public
     function ToString: string;
     function ToMilliseconds: Cardinal;
@@ -175,7 +177,14 @@ type
     class function AllTimeOuts: string; static;
   end;
 
+function IsDeepResearchModel(const Value: string): Boolean;
+
 implementation
+
+function IsDeepResearchModel(const Value: string): Boolean;
+begin
+  Result := Value.Contains('research');
+end;
 
 { TModelTypeHelper }
 
@@ -237,24 +246,30 @@ begin
   FCosts := TDictionary<Integer, TArray<string>>.Create;
 
   {--- Costs of research models }
-  FCosts.Add(Ord(mtSearch) * 1000 + 0, ['$2.50', '$10.00']);
-  FCosts.Add(Ord(mtSearch) * 1000 + 1, ['$0.15', '$0.60']);
-  FCosts.Add(Ord(mtSearch) * 1000 + 2, ['$2.00', '$8.00']);
-  FCosts.Add(Ord(mtSearch) * 1000 + 3, ['$0.40', '$1.60']);
-  FCosts.Add(Ord(mtSearch) * 1000 + 4, ['$0.10', '$0.40']);
-  FCosts.Add(Ord(mtSearch) * 1000 + 5, ['$1.25', '$10.00']);
-  FCosts.Add(Ord(mtSearch) * 1000 + 6, ['$0.25', '$2.00']);
-  FCosts.Add(Ord(mtSearch) * 1000 + 7, ['$0.05', '$0.40']);
+  FCosts.Add(Ord(mtSearch) * 1000 + 0, ['$2.50', '$10.00']);       // gpt-4o
+  FCosts.Add(Ord(mtSearch) * 1000 + 1, ['$0.15', '$0.60']);        // gpt-4o-mini
+  FCosts.Add(Ord(mtSearch) * 1000 + 2, ['$2.00', '$8.00']);        // gpt-4.1
+  FCosts.Add(Ord(mtSearch) * 1000 + 3, ['$0.40', '$1.60']);        // gpt-4.1-mini
+  FCosts.Add(Ord(mtSearch) * 1000 + 4, ['$0.10', '$0.40']);        // gpt-4.1-nano
+  FCosts.Add(Ord(mtSearch) * 1000 + 5, ['$1.25', '$10.00']);       // gpt-5
+  FCosts.Add(Ord(mtSearch) * 1000 + 6, ['$0.25', '$2.00']);        // gpt-5-mini
+  FCosts.Add(Ord(mtSearch) * 1000 + 7, ['$0.05', '$0.40']);        // gpt-5-nano
+  FCosts.Add(Ord(mtSearch) * 1000 + 8, ['$1.25', '$10.00']);       // gpt-5-chat-latest
+  FCosts.Add(Ord(mtSearch) * 1000 + 9, ['$15.00', '$120.00']);     // gpt-5-pro
+  FCosts.Add(Ord(mtSearch) * 1000 + 10, ['$10.00', '$40.00']);     // o3-deep-research
+  FCosts.Add(Ord(mtSearch) * 1000 + 11, ['$2.00', '$8.00']);       // o4-mini-deep-research
 
   {--- Costs of reasoning models }
-  FCosts.Add(Ord(mtReasoning) * 1000 + 0, ['$15.00', '$60.00']);
-  FCosts.Add(Ord(mtReasoning) * 1000 + 1, ['$150.00', '$600.00']);
-  FCosts.Add(Ord(mtReasoning) * 1000 + 2, ['$10.00', '$40.00']);
-  FCosts.Add(Ord(mtReasoning) * 1000 + 3, ['$1.10', '$4.40']);
-  FCosts.Add(Ord(mtReasoning) * 1000 + 4, ['$1.10', '$4.40']);
-  FCosts.Add(Ord(mtReasoning) * 1000 + 5, ['$1.25', '$10.00']);
-  FCosts.Add(Ord(mtReasoning) * 1000 + 6, ['$0.25', '$2.00']);
-  FCosts.Add(Ord(mtReasoning) * 1000 + 7, ['$0.05', '$0.40']);
+  FCosts.Add(Ord(mtReasoning) * 1000 + 0, ['$15.00', '$60.00']);   // o1
+  FCosts.Add(Ord(mtReasoning) * 1000 + 1, ['$150.00', '$600.00']); // o1-pro
+  FCosts.Add(Ord(mtReasoning) * 1000 + 2, ['$10.00', '$40.00']);   // o3
+  FCosts.Add(Ord(mtReasoning) * 1000 + 3, ['$1.10', '$4.40']);     // o3-mini
+  FCosts.Add(Ord(mtReasoning) * 1000 + 4, ['$1.10', '$4.40']);     // o4-mini
+  FCosts.Add(Ord(mtReasoning) * 1000 + 5, ['$1.25', '$10.00']);    // gpt-5
+  FCosts.Add(Ord(mtReasoning) * 1000 + 6, ['$0.25', '$2.00']);     // gpt-5-mini
+  FCosts.Add(Ord(mtReasoning) * 1000 + 7, ['$0.05', '$0.40']);     // gpt-5-nano
+
+  FCosts.Add(Ord(mtReasoning) * 1000 + 8, ['$15.00', '$120.00']);  // gpt-5-pro
 end;
 
 destructor TModelCosts.Destroy;

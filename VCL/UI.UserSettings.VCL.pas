@@ -246,6 +246,11 @@ type
     /// </returns>
     function City: string;
 
+    /// <summary>
+    /// Constrains the verbosity of the model's response. Lower values will result in more concise
+    /// responses, while higher values will result in more verbose responses. Currently supported
+    /// values are low, medium, and high.
+    /// </summary>
     function Verbosity: string;
 
     /// <summary>

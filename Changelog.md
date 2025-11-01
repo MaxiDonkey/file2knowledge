@@ -1,3 +1,12 @@
+#### 2025, November 1 version 1.0.7
+- Upgrade to DelphiGenAI wrapper version 1.3.1
+  - Added support for o3-deep-research, o4-mini-deep-research models for Deep Research.
+  - Implementation of the methods enabling Deep Research execution whenever one of the two newly added models is selected from the list of available search execution models. 
+- Data update including DelphiGenAI version 1.3.1
+- Data update including File2knowledge version 1.0.7
+
+<br>
+
 #### 2025, August 15 version 1.0.6
 - Upgrade to DelphiGenAI wrapper version 1.2.1
   - Added support for GPT-5 series models (mini, nano) for search and reasoning features.

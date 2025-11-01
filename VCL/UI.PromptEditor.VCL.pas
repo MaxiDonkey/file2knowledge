@@ -30,10 +30,10 @@ interface
 
 uses
   System.SysUtils, System.Classes, Winapi.Windows, System.Generics.Collections,
-  Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Controls, Vcl.Buttons,
+  Vcl.StdCtrls, Vcl.ComCtrls, Vcl.Controls, Vcl.Buttons, Vcl.Dialogs,
   System.Character, System.UITypes,
-  Manager.Intf, GenAI.Async.Promise, Manager.Utf8Mapping, Manager.Types,
-  UI.Styles.VCL;
+  Manager.Intf, GenAI.Async.Promise, Manager.Utf8Mapping, Manager.Types, Helper.UserSettings,
+  Manager.IoC, Provider.InstructionManager, UI.Styles.VCL;
 
 const
   NEW_CHAT_TITLE = 'New chat ...';
@@ -59,6 +59,25 @@ type
     ///<summary> Reference to the validation button control. </summary>
     FValidation: TSpeedButton;
 
+    ///<summary>
+    /// Stores the accumulated prompt text used during the Deep Research process.
+    ///</summary>
+    ///<remarks>
+    /// Holds intermediate user input between the clarification and final research
+    /// phases, allowing multi-step asynchronous analysis before resetting at completion.
+    ///</remarks>
+    FDeepResearchPrompt: string;
+
+    ///<summary>
+    /// Provides access to the system prompt builder used to generate structured instructions.
+    ///</summary>
+    ///<remarks>
+    /// Used to retrieve predefined or dynamic system prompts, particularly for
+    /// Deep Research operations, ensuring consistent instruction formatting
+    /// across asynchronous requests.
+    ///</remarks>
+    FSystemPromptBuilder: ISystemPromptBuilder;
+
     procedure SetEditor(const Value: TRichEdit);
     procedure SetValidation(const Value: TSpeedButton);
     function GetText: string;
@@ -76,7 +95,38 @@ type
     function PrepareNamingPromt(const Value, Text: string): string;
 
     /// <summary> Gets the instruction text used during automatic naming. </summary>
-    function GetInstructions: string;
+    function GetNamingInstructions: string;
+
+    /// <summary>
+    /// Handles the main asynchronous prompt submission process.
+    /// </summary>
+    /// <param name="Sender">
+    /// The control that triggered the execution.
+    /// </param>
+    /// <remarks>
+    /// Validates file and vector-store linkage, then sends the user prompt asynchronously
+    /// through <c>OpenAI.Execute</c>. If chat naming is required, a secondary asynchronous
+    /// request generates and applies a title using <c>OpenAI.ExecuteSilently</c>.
+    /// Errors are caught and displayed, and focus is restored to the editor.
+    /// </remarks>
+    procedure HandleMainProcess(Sender: TObject);
+
+    /// <summary>
+    /// Handles the asynchronous submission process for Deep Research mode.
+    /// </summary>
+    /// <param name="Sender">
+    /// The control that triggered the execution.
+    /// </param>
+    /// <remarks>
+    /// Manages a two-phase Deep Research workflow. The first submission sends the initial
+    /// clarifying request via <c>OpenAI.ExecuteClarifying</c>. The second combines the
+    /// accumulated prompt with generated instructions and executes an in-depth request
+    /// using <c>OpenAI.ExecuteSilently</c>. If naming is required, an additional
+    /// asynchronous call generates and applies a chat title. Errors are handled gracefully,
+    /// reasoning indicators are updated accordingly, and focus is returned to the editor.
+    /// </remarks>
+    procedure HandleDeepResearchProcess(Sender: TObject);
+
   protected
     ///<summary> Handles key down events in the editor control. </summary>
     ///<param name="Sender"> The source of the event. </param>
@@ -88,7 +138,17 @@ type
     ///<param name="Sender"> The source of the execution event. </param>
     procedure Execute(Sender: TObject);
 
+    /// <summary>
+    /// Validates whether the main process can be executed.
+    /// </summary>
+    /// <remarks>
+    /// Checks the current file and vector-store linkage. If the linkage is broken,
+    /// prompts the user for confirmation to reestablish it. When confirmed and files
+    /// are available, triggers a vector-store ping before proceeding. Returns True
+    /// if execution can continue, otherwise False.
+    /// </remarks>
     function CanExecute: Boolean;
+
   public
     ///<summary> Constructor for TServicePrompt requiring editor and validation button. </summary>
     ///<param name="AEditor"> The TRichEdit component used for input. </param>
@@ -159,52 +219,47 @@ begin
   inherited Create;
   SetEditor(AEditor);
   SetValidation(AButtonValidation);
+
+  IoC.RegisterType<ISystemPromptBuilder>('PromptBuilder',
+    function: ISystemPromptBuilder
+    begin
+      Result := TSystemPromptBuilder.Create;
+    end,
+    TLifetime.Singleton
+  );
+
+  FSystemPromptBuilder := IoC.Resolve<ISystemPromptBuilder>('PromptBuilder');
 end;
 
 procedure TServicePrompt.Execute(Sender: TObject);
-var
-  Promise: TPromise<string>;
+{$REGION 'dev note'}
+(*
+  Developer note:
+    The Execute method acts as the central entry point for submitting user prompts.
+    It determines the execution path based on the currently selected AI model.
+
+    - If the active model is identified as a "Deep Research" model
+      (checked via Helper.UserSettings.IsDeepResearchModel), the method
+      delegates execution to HandleDeepResearchProcess, which performs
+      a two-phase clarification and research flow.
+    - Otherwise, it routes the request to HandleMainProcess for standard
+      single-phase prompt execution.
+
+    This design cleanly separates logic between normal prompt processing
+    and Deep Research workflows while maintaining a unified entry point
+    for UI event bindings (keyboard or button triggers).
+*)
+{$ENDREGION}
 begin
-  if FileStoreManager.VectorStore.Trim.IsEmpty and not CanExecute then
-    Exit;
+  var isDeepResearch := Helper.UserSettings.IsDeepResearchModel(Settings.SearchModel);
 
-  EdgeDisplayer.Show;
-  var Prompt := TUtf8Mapping.CleanTextAsUTF8(FEditor.Lines.Text);
-  if not string(Prompt).Trim.IsEmpty then
-    begin
-      Promise := OpenAI.Execute(Prompt);
-
-      if NeedToName then
-        begin
-          Promise
-            .&Then<string>(
-              function (Value: string): string
-              begin
-                Result := PrepareNamingPromt(Value, Text);
-              end)
-            .&Then(
-              function (Value: string): TPromise<string>
-              begin
-                Result := OpenAI.ExecuteSilently(Value, GetInstructions);
-              end)
-            .&Then<string>(
-              function (Value: string): string
-              begin
-                PersistentChat.CurrentChat.ApplyTitle(Value);
-                PersistentChat.SaveToFile;
-                ChatSessionHistoryView.Refresh(nil);
-              end)
-            .&Catch(
-              procedure(E: Exception)
-              begin
-                AlertService.ShowError(E.Message);
-              end);
-        end;
-    end;
-  SetFocus;
+  if isDeepResearch then
+    HandleDeepResearchProcess(Sender)
+  else
+    HandleMainProcess(Sender);
 end;
 
-function TServicePrompt.GetInstructions: string;
+function TServicePrompt.GetNamingInstructions: string;
 begin
   Result := NAMING_INSTRUCTION;
 end;
@@ -273,8 +328,140 @@ begin
   end;
 end;
 
+procedure TServicePrompt.HandleMainProcess(Sender: TObject);
+var
+  Promise: TPromise<string>;
+begin
+  FDeepResearchPrompt := EmptyStr;
+
+  if FileStoreManager.VectorStore.Trim.IsEmpty and not CanExecute then
+    Exit;
+
+  EdgeDisplayer.Show;
+  var Prompt := TUtf8Mapping.CleanTextAsUTF8(FEditor.Lines.Text);
+  if not string(Prompt).Trim.IsEmpty then
+    begin
+      Promise := OpenAI.Execute(Prompt);
+
+      if NeedToName then
+        begin
+          Promise
+            .&Then<string>(
+              function (Value: string): string
+              begin
+                Result := PrepareNamingPromt(Value, Text);
+              end)
+            .&Then(
+              function (Value: string): TPromise<string>
+              begin
+                {--- Find a fileName }
+                Result := OpenAI.ExecuteSilently('gpt-4.1-nano', Value, GetNamingInstructions);
+              end)
+            .&Then<string>(
+              function (Value: string): string
+              begin
+                PersistentChat.CurrentChat.ApplyTitle(Value);
+                PersistentChat.SaveToFile;
+                ChatSessionHistoryView.Refresh(nil);
+              end)
+            .&Catch(
+              procedure(E: Exception)
+              begin
+                AlertService.ShowError(E.Message);
+              end);
+        end;
+    end;
+  SetFocus;
+end;
+
+procedure TServicePrompt.HandleDeepResearchProcess(Sender: TObject);
+begin
+  {--- We are keeping the stored files to stay in line with the philosophy of the POC. }
+  if FileStoreManager.VectorStore.Trim.IsEmpty and not CanExecute then
+    Exit;
+
+  EdgeDisplayer.Show;
+  var Prompt := TUtf8Mapping.CleanTextAsUTF8(FEditor.Lines.Text);
+  if not string(Prompt).Trim.IsEmpty then
+    begin
+      if FDeepResearchPrompt.IsEmpty then
+        begin
+          FDeepResearchPrompt := Prompt;
+          OpenAI.ExecuteClarifying(Prompt)
+            .&Catch(
+              procedure(E: Exception)
+                begin
+                  AlertService.ShowError(E.Message);
+                end);
+        end
+      else
+        begin
+          var Instructions := FSystemPromptBuilder.GetDeepReseachInstructions;
+          FDeepResearchPrompt := FDeepResearchPrompt + Prompt;
+          Clear;
+          var Promise := OpenAI.ExecuteSilently('gpt-4.1-nano', FDeepResearchPrompt, Instructions);
+          EdgeDisplayer.ShowReasoning;
+
+          Promise
+            .&Then<string>(
+              function (Value: string): string
+              begin
+                Result := Value;
+                EdgeDisplayer.HideReasoning;
+              end)
+            .&Catch(
+              procedure(E: Exception)
+              begin
+                AlertService.ShowError(E.Message);
+                EdgeDisplayer.HideReasoning;
+                FDeepResearchPrompt := EmptyStr;
+              end);
+
+          Promise
+            .&Then<string>(
+              function (Value: string): string
+              begin
+                var DeepPromise := OpenAI.Execute(FDeepResearchPrompt, Value);
+
+                if NeedToName then
+                  begin
+                    DeepPromise
+                      .&Then<string>(
+                        function (Value: string): string
+                        begin
+                          Result := PrepareNamingPromt(Value, Text);
+                        end)
+                      .&Then(
+                        function (Value: string): TPromise<string>
+                        begin
+                          {--- Find a fileName }
+                          Result := OpenAI.ExecuteSilently('gpt-4.1-nano', Value, GetNamingInstructions);
+                        end)
+                      .&Then<string>(
+                        function (Value: string): string
+                        begin
+                          PersistentChat.CurrentChat.ApplyTitle(Value);
+                          PersistentChat.SaveToFile;
+                          ChatSessionHistoryView.Refresh(nil);
+                        end)
+                      .&Catch(
+                        procedure(E: Exception)
+                        begin
+                          AlertService.ShowError(E.Message);
+                        end);
+                  end;
+                FDeepResearchPrompt := EmptyStr;
+              end);
+        end;
+    end;
+  SetFocus;
+end;
+
 function TServicePrompt.NeedToName: Boolean;
 begin
+  if not Assigned(PersistentChat.CurrentChat) then
+    Exit(False);
+
   Result := (Length(PersistentChat.CurrentChat.Data) = 1) or
             (PersistentChat.CurrentChat.Title = NEW_CHAT_TITLE);
 end;

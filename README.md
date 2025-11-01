@@ -1,10 +1,22 @@
 # File2Knowledge
 ![Delphi Next Gen Ready](https://img.shields.io/badge/Delphi--Next--Gen-ready-brightgreen)
 ![GitHub](https://img.shields.io/badge/IDE%20Version-Delphi%2012-yellow)
-![GitHub](https://img.shields.io/badge/Updated%20on%20August%2014,%202025-blue)
+![GitHub](https://img.shields.io/badge/Updated%20on%20November%201,%202025-blue)
+
+<br>
+
+___
+
+### NEW
+- [Deep Research](https://github.com/MaxiDonkey/DelphiGenAI/blob/main/guides/DeepResearch.md#deep-research)
+
+
+<br>
+
+___
 
 Mini-lab Delphi/VCL open source to experiment with the `v1/responses endpoint` of the OpenAI API in a modern environment. 
-Clone & run: the app acts as a tutor for exploring my AI wrappers through the `file_search`, `embeddings`, and `chat` features.
+Clone & run: the app acts as a tutor for exploring my AI wrappers through the `file_search`, `embeddings`, `chat` features and `Deep Reseach`.
 
 <br>
 
@@ -13,7 +25,7 @@ Clone & run: the app acts as a tutor for exploring my AI wrappers through the `f
 To review the latest changes, please refer to the [changelog](https://github.com/MaxiDonkey/file2knowledge/blob/main/Changelog.md).
 
 >[!IMPORTANT]
-> To perform the update, install [DelphiGenAI](https://github.com/MaxiDonkey/DelphiGenAI) version 1.2.1 and then recompile the project.
+> To perform the update, install [DelphiGenAI](https://github.com/MaxiDonkey/DelphiGenAI) version 1.3.1 and then recompile the project.
 
 <br>
 
@@ -26,7 +38,9 @@ File2knowledge was designed to provide a concrete implementation of the OpenAI A
 Its main goal: to demonstrate how to leverage advanced file search (file_search) features and the use of vector stores to enhance the semantic processing of documents.
 This approach enables more contextual, relevant, and intelligent responses when querying technical documentation, source code, or any other textual files.
 
-![Preview](https://github.com/MaxiDonkey/file2knowledge/blob/main/Images/F2KAni.gif?raw=true "Preview")
+<p align="center">
+  <img src="https://github.com/MaxiDonkey/file2knowledge/blob/main/Images/F2KAni.gif?raw=true"/>
+</p>
 
 <br>
 
@@ -39,13 +53,15 @@ open WrapperAssistant.dproj     # Delphi 12 Athens
 Prerequisites: OpenAI API key
 
 ## Dependencies
-- Add [DelphiGenAI (OpenAI wrapper)](https://github.com/MaxiDonkey/DelphiGenAI) version 1.2.1 to your Delphi project **Library Path** if not globally referenced
+- Add [DelphiGenAI (OpenAI wrapper)](https://github.com/MaxiDonkey/DelphiGenAI) version 1.3.1 to your Delphi project **Library Path** if not globally referenced
 - Delphi 12 Athens (or later)
 - WebView2 Runtime (EdgeView2 for VCL)
 - OpenAI API key (OPENAI_API_KEY)
 - Windows 11 MineShaft (custom VCL theme)
 
-![Preview](https://github.com/MaxiDonkey/SynkFlowAI/blob/main/Images/themis.png?raw=true "Preview")
+<p align="center">
+  <img src="https://github.com/MaxiDonkey/SynkFlowAI/blob/main/Images/themis.png?raw=true"/>
+</p>
 
 <br>
 
@@ -54,7 +70,9 @@ Prerequisites: OpenAI API key
 >[!NOTE]
 > Make sure to correctly set the **search path** to the `DelphiGenAI` wrapper in your Delphi project settings. This is required for proper compilation and integration.
 
-![Preview](https://github.com/MaxiDonkey/file2knowledge/blob/main/Images/Genai_path.png?raw=true "Preview")
+<p align="center">
+  <img src="https://github.com/MaxiDonkey/file2knowledge/blob/main/Images/Genai_path.png?raw=true" width="300"/>
+</p>
 
 >Before running the client for the first time, make sure to place the appropriate DLL (32-bit or 64-bit) in the executable's directory. The required files are available in the repository.
 

@@ -122,7 +122,6 @@ type
     function GetDisplayTemplate: string;
     function GetReasoningTemplate: string;
     function GetPromptTemplate: string;
-    function GetAudioHtml: string;
 
     /// <summary>
     /// Enables automatic reloading of template files from the specified directory on each access.
@@ -178,8 +177,6 @@ type
     /// The content of the prompt JavaScript template.
     /// </returns>
     property PromptTemplate: string read GetPromptTemplate;
-
-    property AudioHtml: string read GetAudioHtml;
   end;
 
   /// <summary>
@@ -499,7 +496,41 @@ type
     /// A promise (TPromise&lt;string&gt;) which resolves to the AI response text,
     /// or is rejected upon error or cancellation.
     /// </returns>
-    function Execute(const Prompt: string): TPromise<string>;
+    function Execute(const Prompt: string): TPromise<string>; overload;
+
+    /// <summary>
+    /// Executes a streamed prompt with explicit system instructions.
+    /// </summary>
+    /// <param name="Prompt">
+    /// The user input to send to the AI.
+    /// </param>
+    /// <param name="Instructions">
+    /// System instructions providing context or behavior.
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> resolving to the streamed response text.
+    /// </returns>
+    /// <remarks>
+    /// <para>Delegates execution to the configured engine, managing streaming, session persistence, and UI updates as set by the application.</para>
+    /// </remarks>
+    function Execute(const Prompt, Instructions: string): TPromise<string>; overload;
+
+    /// <summary>
+    /// Executes a clarification request for the specified prompt.
+    /// </summary>
+    /// <param name="Prompt">
+    /// The user prompt to clarify.
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> resolving to the clarification response text.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// Delegates execution to the underlying engine using predefined clarifying instructions.
+    /// Used to refine or disambiguate user input before a main prompt execution.
+    /// </para>
+    /// </remarks>
+    function ExecuteClarifying(const Prompt: string): TPromise<string>;
 
     /// <summary>
     /// Executes a prompt in "silent" mode, without real-time streaming or UI updates.
@@ -514,7 +545,29 @@ type
     /// <returns>
     /// A promise (TPromise&lt;string&gt;) which resolves to the complete AI response text.
     /// </returns>
-    function ExecuteSilently(const Prompt, Instructions: string): TPromise<string>;
+    function ExecuteSilently(const Prompt, Instructions: string): TPromise<string>; overload;
+
+    /// <summary>
+    /// Executes a non-streamed prompt with an explicit model, returning the complete response text.
+    /// </summary>
+    /// <remarks>
+    /// Sends a single-shot request (no streaming) using the provided model, prompt, and system
+    /// instructions. Response storage is disabled (<c>Store(False)</c>) and streaming is off
+    /// (<c>Stream(False)</c>). Errors reject the returned promise.
+    /// </remarks>
+    /// <param name="Model">
+    /// The model identifier to use for this request (e.g., <c>gpt-4.1</c>, <c>gpt-5-mini</c>).
+    /// </param>
+    /// <param name="Prompt">
+    /// The user input to be processed by the model.
+    /// </param>
+    /// <param name="Instructions">
+    /// System/developer instructions providing context or behavioral constraints.
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> that resolves with the full response text, or is rejected on error.
+    /// </returns>
+    function ExecuteSilently(const Model, Prompt, Instructions: string): TPromise<string>; overload;
 
     /// <summary>
     /// Ensures a file is present in OpenAI storage and is linked to a vector store.
@@ -1153,6 +1206,11 @@ type
     /// </returns>
     function City: string;
 
+    /// <summary>
+    /// Constrains the verbosity of the model's response. Lower values will result in more concise
+    /// responses, while higher values will result in more verbose responses. Currently supported
+    /// values are low, medium, and high.
+    /// </summary>
     function Verbosity: string;
 
     /// <summary>
@@ -1280,7 +1338,51 @@ type
 
   IPromptExecutionEngine = interface
     ['{7434A3D6-0DDC-4EB8-BFF6-8984A49FF6AF}']
-    function Execute(const Prompt: string): TPromise<string>;
+    /// <summary>
+    /// Submits a prompt for execution via the OpenAI/GenAI engine, handling streaming
+    /// of results, session management, and output tracking.
+    /// </summary>
+    /// <param name="Prompt">
+    /// The user's prompt or question to be sent to the AI for completion or answer.
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> that resolves asynchronously with the AI's response text,
+    /// or is rejected if an error or cancellation occurs.
+    /// </returns>
+    function Execute(const Prompt: string): TPromise<string>; overload;
+
+    /// <summary>
+    /// Submits a prompt for execution via the OpenAI/GenAI engine, handling streaming
+    /// of results, session management, and output tracking.
+    /// </summary>
+    /// <param name="Prompt">
+    /// The user's prompt or question to be sent to the AI for completion or answer.
+    /// </param>
+    /// <returns>
+    /// <param name="Instructions">
+    /// System instructions
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> that resolves asynchronously with the AI's response text,
+    /// or is rejected if an error or cancellation occurs.
+    /// </returns>
+    function Execute(const Prompt: string; const Instructions: string): TPromise<string>; overload;
+
+    /// <summary>
+    /// Executes a clarification request based on the provided prompt.
+    /// </summary>
+    /// <param name="Prompt">
+    /// The user prompt requiring clarification.
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> resolving to the AI-generated clarification text.
+    /// </returns>
+    /// <remarks>
+    /// Uses a predefined clarifying instruction from the system prompt builder
+    /// and executes the request with a lightweight model. Intended for refining
+    /// or disambiguating user input before deeper processing.
+    /// </remarks>
+    function Clarifying(const Prompt: string): TPromise<string>; overload;
   end;
 
   IVectorStoreManager = interface
@@ -1303,7 +1405,9 @@ type
 
   ISystemPromptBuilder = interface
     ['{F4C1A33D-A004-4D63-8532-E320731E1082}']
-    function BuildSystemPrompt: string;
+    function GetInstructions: string;
+    function GetDeepReseachInstructions: string;
+    function GetClarifyingInstructions: string;
   end;
 
   {--- Startup services }

@@ -5,7 +5,7 @@ interface
 {$REGION  'Dev notes : Provider.OpenAI'}
 
 (*
-  Unit: Provider.OpenAI with GenAI v1.3.0
+  Unit: Provider.OpenAI
 
   Purpose:
     This unit serves as the central integration and orchestration point for OpenAI/GenAI capabilities
@@ -69,9 +69,12 @@ type
     FClient: IGenAI;
     FFileStoreManager: IFileStoreManager;
     FVectorStoreManager: IVectorStoreManager;
+    FSystemPromptBuilder: ISystemPromptBuilder;
     FPromptExecutionEngine: IPromptExecutionEngine;
+
     procedure InitializeProviderOpenAI(const GenAIClient: IGenAI);
     procedure HandleError(E: Exception);
+    procedure HandleErrorFileDelete(E: Exception);
     function HandleThenSilently(Value: TResponse): string;
     function HandleThenDeleteResponse(Value: TResponseDelete): string;
     function HandleThenDeleteFile(Value: TDeletion): string;
@@ -156,7 +159,41 @@ type
     /// A promise (TPromise&lt;string&gt;) which resolves to the AI response text,
     /// or is rejected upon error or cancellation.
     /// </returns>
-    function Execute(const Prompt: string): TPromise<string>;
+    function Execute(const Prompt: string): TPromise<string>; overload;
+
+    /// <summary>
+    /// Executes a streamed prompt with explicit system instructions.
+    /// </summary>
+    /// <param name="Prompt">
+    /// The user input to send to the AI.
+    /// </param>
+    /// <param name="Instructions">
+    /// System instructions providing context or behavior.
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> resolving to the streamed response text.
+    /// </returns>
+    /// <remarks>
+    /// <para>Delegates execution to the configured engine, managing streaming, session persistence, and UI updates as set by the application.</para>
+    /// </remarks>
+    function Execute(const Prompt, Instructions: string): TPromise<string>; overload;
+
+    /// <summary>
+    /// Executes a clarification request for the specified prompt.
+    /// </summary>
+    /// <param name="Prompt">
+    /// The user prompt to clarify.
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> resolving to the clarification response text.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// Delegates execution to the underlying engine using predefined clarifying instructions.
+    /// Used to refine or disambiguate user input before a main prompt execution.
+    /// </para>
+    /// </remarks>
+    function ExecuteClarifying(const Prompt: string): TPromise<string>;
 
     /// <summary>
     /// Executes a prompt in "silent" mode, without real-time streaming or UI updates.
@@ -171,7 +208,29 @@ type
     /// <returns>
     /// A promise (TPromise&lt;string&gt;) which resolves to the complete AI response text.
     /// </returns>
-    function ExecuteSilently(const Prompt, Instructions: string): TPromise<string>;
+    function ExecuteSilently(const Prompt, Instructions: string): TPromise<string>; overload;
+
+    /// <summary>
+    /// Executes a non-streamed prompt with an explicit model, returning the complete response text.
+    /// </summary>
+    /// <remarks>
+    /// Sends a single-shot request (no streaming) using the provided model, prompt, and system
+    /// instructions. Response storage is disabled (<c>Store(False)</c>) and streaming is off
+    /// (<c>Stream(False)</c>). Errors reject the returned promise.
+    /// </remarks>
+    /// <param name="Model">
+    /// The model identifier to use for this request (e.g., <c>gpt-4.1</c>, <c>gpt-5-mini</c>).
+    /// </param>
+    /// <param name="Prompt">
+    /// The user input to be processed by the model.
+    /// </param>
+    /// <param name="Instructions">
+    /// System/developer instructions providing context or behavioral constraints.
+    /// </param>
+    /// <returns>
+    /// A <c>TPromise&lt;string&gt;</c> that resolves with the full response text, or is rejected on error.
+    /// </returns>
+    function ExecuteSilently(const Model, Prompt, Instructions: string): TPromise<string>; overload;
 
     /// <summary>
     /// Ensures a file is present in OpenAI storage and is linked to a vector store.
@@ -288,6 +347,7 @@ begin
   InitializeProviderOpenAI(FClient);
   FFileStoreManager := IoC.Resolve<IFileStoreManager>;
   FVectorStoreManager := IoC.Resolve<IVectorStoreManager>;
+  FSystemPromptBuilder := IoC.Resolve<ISystemPromptBuilder>;
   FPromptExecutionEngine := IoC.Resolve<IPromptExecutionEngine>;
 end;
 
@@ -305,7 +365,8 @@ begin
   Result := FClient.Responses
     .AsyncAwaitDelete(ResponseId)
     .&Then<string>(HandleThenDeleteResponse)
-    .&Catch(HandleError);
+    {--- Do not display an error if the file is not found. }
+    .&Catch(HandleErrorFileDelete);
 end;
 
 function TOpenAIProvider.DeleteVectorStore(const VectorStoreId,
@@ -325,12 +386,25 @@ begin
   Result := FPromptExecutionEngine.Execute(Prompt);
 end;
 
-function TOpenAIProvider.ExecuteSilently(const Prompt, Instructions: string): TPromise<string>;
+function TOpenAIProvider.Execute(const Prompt,
+  Instructions: string): TPromise<string>;
+begin
+  Result := FPromptExecutionEngine.Execute(Prompt, Instructions);
+end;
+
+function TOpenAIProvider.ExecuteClarifying(
+  const Prompt: string): TPromise<string>;
+begin
+  Result := FPromptExecutionEngine.Clarifying(Prompt);
+end;
+
+function TOpenAIProvider.ExecuteSilently(const Model, Prompt,
+  Instructions: string): TPromise<string>;
 begin
   Result := FClient.Responses.AsyncAwaitCreate(
       procedure (Params: TResponsesParams)
       begin
-         Params.Model(Settings.SearchModel);
+         Params.Model(Model);
          Params.Input(Prompt);
          Params.Instructions(Instructions);
          Params.Store(False);
@@ -340,9 +414,22 @@ begin
    .&Catch(HandleError);
 end;
 
+function TOpenAIProvider.ExecuteSilently(const Prompt, Instructions: string): TPromise<string>;
+begin
+  Result := ExecuteSilently(Settings.SearchModel, Prompt, Instructions);
+end;
+
 procedure TOpenAIProvider.HandleError(E: Exception);
 begin
   if not E.Message.StartsWith('error 404') then
+    begin
+      AlertService.ShowError(E.ClassName + ' : ' + E.Message);
+    end;
+end;
+
+procedure TOpenAIProvider.HandleErrorFileDelete(E: Exception);
+begin
+  if not E.Message.Contains('403') and not E.Message.StartsWith('error 404') then
     begin
       AlertService.ShowError(E.ClassName + ' : ' + E.Message);
     end;

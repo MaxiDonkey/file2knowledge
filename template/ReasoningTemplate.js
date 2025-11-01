@@ -11,6 +11,6 @@
         window.scrollTo(0, document.body.scrollHeight);
       }
 
-      // Hide the bubble after 10 minutes
-      setTimeout(() => { bubble.remove(); }, 600000);
+      // Hide the bubble after 40 minutes
+      setTimeout(() => { bubble.remove(); }, 2400000);
     })();

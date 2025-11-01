@@ -32,8 +32,7 @@ type
     main_html,
     js_response,
     js_prompt,
-    js_waitfor,
-    js_audio_capture);
+    js_waitfor);
 
   TTemplateTypeHelper = record Helper for TTemplateType
   private
@@ -42,8 +41,7 @@ type
         'InitialHtml.htm',
         'DisplayTemplate.js',
         'PromptTemplate.js',
-        'ReasoningTemplate.js',
-        'AudioCaptureHtml.htm'
+        'ReasoningTemplate.js'
       );
   public
     function ToString: string;
@@ -52,7 +50,6 @@ type
   TEdgeInjection = class(TInterfacedObject, ITemplateProvider)
   private
     FInitialHtml: string;
-    FAudioHtml: string;
     FDisplayTemplate: string;
     FReasoningTemplate: string;
     FPromptTemplate: string;
@@ -60,7 +57,6 @@ type
     FPath: string;
     function LoadTemplate(const FileName: string): string;
     procedure InitializeTemplates;
-    function GetAudioHtml: string;
     function GetInitialHtml: string;
     function GetDisplayTemplate: string;
     function GetReasoningTemplate: string;
@@ -123,8 +119,6 @@ type
     /// The content of the prompt JavaScript template.
     /// </returns>
     property PromptTemplate: string read GetPromptTemplate;
-
-    property AudioHtml: string read GetAudioHtml;
   end;
 
 implementation
@@ -137,13 +131,6 @@ begin
   FPath := TEMPLATE_PATH;
   FAlwaysReloading := False;
   InitializeTemplates;
-end;
-
-function TEdgeInjection.GetAudioHtml: string;
-begin
-  if FAlwaysReloading then
-    FAudioHtml := LoadTemplate(js_audio_capture.ToString);
-  Result := FAudioHtml;
 end;
 
 function TEdgeInjection.GetDisplayTemplate: string;
