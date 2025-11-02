@@ -19,7 +19,7 @@ type
     function LoadContent(const FileName: string): string;
   public
     function GetInstructions: string;
-    function GetDeepReseachInstructions: string;
+    function GetDeepResearchInstructions: string;
     function GetClarifyingInstructions: string;
   end;
 
@@ -32,7 +32,7 @@ begin
   Result := LoadContent(FILE_PATH_SYSTEM_CLARIFYING)
 end;
 
-function TSystemPromptBuilder.GetDeepReseachInstructions: string;
+function TSystemPromptBuilder.GetDeepResearchInstructions: string;
 begin
   Result := Format(LoadContent(FILE_PATH_SYSTEM_PROMPT_DEEP_RESEARCH), [Settings.UserScreenName]);
 end;

@@ -92,10 +92,12 @@ type
     ///<param name="Value"> Incoming response text. </param>
     ///<param name="Text"> Original prompt text. </param>
     ///<returns> A formatted string used to request automatic chat naming. </returns>
-    function PrepareNamingPromt(const Value, Text: string): string;
+    function PrepareNamingPrompt(const Value, Text: string): string;
 
     /// <summary> Gets the instruction text used during automatic naming. </summary>
     function GetNamingInstructions: string;
+
+    procedure HandleWithRenaming(const Promise: TPromise<string>);
 
     /// <summary>
     /// Handles the main asynchronous prompt submission process.
@@ -329,8 +331,6 @@ begin
 end;
 
 procedure TServicePrompt.HandleMainProcess(Sender: TObject);
-var
-  Promise: TPromise<string>;
 begin
   FDeepResearchPrompt := EmptyStr;
 
@@ -341,40 +341,47 @@ begin
   var Prompt := TUtf8Mapping.CleanTextAsUTF8(FEditor.Lines.Text);
   if not string(Prompt).Trim.IsEmpty then
     begin
-      Promise := OpenAI.Execute(Prompt);
-
-      if NeedToName then
-        begin
-          Promise
-            .&Then<string>(
-              function (Value: string): string
-              begin
-                Result := PrepareNamingPromt(Value, Text);
-              end)
-            .&Then(
-              function (Value: string): TPromise<string>
-              begin
-                {--- Find a fileName }
-                Result := OpenAI.ExecuteSilently('gpt-4.1-nano', Value, GetNamingInstructions);
-              end)
-            .&Then<string>(
-              function (Value: string): string
-              begin
-                PersistentChat.CurrentChat.ApplyTitle(Value);
-                PersistentChat.SaveToFile;
-                ChatSessionHistoryView.Refresh(nil);
-              end)
-            .&Catch(
-              procedure(E: Exception)
-              begin
-                AlertService.ShowError(E.Message);
-              end);
-        end;
+      var Promise := OpenAI.Execute(Prompt);
+      HandleWithRenaming(Promise);
     end;
   SetFocus;
 end;
 
+procedure TServicePrompt.HandleWithRenaming(const Promise: TPromise<string>);
+begin
+  if not NeedToName then
+    Exit;
+
+  Promise
+    .&Then(
+      function (Value: string): TPromise<string>
+      begin
+        {--- Find a fileName }
+        Result := OpenAI.ExecuteSilently('gpt-4.1-nano',
+          PrepareNamingPrompt(Value, Text),
+          GetNamingInstructions);
+      end)
+    .&Then<string>(
+      function (Value: string): string
+      begin
+        {--- Save the branch }
+        PersistentChat.CurrentChat.ApplyTitle(Value);
+        PersistentChat.SaveToFile;
+        ChatSessionHistoryView.Refresh(nil);
+        Result := Value;
+      end)
+    .&Catch(
+      procedure(E: Exception)
+      begin
+        AlertService.ShowError(E.Message);
+        EdgeDisplayer.HideReasoning;
+        FDeepResearchPrompt := EmptyStr;
+      end);
+end;
+
 procedure TServicePrompt.HandleDeepResearchProcess(Sender: TObject);
+var
+  DeepPromise: TPromise<string>;
 begin
   {--- We are keeping the stored files to stay in line with the philosophy of the POC. }
   if FileStoreManager.VectorStore.Trim.IsEmpty and not CanExecute then
@@ -387,70 +394,66 @@ begin
       if FDeepResearchPrompt.IsEmpty then
         begin
           FDeepResearchPrompt := Prompt;
+
+          {--- STEP 1 : Clarifying the request }
           OpenAI.ExecuteClarifying(Prompt)
             .&Catch(
               procedure(E: Exception)
                 begin
                   AlertService.ShowError(E.Message);
+
+                  {--- Clear the value of FDeepResearchPrompt to allow a future deep search. }
+                  FDeepResearchPrompt := EmptyStr;
                 end);
         end
       else
+        {--- Second submission detected (accumulated prompt present). }
         begin
-          var Instructions := FSystemPromptBuilder.GetDeepReseachInstructions;
-          FDeepResearchPrompt := FDeepResearchPrompt + Prompt;
+          {--- Update display }
           Clear;
-          var Promise := OpenAI.ExecuteSilently('gpt-4.1-nano', FDeepResearchPrompt, Instructions);
           EdgeDisplayer.ShowReasoning;
+
+          {--- Priming the deep search process with accumulated input (append with newline to separate turns). }
+          FDeepResearchPrompt := FDeepResearchPrompt + sLineBreak + Prompt;
+
+          {--- Retrieve the appropriate instruction string }
+          var Instructions := FSystemPromptBuilder.GetDeepResearchInstructions;
+
+          {--- STEP 2 : Build the appropriate instruction sequence as requested }
+          var Promise := OpenAI.ExecuteSilently('gpt-4.1-nano', FDeepResearchPrompt, Instructions);
 
           Promise
             .&Then<string>(
               function (Value: string): string
               begin
-                Result := Value;
+                {--- Update display }
                 EdgeDisplayer.HideReasoning;
+
+                {--- STEP 3 : Perform deep research }
+                DeepPromise := OpenAI.Execute(FDeepResearchPrompt, Value)
+                  .&Then<string>(
+                    function (Value: string): string
+                    begin
+                      Result := Value;
+
+                      {--- Clear the value of FDeepResearchPrompt to allow a future deep search. }
+                      FDeepResearchPrompt := EmptyStr;
+
+                      {--- Naming Branch if needed }
+                      HandleWithRenaming(DeepPromise);
+                    end);
+                Result := Value;
               end)
             .&Catch(
               procedure(E: Exception)
               begin
                 AlertService.ShowError(E.Message);
+
+                {--- Clear the value of FDeepResearchPrompt to allow a future deep search. }
+                FDeepResearchPrompt := EmptyStr;
+
+                {--- Update display }
                 EdgeDisplayer.HideReasoning;
-                FDeepResearchPrompt := EmptyStr;
-              end);
-
-          Promise
-            .&Then<string>(
-              function (Value: string): string
-              begin
-                var DeepPromise := OpenAI.Execute(FDeepResearchPrompt, Value);
-
-                if NeedToName then
-                  begin
-                    DeepPromise
-                      .&Then<string>(
-                        function (Value: string): string
-                        begin
-                          Result := PrepareNamingPromt(Value, Text);
-                        end)
-                      .&Then(
-                        function (Value: string): TPromise<string>
-                        begin
-                          {--- Find a fileName }
-                          Result := OpenAI.ExecuteSilently('gpt-4.1-nano', Value, GetNamingInstructions);
-                        end)
-                      .&Then<string>(
-                        function (Value: string): string
-                        begin
-                          PersistentChat.CurrentChat.ApplyTitle(Value);
-                          PersistentChat.SaveToFile;
-                          ChatSessionHistoryView.Refresh(nil);
-                        end)
-                      .&Catch(
-                        procedure(E: Exception)
-                        begin
-                          AlertService.ShowError(E.Message);
-                        end);
-                  end;
-                FDeepResearchPrompt := EmptyStr;
               end);
         end;
     end;
@@ -466,7 +469,7 @@ begin
             (PersistentChat.CurrentChat.Title = NEW_CHAT_TITLE);
 end;
 
-function TServicePrompt.PrepareNamingPromt(const Value, Text: string): string;
+function TServicePrompt.PrepareNamingPrompt(const Value, Text: string): string;
 begin
   Result := Format('Question: %s'#10'Response: %s', [Text, Value]);
 end;

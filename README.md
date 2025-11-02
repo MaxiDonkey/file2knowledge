@@ -1,7 +1,7 @@
 # File2Knowledge
 ![Delphi Next Gen Ready](https://img.shields.io/badge/Delphi--Next--Gen-ready-brightgreen)
 ![GitHub](https://img.shields.io/badge/IDE%20Version-Delphi%2012-yellow)
-![GitHub](https://img.shields.io/badge/Updated%20on%20November%201,%202025-blue)
+![GitHub](https://img.shields.io/badge/Updated%20on%20November%202,%202025-blue)
 
 <br>
 

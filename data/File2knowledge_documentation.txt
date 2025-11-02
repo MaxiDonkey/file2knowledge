@@ -1,4 +1,4 @@
-# Projet : File2knowledge version 1.0.7
+# Projet : File2knowledge version 1.0.8
 
 - Ce projet propose une mise en œuvre concrète du point de terminaison v1/responses de l’API OpenAI, en exploitant notamment les fonctionnalités file_search et les magasins vectoriels. L’objectif est de démontrer comment ces outils permettent une exploitation plus fine et pertinente des fichiers, en enrichissant leur surface sémantique. L’indexation vectorielle améliore considérablement la capacité à explorer, relier et interroger le contenu, en offrant des réponses plus contextualisées et informatives.
 

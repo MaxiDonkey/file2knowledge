@@ -433,7 +433,7 @@ object Form1: TForm1
         Top = 50
         Width = 350
         Height = 488
-        ActivePage = SettingsSheet
+        ActivePage = HistorySheet
         Align = alClient
         Style = tsButtons
         TabOrder = 0
@@ -928,7 +928,6 @@ object Form1: TForm1
             ParentColor = False
             TabOrder = 0
             StyleElements = [seFont, seBorder]
-            ExplicitLeft = 2
             object Label5: TLabel
               Left = 8
               Top = 8
@@ -1570,7 +1569,7 @@ object Form1: TForm1
       Top = 6
       Width = 179
       Height = 20
-      Caption = 'v1.0.6 '#721' @2025 Maxidonkey'
+      Caption = 'v1.0.7 '#721' @2025 Maxidonkey'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = 10724259
       Font.Height = -15

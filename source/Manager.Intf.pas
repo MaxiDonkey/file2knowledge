@@ -1406,7 +1406,7 @@ type
   ISystemPromptBuilder = interface
     ['{F4C1A33D-A004-4D63-8532-E320731E1082}']
     function GetInstructions: string;
-    function GetDeepReseachInstructions: string;
+    function GetDeepResearchInstructions: string;
     function GetClarifyingInstructions: string;
   end;
 

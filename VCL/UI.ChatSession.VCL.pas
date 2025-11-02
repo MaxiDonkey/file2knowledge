@@ -453,35 +453,57 @@ var
   N1, N2: Double;
   D1, D2: TDateTime;
   FS: TFormatSettings;
-begin
-  if Data = 0 then
-    begin
-      S1 := Item1.Caption;
-      S2 := Item2.Caption;
-    end
-  else
-    begin
-      S1 := Item1.SubItems[Data-1];
-      S2 := Item2.SubItems[Data-1];
-    end;
 
-  FS := TFormatSettings.Create;
-  FS.DateSeparator := '/';
+  function ParseDateLoose(const S: string; out V: TDateTime): Boolean;
+  var
+    T: string;
+    FS: TFormatSettings;
+  begin
+    FS := TFormatSettings.Create;
+    FS.DateSeparator   := '/';
+    FS.TimeSeparator   := ':';
+    FS.ShortDateFormat := 'dd/MM/yyyy';
+    FS.LongTimeFormat  := 'hh:nn:ss';
+
+    {--- Cleaning up any non-breaking spaces, trimming. }
+    T := Trim(StringReplace(S, #$00A0, ' ', [rfReplaceAll]));
+
+    {--- date and time (standard format "dd/MM/yyyy hh:nn:ss") }
+    Result := TryStrToDateTime(T, V, FS);
+    if Result then Exit;
+
+    {--- date only }
+    Result := TryStrToDate(T, V, FS);
+    if Result then Exit;
+
+    {--- ISO 8601 format if the source is of that type (e.g. 2025-11-01T00:16:00) }
+    Result := TryISO8601ToDate(T, V, False);
+  end;
+
+begin
+  if Data = 0 then begin
+    S1 := Item1.Caption;
+    S2 := Item2.Caption;
+  end else begin
+    S1 := Item1.SubItems[Data-1];
+    S2 := Item2.SubItems[Data-1];
+  end;
 
   if Data = 1 then
-    begin
-      if TryStrToDate(S1, D1, FS) and TryStrToDate(S2, D2, FS) then
-        Compare := Sign(D1 - D2)
-      else
-        Compare := CompareText(S1, S2);
-    end
+  begin
+    if ParseDateLoose(S1, D1) and ParseDateLoose(S2, D2) then
+      Compare := CompareDateTime(D1, D2)
+    else
+      Compare := CompareText(S1, S2);
+  end
   else
-    begin
-      if TryStrToFloat(S1, N1) and TryStrToFloat(S2, N2) then
-        Compare := Sign(N1 - N2)
-      else
-        Compare := CompareText(S1, S2);
-    end;
+  begin
+    FS := TFormatSettings.Create;
+    if TryStrToFloat(S1, N1, FS) and TryStrToFloat(S2, N2, FS) then
+      Compare := Sign(N1 - N2)
+    else
+      Compare := CompareText(S1, S2);
+  end;
 
   if not FSortAscending then
     Compare := -Compare;

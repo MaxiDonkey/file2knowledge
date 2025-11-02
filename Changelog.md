@@ -1,3 +1,8 @@
+#### 2025, November 1 version 1.0.8
+- Fix the date sorting when arranging the session list.
+- Code optimization for the DeepResearch function.
+
+
 #### 2025, November 1 version 1.0.7
 - Upgrade to DelphiGenAI wrapper version 1.3.1
   - Added support for o3-deep-research, o4-mini-deep-research models for Deep Research.
